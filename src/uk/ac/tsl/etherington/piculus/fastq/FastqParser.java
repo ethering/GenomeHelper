@@ -56,19 +56,7 @@ public class FastqParser
 
     }
 
-    /**
-     * takes a Hashset of fastq sequence ids (with no paired end info), goes
-     * through the pairs of the two fastq files, chops off any 'handendness'
-     * info and writes any sequences found in the HashSet to a new file
-     *
-     * @param list
-     * @param fastqFileInLeftString
-     * @param fastqFileInRightString
-     * @param fastqFileOutLeftString
-     * @param fastqFileOutRightString
-     *
-     */
-    public HashSet readNamesToHashSet(File readNames) throws FileNotFoundException, IOException
+        public HashSet readNamesToHashSet(File readNames) throws FileNotFoundException, IOException
     {
         HashSet reads = new HashSet();
         BufferedReader reader = new BufferedReader(new FileReader(readNames));

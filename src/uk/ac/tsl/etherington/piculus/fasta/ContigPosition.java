@@ -2,6 +2,7 @@ package uk.ac.tsl.etherington.piculus.fasta;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Objects;
 import net.sf.samtools.SAMRecord;
 
 /**
@@ -13,7 +14,6 @@ import net.sf.samtools.SAMRecord;
  */
 public class ContigPosition 
 {
-
     String contigid;
     int start;
     int end;
@@ -173,25 +173,37 @@ public class ContigPosition
     {
         this.end = end;
     }
-
+    
+    @Override
+    public int hashCode()
+    {
+        int hash = 7;
+        hash = 79 * hash + Objects.hashCode(this.contigid);
+        hash = 79 * hash + this.start;
+        hash = 79 * hash + this.end;
+        hash = 79 * hash + this.strand;
+        return hash;
+    }
+     
     /**
      *
-     * @param contigPosition the ContigPosition object to compare
+     * @param obj the ContigPosition object to compare
      * @return true if the two ContigPosition objects are equal, false if not
      */
+
     @Override
-    public boolean equals(Object contigPosition)
+    public boolean equals(Object obj)
     {
-        if (contigPosition == null)
+        if (obj == null)
         {
             return false;
         }
-        if (getClass() != contigPosition.getClass())
+        if (getClass() != obj.getClass())
         {
             return false;
         }
-        final ContigPosition other = (ContigPosition) contigPosition;
-        if ((this.contigid == null) ? (other.contigid != null) : !this.contigid.equals(other.contigid))
+        final ContigPosition other = (ContigPosition) obj;
+        if (!Objects.equals(this.contigid, other.contigid))
         {
             return false;
         }
@@ -199,22 +211,14 @@ public class ContigPosition
         {
             return false;
         }
-        if (this.end != other.end)
+        if (this.strand != other.strand)
         {
             return false;
         }
         return true;
     }
 
-    @Override
-    public int hashCode()
-    {
-        int hash = 7;
-        hash = 79 * hash + (this.contigid != null ? this.contigid.hashCode() : 0);
-        hash = 79 * hash + this.start;
-        hash = 79 * hash + this.end;
-        return hash;
-    }
+
 
 
     /**
@@ -263,7 +267,6 @@ public class ContigPosition
     public String toString()
     {
         String str = this.contigid.concat(":").concat(Integer.toString(this.start)).concat("-").concat(Integer.toString(this.end)).concat(String.valueOf(strand));
-
         return str;
     }
 }

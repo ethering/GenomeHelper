@@ -4,37 +4,22 @@
  */
 package uk.ac.tsl.etherington.piculus.fasta;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import net.sf.picard.fastq.FastqReader;
-import net.sf.picard.fastq.FastqRecord;
-import net.sf.picard.fastq.FastqWriter;
-import net.sf.picard.fastq.FastqWriterFactory;
 import org.biojava3.core.sequence.*;
-import org.biojava3.core.sequence.io.FastaReader;
 import org.biojava3.core.sequence.io.FastaReaderHelper;
-import org.biojava3.core.sequence.transcription.Frame;
-import org.biojava3.data.sequence.FastaSequence;
 import org.jtr.transliterate.CharacterParseException;
 import org.jtr.transliterate.CharacterReplacer;
 import org.jtr.transliterate.Perl5Parser;
@@ -45,19 +30,33 @@ import org.jtr.transliterate.Perl5Parser;
  */
 public class FastaMotifFinder
 {
-
+    /**
+     * Looks through a DNA fasta file for a given motif. The motif can contain regular expressions, such as ATG[CG]G[AT], 
+     * which will search for ATGCGA, ATGCGT, ATGGGA and ATGGGT. Refer to java.util.regex.Pattern for more details. 
+     * The output is two files, one a tab-delimited file of DNA motif counts, the other a count of the corresponding ammino acid translations. 
+     * The reverse complement is also examined for the motif.
+     * 
+     * @param fastaFile the input file of DNA sequences in fasta format
+     * @param strPattern the pattern to be searched for
+     * @param motifCounts a tab-delimited file of the occurrence of each pattern
+     * @param proteinCounts a tab-delimited file of the occurrence of each pattern when translated into ammino acids
+     * @param minCount the minimum number of times a motif must be found to be included in the results
+     * @throws IOException
+     * @throws CharacterParseException
+     * @throws Exception 
+     */
     public void findMatches(File fastaFile, String strPattern, File motifCounts, File proteinCounts, int minCount) throws IOException, CharacterParseException, Exception
     {
         DNASequence dna;
         RNASequence rna;
         ProteinSequence aa;
         //hash maps to count the dna and aa motifs
-        HashMap<String, Integer> dnaMotifs = new HashMap<String, Integer>();
-        HashMap<String, Integer> aaMotifs = new HashMap<String, Integer>();
+        HashMap<String, Integer> dnaMotifs = new HashMap<>();
+        HashMap<String, Integer> aaMotifs = new HashMap<>();
         ValueComparator dbvc = new ValueComparator(dnaMotifs);
         ValueComparator abvc = new ValueComparator(aaMotifs);
-        TreeMap<String, Integer> sorted_dna_map = new TreeMap<String, Integer>(dbvc);
-        TreeMap<String, Integer> sorted_aa_map = new TreeMap<String, Integer>(abvc);
+        TreeMap<String, Integer> sorted_dna_map = new TreeMap<>(dbvc);
+        TreeMap<String, Integer> sorted_aa_map = new TreeMap<>(abvc);
         //a compiler for out
         Pattern pattern = Pattern.compile(strPattern);
         //Writers for the dna motif counts and protein motif counts
@@ -177,17 +176,6 @@ public class FastaMotifFinder
         aaMotifWriter.close();
     }
 
-   
-    public static void main(String[] args)
-    {
-            FastaMotifFinder fmf = new FastaMotifFinder();
-            File fqfile = new File("/Users/ethering/temp/solexa/uk_us/US_from_UK_US_shared.fastq");
-            File fqOut = new File("/Users/ethering/temp/solexa/uk_us/US_from_UK_US_shared_found.fastq");
-
-            String pattern = "GTGCTGGTGG[TC]G[TG]T[TG]CC";
-
-            
-    }
 
     class ValueComparator implements Comparator<String>
     {
@@ -200,6 +188,7 @@ public class FastaMotifFinder
         }
 
         // Note: this comparator imposes orderings that are inconsistent with equals.    
+        @Override
         public int compare(String a, String b)
         {
             if (base.get(a) >= base.get(b))
@@ -213,26 +202,26 @@ public class FastaMotifFinder
         }
     }
 
+    /**
+     * Reverse complement a sequence
+     * @param seq the sequence to reverse complemented
+     * @return the reverse complement of the provided sequence
+     * @throws CharacterParseException 
+     */
     public static String revcom(String seq) throws CharacterParseException
     {
         //System.out.println("seqIn: "+seq);
         CharacterReplacer cReplacer = Perl5Parser.makeReplacer("tr/ATCG/TAGC/");
-        seq = reverseString(seq);
+        seq = new StringBuffer(seq).reverse().toString();;
         String newSeq = cReplacer.doReplacement(seq);
         //System.out.println("seqOut: "+newSeq);
         return newSeq;
     }
-
-    public static String reverseString(String s)
-    {
-        return new StringBuffer(s).reverse().toString();
-
-
-    }
-
+   
     public class StringLengthComparator implements Comparator<String>
     {
 
+        @Override
         public int compare(String o1, String o2)
         {
             if (o1.length() > o2.length())

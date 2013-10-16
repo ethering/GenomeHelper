@@ -5,20 +5,19 @@
 package uk.ac.tsl.etherington.piculus.fasta;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.Writer;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.NoSuchElementException;
 import org.biojava.bio.BioException;
+import org.biojava.bio.seq.DNATools;
+import org.biojava.bio.seq.Sequence;
 import org.biojava.bio.symbol.Alphabet;
 import org.biojava.bio.symbol.AlphabetManager;
+import org.biojava.bio.symbol.Symbol;
 import org.biojava3.core.sequence.DNASequence;
 import org.biojava3.core.sequence.io.FastaReaderHelper;
 import org.biojavax.SimpleNamespace;
@@ -26,17 +25,23 @@ import org.biojavax.bio.seq.RichSequence;
 import org.biojavax.bio.seq.RichSequenceIterator;
 
 /**
- *
+ *A class of helper methods to obtain information and data structures from fasta files 
  * @author ethering
  */
 public class FastaFeatures
 {
-
-    public static HashMap getSequenceLengths(File filename) throws FileNotFoundException, BioException
+    /**
+     * 
+     * @param refSeq a multi-fasta file of DNA sequences
+     * @return a HashMap of sequence names as keys with their sequence-lengths as values
+     * @throws FileNotFoundException
+     * @throws BioException 
+     */
+    public static HashMap getSequenceLengths(File refSeq) throws FileNotFoundException, BioException
     {
 
-        HashMap<String, Integer> seqLengths = new HashMap<String, Integer>();
-        BufferedReader br = new BufferedReader(new FileReader(filename));
+        HashMap<String, Integer> seqLengths = new HashMap<>();
+        BufferedReader br = new BufferedReader(new FileReader(refSeq));
         Alphabet alpha = AlphabetManager.alphabetForName("DNA");
         SimpleNamespace ns = new SimpleNamespace("biojava");
 
@@ -46,19 +51,25 @@ public class FastaFeatures
         {
             RichSequence rec = iterator.nextRichSequence();
             seqLengths.put(rec.getName(), rec.length());
-//            System.out.println(rec.getName());
-//            System.out.println(rec.length());
         }
         return seqLengths;
     }
+    
+    /**
+     * 
+     * @param refSeq a multi-fasta file of DNA sequences
+     * @return a LinkedHashMap of Accession numbers as keys with their DNA sequences as values. All sequence names will have any non-accession information stripped
+     * (e.g. ">gi|2033910|gb|AA381581.1|AA381581 EST94688 Activated T-cells I Homo sapiens" would become ">gi|2033910|gb|AA381581.1|AA381581")
+     * @throws Exception 
+     */
     public static LinkedHashMap<String, DNASequence> getParsedDNASequences(File refSeq) throws Exception
     {
         LinkedHashMap<String, DNASequence> tempgenome = FastaReaderHelper.readFastaDNASequence(refSeq);
-        LinkedHashMap<String, DNASequence> genome = new LinkedHashMap<String, DNASequence>();
+        LinkedHashMap<String, DNASequence> genome = new LinkedHashMap<>();
         for (Map.Entry<String, DNASequence> entry : tempgenome.entrySet())
         {
             String seqName = entry.getKey();
-            String newSeqName = new String(seqName.split(" ")[0]);
+            String newSeqName = seqName.split(" ")[0];
             DNASequence dna = entry.getValue();
             genome.put(newSeqName, dna);
             System.out.println(newSeqName + " : " + entry.getKey());
@@ -67,24 +78,38 @@ public class FastaFeatures
         return genome;
     }
     
-    public static double getGenomeSize(File filename) throws FileNotFoundException, BioException
+    /**
+     * 
+     * @param refSeq
+     * @return the cumulative length of the provided sequences
+     * @throws FileNotFoundException
+     * @throws BioException 
+     */
+    
+    public static double getGenomeSize(File refSeq) throws FileNotFoundException, BioException
     {
         double genomeSize = 0;
-        HashMap<String, Integer> seqLengths = new HashMap<String, Integer>(FastaFeatures.getSequenceLengths(filename));
+        HashMap<String, Integer> seqLengths = new HashMap<>(FastaFeatures.getSequenceLengths(refSeq));
         for (Map.Entry<String, Integer> entry : seqLengths.entrySet())
         {
-            
             int genomeLength = entry.getValue();
             genomeSize+=genomeLength;
         }
         return genomeSize;
     }
 
-    public static HashMap getSequenceAsIntArray(File filename) throws FileNotFoundException, BioException
+    /**
+     * 
+     * @param refSeq
+     * @return a HashMap where the keys are sequence names and the values are int arrays the length of the corresponding sequence, filed with zeros
+     * @throws FileNotFoundException
+     * @throws BioException 
+     */
+    public static HashMap getSequenceAsIntArray(File refSeq) throws FileNotFoundException, BioException
     {
 
-        HashMap<String, Integer> seqLengths = new HashMap<String, Integer>(FastaFeatures.getSequenceLengths(filename));
-        HashMap<String, int[]> codingMap = new HashMap<String, int[]>();
+        HashMap<String, Integer> seqLengths = new HashMap<>(FastaFeatures.getSequenceLengths(refSeq));
+        HashMap<String, int[]> codingMap = new HashMap<>();
 
         for (Map.Entry<String, Integer> entry : seqLengths.entrySet())
         {
@@ -97,73 +122,38 @@ public class FastaFeatures
 
         return codingMap;
     }
-
-    public void seqFromCommandLine(File fastaIn, File outfile, String seqid) throws FileNotFoundException, Exception
+    
+    public void getGCContent(String fileName) throws FileNotFoundException, NoSuchElementException, BioException
     {
-        Writer out = new BufferedWriter(new FileWriter(outfile));
-
-        BufferedReader br = new BufferedReader(new FileReader(fastaIn));
-        Alphabet alpha = AlphabetManager.alphabetForName("DNA");
+        // Set up sequence iterator
+        double noSeqs = 0;
+        double combinedGcTally = 0;
+        BufferedReader br = new BufferedReader(new FileReader(fileName));
         SimpleNamespace ns = new SimpleNamespace("biojava");
 
-        RichSequenceIterator iterator = RichSequence.IOTools.readFasta(br,
-                alpha.getTokenization("token"), ns);
-        while (iterator.hasNext())
+        // You can use any of the convenience methods found in the BioJava 1.6 API
+        RichSequenceIterator stream = RichSequence.IOTools.readFastaDNA(br, ns);
+
+        // Iterate over all sequences in the stream
+
+        while (stream.hasNext())
         {
-            RichSequence rec = iterator.nextRichSequence();
-            String id = rec.getName();
-            if (id.equalsIgnoreCase(seqid))
+            Sequence seq = stream.nextSequence();
+            int gc = 0;
+            for (int pos = 1; pos <= seq.length(); ++pos)
             {
-                String seq = rec.seqString();
-                out.write(">" + id + "\n");
-                out.write(seq + "\n");
-                break;
+                Symbol sym = seq.symbolAt(pos);
+                if (sym == DNATools.g() || sym == DNATools.c())
+                {
+                    ++gc;
+                }
             }
+            double currentGcCount = (gc * 100.0) / seq.length();
+            //System.out.println(seq.getName() + ": "+ currentGcCount+ "%");
+            combinedGcTally+=currentGcCount;
+            noSeqs++;
         }
-        out.close();
-    }
-    public void seqFromCommandLine(File fastaIn, File outfile, String seqid, int start, int end) throws FileNotFoundException, Exception
-    {
-        int subseqLength = end -start;
-        System.out.println("Requested subsequence length is "+subseqLength);
-        Writer out = new BufferedWriter(new FileWriter(outfile));
-
-        BufferedReader br = new BufferedReader(new FileReader(fastaIn));
-        Alphabet alpha = AlphabetManager.alphabetForName("DNA");
-        SimpleNamespace ns = new SimpleNamespace("biojava");
-
-        RichSequenceIterator iterator = RichSequence.IOTools.readFasta(br,
-                alpha.getTokenization("token"), ns);
-        while (iterator.hasNext())
-        {
-            RichSequence rec = iterator.nextRichSequence();
-            String id = rec.getName();
-            if (id.equalsIgnoreCase(seqid))
-            {
-                String seq = rec.seqString();
-                String subseq = seq.substring(start, end);
-                subseqLength = subseq.length();
-                System.out.println("Provided subsequence length is "+subseqLength);
-                
-                out.write(">" + id + "\n");
-                out.write(subseq + "\n");
-                break;
-            }
-        }
-        out.close();
-    }
-
-    public static void main(String[] args)
-    {
-        File gff = new File("/Users/ethering/projects/oomycete_genomes/genome_biology/pinfestans/phytophthora_infestans_t30-4_1_supercontigs-3_edited.fasta");
-        FastaFeatures ff = new FastaFeatures();
-        try
-        {
-            HashMap<String, Integer> seqLengths = ff.getSequenceLengths(gff);
-        }
-        catch (Exception ex)
-        {
-            Logger.getLogger(FastaFeatures.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        double gcCount = (combinedGcTally/noSeqs)/100;
+        System.out.println("Overall gcCount = "+gcCount);
     }
 }

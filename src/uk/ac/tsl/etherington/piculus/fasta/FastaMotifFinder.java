@@ -212,8 +212,8 @@ public class FastaMotifFinder
     {
         //System.out.println("seqIn: "+seq);
         CharacterReplacer cReplacer = Perl5Parser.makeReplacer("tr/ATCG/TAGC/");
-        seq = new StringBuffer(seq).reverse().toString();;
-        String newSeq = cReplacer.doReplacement(seq);
+        String reversed = new StringBuffer(seq).reverse().toString();
+        String newSeq = cReplacer.doReplacement(reversed);
         //System.out.println("seqOut: "+newSeq);
         return newSeq;
     }

@@ -159,6 +159,5 @@ public class FastqJoiner
         leftPairedSeqs.close();
         rightPairedSeqs.close();
         System.out.println("Completed spliting " + peCounter + " paired-reads");
-    
     }
 }

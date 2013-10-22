@@ -19,12 +19,13 @@ import org.biojava3.data.sequence.SequenceUtil;
  */
 public class RandomFasta
 {
+
     /**
-     * 
+     *
      * @param fasta the multi-fasta infile
      * @param numberOfSeqsRequired the number of random sequences required
      * @param outfile
-     * @throws Exception 
+     * @throws Exception
      */
     public void selectRandomSequences(File fasta, int numberOfSeqsRequired, File outfile) throws Exception
     {
@@ -32,7 +33,7 @@ public class RandomFasta
         List<FastaSequence> seqs = SequenceUtil.readFasta(new FileInputStream(fasta));
         if (seqs.size() < numberOfSeqsRequired)
         {
-            System.err.println("The number of random sequences requested is greater than that available.\nThere are "+seqs.size()+" sequences available");
+            System.err.println("The number of random sequences requested is greater than that available.\nThere are " + seqs.size() + " sequences available");
             System.exit(1);
         }
         //get the random ints
@@ -48,5 +49,4 @@ public class RandomFasta
         SequenceUtil.writeFasta(fop, dnaSeqs);
         fop.close();
     }
-        
-   }
+}

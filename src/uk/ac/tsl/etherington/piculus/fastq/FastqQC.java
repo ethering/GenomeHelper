@@ -15,9 +15,13 @@ import net.sf.picard.fastq.FastqWriterFactory;
 import net.sf.picard.util.SolexaQualityConverter;
 
 /**
- * A Quality Control (QC) class that takes fastq sequences in various structure and quality format. The sequences are checked for Ns, long/short reads and format. 
- * With paired-end reads, if either of the pairs fails QC then neither of the pair is returned. 
- * Reads with the quality format of 'illumina' (pre-Illumina 1.8) are automatically changed to sanger quality format. Currently only accepts Illumina 1.3+
+ * A Quality Control (QC) class that takes fastq sequences in various structure
+ * and quality format. The sequences are checked for Ns, long/short reads and
+ * format. With paired-end reads, if either of the pairs fails QC then neither
+ * of the pair is returned. Reads with the quality format of 'illumina'
+ * (pre-Illumina 1.8) are automatically changed to sanger quality format.
+ * Currently only accepts Illumina 1.3+
+ *
  * @author ethering
  */
 public class FastqQC
@@ -81,18 +85,10 @@ public class FastqQC
                 //get the corresponding reads
                 FastqRecord leftSeqRecord = (FastqRecord) itl.next();
                 FastqRecord rightSeqRecord = (FastqRecord) itr.next();
+                boolean leftGood = qcFastq(leftSeqRecord, singleEndReadLength);
+                boolean rightGood = qcFastq(rightSeqRecord, singleEndReadLength);
 
-                //get the length of them
-                int leftSeqLength = leftSeqRecord.getReadString().length();
-                int rightSeqLength = rightSeqRecord.getReadString().length();
-
-                //check for N's
-                String leftReadString = leftSeqRecord.getReadString();
-                String rightReadString = rightSeqRecord.getReadString();
-                boolean leftContainsN = leftReadString.contains("N");
-                boolean rightContainsN = rightReadString.contains("N");
-
-                if (leftSeqLength == singleEndReadLength && rightSeqLength == singleEndReadLength && leftContainsN == false && rightContainsN == false)
+                if (leftGood && rightGood)
                 {
                     FastqRecord newLeftSeq = groomRead(leftSeqRecord, format);
                     FastqRecord newRightSeq = groomRead(rightSeqRecord, format);
@@ -109,8 +105,22 @@ public class FastqQC
         }
         System.out.println("Completed writing " + itCounter + " good reads");
     }
-    
-    
+
+    public boolean qcFastq(FastqRecord seqRecord, int singleEndReadLength)
+    {
+        //get the length of them
+        int seqLength = seqRecord.getReadString().length();
+        String readString = seqRecord.getReadString();
+        boolean containsN = readString.contains("N");
+        if (seqLength == singleEndReadLength && containsN == false)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
 
     /**
      * Removes pairs of reads where at least one of the pair contains short/long
@@ -124,7 +134,7 @@ public class FastqQC
      * @param writeBadSeqs whether to write the bad reads to a file (bad reads
      * file name will start with 'bad_')
      */
-    public void qcInterlacedReads(File fastqFileIn, File fastqFileOut, int readLength, String format, boolean writeBadSeqs)
+    public void qcInterlacedReads(File fastqFileIn, File fastqFileOut, int singleEndReadLength, String format, boolean writeBadSeqs)
     {
         FastqReader fq = new FastqReader(fastqFileIn);
 
@@ -150,17 +160,10 @@ public class FastqQC
                 FastqRecord leftSeqRecord = (FastqRecord) it.next();
                 FastqRecord rightSeqRecord = (FastqRecord) it.next();
 
-                //get the length of them
-                int leftSeqLength = leftSeqRecord.getReadString().length();
-                int rightSeqLength = rightSeqRecord.getReadString().length();
+                boolean leftGood = qcFastq(leftSeqRecord, singleEndReadLength);
+                boolean rightGood = qcFastq(rightSeqRecord, singleEndReadLength);
 
-                //check for N's
-                String leftReadString = leftSeqRecord.getReadString();
-                String rightReadString = rightSeqRecord.getReadString();
-                boolean leftContainsN = leftReadString.contains("N");
-                boolean rightContainsN = rightReadString.contains("N");
-
-                if (leftSeqLength == readLength && rightSeqLength == readLength && leftContainsN == false && rightContainsN == false)
+                if (leftGood && rightGood)
                 {
                     FastqRecord newLeftSeq = groomRead(leftSeqRecord, format);
                     FastqRecord newRightSeq = groomRead(rightSeqRecord, format);
@@ -168,7 +171,7 @@ public class FastqQC
                     goodSeqs.write(newRightSeq);
                     itCounter++;
                 }
-                if (writeBadSeqs == true && (leftSeqLength != readLength || rightSeqLength != readLength || leftContainsN == true || rightContainsN == true))
+                else if (writeBadSeqs == true)
                 {
                     badSeqs.write(leftSeqRecord);
                     badSeqs.write(rightSeqRecord);
@@ -178,7 +181,7 @@ public class FastqQC
 
         System.out.println("Completed writing " + itCounter + " good reads");
     }
-    
+
     /**
      * Removes pairs of reads where at least one of the pair contains short/long
      * reads or a read that contain an 'N', from an interlaced fastq file
@@ -191,7 +194,7 @@ public class FastqQC
      * @param writeBadSeqs whether to write the bad reads to a file (bad reads
      * file name will start with 'bad_')
      */
-    public void qcInterlacedReadsToPairs(File fastqFileIn, File leftReadsOut, File rightReadsOut, int readLength, String format, boolean writeBadSeqs)
+    public void qcInterlacedReadsToPairs(File fastqFileIn, File leftReadsOut, File rightReadsOut, int singleEndReadLength, String format, boolean writeBadSeqs)
     {
         FastqReader fq = new FastqReader(fastqFileIn);
 
@@ -223,17 +226,10 @@ public class FastqQC
                 FastqRecord leftSeqRecord = (FastqRecord) it.next();
                 FastqRecord rightSeqRecord = (FastqRecord) it.next();
 
-                //get the length of them
-                int leftSeqLength = leftSeqRecord.getReadString().length();
-                int rightSeqLength = rightSeqRecord.getReadString().length();
+                 boolean leftGood = qcFastq(leftSeqRecord, singleEndReadLength);
+                boolean rightGood = qcFastq(rightSeqRecord, singleEndReadLength);
 
-                //check for N's
-                String leftReadString = leftSeqRecord.getReadString();
-                String rightReadString = rightSeqRecord.getReadString();
-                boolean leftContainsN = leftReadString.contains("N");
-                boolean rightContainsN = rightReadString.contains("N");
-
-                if (leftSeqLength == readLength && rightSeqLength == readLength && leftContainsN == false && rightContainsN == false)
+                if (leftGood && rightGood)
                 {
                     FastqRecord newLeftSeq = groomRead(leftSeqRecord, format);
                     FastqRecord newRightSeq = groomRead(rightSeqRecord, format);
@@ -241,7 +237,7 @@ public class FastqQC
                     goodRightSeqs.write(newRightSeq);
                     itCounter++;
                 }
-                if (writeBadSeqs == true && (leftSeqLength != readLength || rightSeqLength != readLength || leftContainsN == true || rightContainsN == true))
+                else if (writeBadSeqs == true)
                 {
                     badLeftSeqs.write(leftSeqRecord);
                     badRightSeqs.write(rightSeqRecord);
@@ -293,6 +289,9 @@ public class FastqQC
                 int seqLength = seqRecord.getReadString().length();
                 String readString = seqRecord.getReadString();
                 boolean containsN = readString.contains("N");
+                
+                
+                
 
                 if (seqLength / 2 == readLength && containsN == false)
                 {
@@ -378,8 +377,9 @@ public class FastqQC
         }
         System.out.println("Completed writing " + itCounter + " good reads");
     }
+
     /**
-     * 
+     *
      * @param record the FastqRecord to be groomed
      * @param format the current format. Can only be 'illumina' or 'sanger'
      * @return a FastqRecord in sanger format
@@ -409,8 +409,11 @@ public class FastqQC
         return newseq;
 
     }
+
     /**
-     * Takes a fastq file and calculates the number of reads which have a 'N' and the distribution of read lengths
+     * Takes a fastq file and calculates the number of reads which have a 'N'
+     * and the distribution of read lengths
+     *
      * @param fastq the fastq file to analyse
      */
     public void countLengthsAndNs(File fastq)
@@ -465,8 +468,12 @@ public class FastqQC
 
     }
     //just counts the reads and makes sure they look right
+
     /**
-     * Checks a fastq file to verify that all the reads can be parsed into a FastqRecord. Errors should be thrown if any of the reads are not formatted correctly.
+     * Checks a fastq file to verify that all the reads can be parsed into a
+     * FastqRecord. Errors should be thrown if any of the reads are not
+     * formatted correctly.
+     *
      * @param fastq the fastq file to verify
      */
     public void veryfiyReads(File fastq)
@@ -486,7 +493,9 @@ public class FastqQC
     }
 
     /**
-     * Verifies that two files of left/right paired-end reads are in order and contain no fastq format errors
+     * Verifies that two files of left/right paired-end reads are in order and
+     * contain no fastq format errors
+     *
      * @param fastqLeft the left-handed fastq file to verify
      * @param fastqRight the right-handed fastq file to verify
      */

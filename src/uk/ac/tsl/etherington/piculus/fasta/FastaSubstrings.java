@@ -29,7 +29,6 @@ import org.biojavax.SimpleNamespace;
 import org.biojavax.bio.seq.RichSequence;
 import org.biojavax.bio.seq.RichSequenceIterator;
 import org.jtr.transliterate.CharacterParseException;
-import uk.ac.tsl.etherington.piculus.fastq.FastqMotifFinder;
 
 /**
  *
@@ -245,6 +244,7 @@ public class FastaSubstrings
     public class StringLengthComparator implements Comparator<String>
     {
 
+        @Override
         public int compare(String o1, String o2)
         {
             if (o1.length() > o2.length())

@@ -8,14 +8,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import net.sf.picard.fastq.FastqReader;
 import net.sf.picard.fastq.FastqRecord;
 import net.sf.picard.fastq.FastqWriter;
@@ -123,7 +116,7 @@ public class FastqParser
      */
     public void getOneSideFastqSeqsFromList(File listFile, File fastqFileIn, File fastqFileOut) throws FileNotFoundException, IOException
     {
-        HashSet<String> list = new HashSet<String>();
+        HashSet<String> list = new HashSet<>();
         BufferedReader input = new BufferedReader(new FileReader(listFile));
 
         String line = null;
@@ -234,5 +227,4 @@ public class FastqParser
         }
         out.close();
     }
-    
 }

@@ -847,7 +847,7 @@ public class GFFFeatureStats
      *
      * @param fl a org.biojava3.genome.parsers.gff.FeatureList
      * @param featureType the type of feature to make blocks from
-     * @attribute the name of the attribute that will make the genes unique
+     * @param attribute the name of the attribute that will make the genes unique
      * (e.g. "name", gene_id, etc)
      * @return a HashMap of blocks where the keys are the names of the reference
      * sequences and the values are arrays of Integers with the consecutive

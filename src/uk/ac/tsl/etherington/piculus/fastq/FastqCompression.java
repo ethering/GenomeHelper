@@ -28,35 +28,6 @@ public class FastqCompression
     public void compressFastq(File fastqFile, File fastqOut) throws FileNotFoundException, IOException, ClassNotFoundException
     {
         FastqReader fqr = new FastqReader(fastqFile);
-        //FastqWriterFactory writer = new FastqWriterFactory();
-        FileOutputStream fos = new FileOutputStream(fastqOut);
-        GZIPOutputStream gz = new GZIPOutputStream(fos);
-        Iterator<FastqRecord> it = fqr.iterator();
-        //int peCounter = 0;
-        ObjectOutputStream oos = new ObjectOutputStream(gz);
-        //loop thru the interlaced file
-        while (it.hasNext())
-        {
-            FastqRecord fastqRecord = it.next();
-
-            oos.writeObject(fastqRecord.getReadHeader());
-            oos.writeObject(fastqRecord.getReadString());
-            oos.writeObject("+");
-            oos.writeObject(fastqRecord.getBaseQualityString());
-
-            System.out.println(fastqRecord.getReadHeader());
-            System.out.println(fastqRecord.getReadString());
-            System.out.println("+");
-            System.out.println(fastqRecord.getBaseQualityString());
-        }
-        oos.flush();
-        oos.close();
-        fos.close();
-    }
-
-    public void compressFastq2(File fastqFile, File fastqOut) throws FileNotFoundException, IOException, ClassNotFoundException
-    {
-        FastqReader fqr = new FastqReader(fastqFile);
         FastqWriterFactory writer = new FastqWriterFactory();
         FastqWriter goodReads = writer.newWriter(fastqOut);
 
@@ -68,34 +39,26 @@ public class FastqCompression
             FastqRecord fastqRecord = it.next();
             if (!fastqRecord.getReadString().equalsIgnoreCase(""))
             {
-                System.out.println(fastqRecord.getReadHeader());
-                System.out.println(fastqRecord.getReadString());
-                System.out.println("+");
-                System.out.println(fastqRecord.getBaseQualityString());
                 goodReads.write(fastqRecord);
-
             }
         }
+        goodReads.close();
     }
 
     public static void main(String[] args)
     {
         try
         {
-            File compFastq = new File("/Users/ethering/temp/solexa/lane1_NoIndex_R1_2000.fastq.gz");
-            File compFastqOut = new File("/Users/ethering/temp/solexa/lane1_NoIndex_R1_2000_out.fastq.gz");
+            File compFastq = new File("/Users/ethering/temp/solexa/lane1_NoIndex_R1_2000_qc.fastq");
+            File compFastqOut = new File("/Users/ethering/temp/solexa/lane1_NoIndex_R1_2000_qc_test.fastq.gz");
             FastqCompression comp = new FastqCompression();
-            comp.compressFastq2(compFastq, compFastqOut);
+            comp.compressFastq(compFastq, compFastqOut);
         }
         catch (FileNotFoundException ex)
         {
             Logger.getLogger(FastqCompression.class.getName()).log(Level.SEVERE, null, ex);
         }
-        catch (IOException ex)
-        {
-            Logger.getLogger(FastqCompression.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        catch (ClassNotFoundException ex)
+        catch (IOException | ClassNotFoundException ex)
         {
             Logger.getLogger(FastqCompression.class.getName()).log(Level.SEVERE, null, ex);
         }

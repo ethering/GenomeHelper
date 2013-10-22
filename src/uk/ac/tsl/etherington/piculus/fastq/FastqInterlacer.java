@@ -4,12 +4,8 @@
  */
 package uk.ac.tsl.etherington.piculus.fastq;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -19,12 +15,18 @@ import net.sf.picard.fastq.FastqWriter;
 import net.sf.picard.fastq.FastqWriterFactory;
 
 /**
- *
+ *A FASTQ interlatcer class for interlacing and de-interlacing fastq files
  * @author ethering
  */
 public class FastqInterlacer
 {
-
+    /**
+     * Interlaces fastq sequences, where it is uncertain that each pair has a corresponding ordered mate
+     * @param leftReads the left-handed fastq reads
+     * @param rightReads the right-handed fastq reads
+     * @param fastqInterlacedFile the interlaced paired fastq files
+     * @param fastqSinglesFile orphan fastq sequences that don't have a corresponding pair
+     */
     public void interlace(File leftReads, File rightReads, File fastqInterlacedFile, File fastqSinglesFile)
     {
         FastqReader fql = new FastqReader(leftReads);
@@ -34,7 +36,7 @@ public class FastqInterlacer
         FastqWriter pairedSeqs = writer.newWriter(fastqInterlacedFile);
         //for unpaired singles
         FastqWriter singleSeqs = writer.newWriter(fastqSinglesFile);
-        Set<String> pairs = new HashSet<String>();
+        Set<String> pairs = new HashSet<>();
         int peCounter = 0;
         int singleCounter = 0;
 
@@ -102,7 +104,13 @@ public class FastqInterlacer
         System.out.println("Completed writing " + singleCounter + " singles");
     }
 
-    //if you know your reads match up, use this one
+    /**
+     * Interlaces fastq sequences, where it is known that each sequence has a corresponding mate in the same order
+     * @param leftReads the left-handed fastq reads
+     * @param rightReads the right-handed fastq reads
+     * @param fastqInterlacedFile the interlaced paired fastq files
+     * @throws IOException 
+     */
     public void interlaceKnownPairs(File leftReads, File rightReads, File fastqInterlacedFile) throws IOException
     {
 
@@ -143,32 +151,37 @@ public class FastqInterlacer
         interlacedSeqs.close();
         System.out.println("Interlaced " + peCounter + " paired-end reads");
     }
-
+    /**
+     * A helper method to print out the sequence ids in a fastq file
+     * @param fastqFile the fastq file for which the sequence ids should be printed
+     */
     public void printFastq(File fastqFile)
     {
         FastqReader fq = new FastqReader(fastqFile);
-
-
         Iterator it = fq.iterator();
-
         //loop thru the left hand reads 
         while (it.hasNext())
         {
             FastqRecord seqRecord = (FastqRecord) it.next();
             System.out.println(seqRecord.getReadHeader());
-
         }
-
         fq.close();
-
     }
 
-    public void deinterlace(File fastqFile, File leftPairdReads, File rightPairedReads, File leftSingleReads, File rightSingleReads)
+    /**
+     * De-interlace interlaced fastq sequences into a file of left and right sequences
+     * @param fastqFile the interlaced fastq file
+     * @param leftPairedReads the left-handed reads from the interlaced fastq file
+     * @param rightPairedReads the right-handed reads from the interlaced fastq file
+     * @param leftSingleReads the unpaired left-handed reads
+     * @param rightSingleReads the unpaired right-handed reads
+     */
+    public void deinterlace(File fastqFile, File leftPairedReads, File rightPairedReads, File leftSingleReads, File rightSingleReads)
     {
         FastqReader fqr = new FastqReader(fastqFile);
         FastqReader fqr2;
         FastqWriterFactory writer = new FastqWriterFactory();
-        FastqWriter leftPairedSeqs = writer.newWriter(leftPairdReads);
+        FastqWriter leftPairedSeqs = writer.newWriter(leftPairedReads);
         FastqWriter rightPairedSeqs = writer.newWriter(rightPairedReads);
         FastqWriter leftSingleSeqs = writer.newWriter(leftSingleReads);
         FastqWriter rightSingleSeqs = writer.newWriter(rightSingleReads);
@@ -181,7 +194,6 @@ public class FastqInterlacer
         //loop thru the interlaced file
         while (it.hasNext())
         {
-
             FastqRecord fastqRecord1 = it.next();
             String readHeader = fastqRecord1.getReadHeader();
             String[] array1 = readHeader.split(" ");
@@ -229,42 +241,8 @@ public class FastqInterlacer
             }
             fqr2.close();
         }
-
         System.out.println("Completed writing " + peCounter + " paired-reads");
         System.out.println("Completed writing " + lrCounter + " left-reads");
         System.out.println("Completed writing " + rrCounter + " right-reads");
-
     }
-//    public static void main(String args[])
-//    {
-//
-//        File leftReads = new File("/Users/ethering/temp/fastqapp_data/new_format_paired_left.fastq");
-//        File rightReads = new File("/Users/ethering/temp/fastqapp_data/new_format_paired_right.fastq");
-//        File zippedFastqInterlacedFile = new File("/Users/ethering/temp/fastqapp_data/interlaced.fq.gz");
-//        File log = new File("/Users/ethering/temp/fastqapp_data/log.txt");
-//
-//
-//        Date start = new Date();
-//        long l1 = start.getTime();
-//        FastqInterlacer fi2 = new FastqInterlacer();
-//        try
-//        {
-//            fi2.interlaceKnownPairs(leftReads, rightReads, zippedFastqInterlacedFile, log);
-//        }
-//        catch (IOException ex)
-//        {
-//            Logger.getLogger(FastqInterlacer.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-//        catch (InterruptedException ex)
-//        {
-//            Logger.getLogger(FastqInterlacer.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-//        //fi2.interlaceKnownPairs(leftReads, rightReads, fastqInterlacedFile);
-//        Date stop = new Date();
-//
-//        long l2 = stop.getTime();
-//        long diff = l2 - l1;
-//        System.out.println("Took " + diff);
-//        //fi2.printFastq(fastqInterlacedFile);
-//    }
 }

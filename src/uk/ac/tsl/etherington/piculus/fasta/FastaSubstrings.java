@@ -225,7 +225,7 @@ public class FastaSubstrings
                 }
             }
             //get the reverse complement and do the same
-            String revcom = FastqMotifFinder.revcom(fastaSeq);
+            String revcom = FastaMotifFinder.revcom(fastaSeq);
             for (int i = 0; i < revcom.length(); i++)
             {
                 int start = i;

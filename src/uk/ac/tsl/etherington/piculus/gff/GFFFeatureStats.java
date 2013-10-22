@@ -1,6 +1,5 @@
 package uk.ac.tsl.etherington.piculus.gff;
 
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -22,7 +21,6 @@ import java.util.logging.Logger;
 import org.biojava.bio.BioException;
 import org.biojava3.core.sequence.DNASequence;
 import org.biojava3.core.sequence.Strand;
-import org.biojava3.core.sequence.io.FastaReaderHelper;
 import org.biojava3.genome.parsers.gff.FeatureI;
 import org.biojava3.genome.parsers.gff.FeatureList;
 import org.biojava3.genome.parsers.gff.GFF3Reader;
@@ -30,8 +28,8 @@ import org.biojava3.genome.parsers.gff.Location;
 import uk.ac.tsl.etherington.piculus.fasta.FastaFeatures;
 
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ *Contains a range of methods that calculate a number of genome statistics for a requested feature type (the 3rd column in a gff file)
+ * normally returning the mean length of the feature and printing out lots of stats associated with the feature.
  */
 /**
  *
@@ -40,18 +38,26 @@ import uk.ac.tsl.etherington.piculus.fasta.FastaFeatures;
 public class GFFFeatureStats
 {
 
+    /**
+     * Combines a number of methods
+     *
+     * @param gff
+     * @param refSeq
+     * @param attribute
+     * @throws FileNotFoundException
+     * @throws BioException
+     * @throws IOException
+     */
     public void getStats(String gff, File refSeq, String attribute) throws FileNotFoundException, BioException, IOException
     {
 
-        HashMap<String, int[]> genomeMap = new HashMap<String, int[]>(FastaFeatures.getSequenceAsIntArray(refSeq));
+        HashMap<String, int[]> genomeMap = new HashMap<>(FastaFeatures.getSequenceAsIntArray(refSeq));
         double genomeSize = getGenomeSizeFromIntArrayHashMap(genomeMap);
         FeatureList fl = GFF3Reader.read(gff);
-
         try
         {
             getMeanFeatureLength(fl, genomeMap, "CDS");
             System.out.println("");
-            genomeMap = new HashMap<String, int[]>(FastaFeatures.getSequenceAsIntArray(refSeq));
             getMeanFeatureLength(fl, genomeMap, "exon");
             System.out.println("");
             getMeanIntronLength(fl, attribute, genomeSize);
@@ -65,6 +71,13 @@ public class GFFFeatureStats
         }
     }
 
+    /**
+     * Calculates the length of a genome from collection of int arrays, where
+     * each int array is the length of a genome sequence
+     *
+     * @param genomeMap
+     * @return the size of the genome (in nucleotides)
+     */
     public double getGenomeSizeFromIntArrayHashMap(HashMap<String, int[]> genomeMap)
     {
         double genomeSize = 0;
@@ -75,6 +88,31 @@ public class GFFFeatureStats
         return genomeSize;
     }
 
+    /**
+     * Gets all the features from a gff file
+     * @param gffFile the gff file from which to extract the features
+     * @return a org.biojava3.genome.parsers.gff.FeatureList
+     * @throws IOException 
+     */
+    public FeatureList getFeatureList(String gffFile) throws IOException
+    {
+        FeatureList fl = GFF3Reader.read(gffFile);
+        return fl;
+    }
+
+    /**
+     * Prints stats and mean feature length for a given feature
+     *
+     * @param fl a org.biojava3.genome.parsers.gff.FeatureList
+     * @param genomeMap a HashMap where the keys are the reference sequence
+     * names and the values a zero-filled int [] the length of the associated
+     * reference sequence
+     * @param featureName the feature-type to analyse (e.g. mRNA, exon, CDS,
+     * etc)
+     * @return the mean length of the requested feature name
+     * @throws IOException
+     * @throws Exception
+     */
     public double getMeanFeatureLength(FeatureList fl, HashMap<String, int[]> genomeMap, String featureName) throws IOException, Exception
     {
         FeatureList featTypes = new FeatureList(fl.selectByType(featureName));
@@ -91,10 +129,12 @@ public class GFFFeatureStats
                 Location loc = fi.location();
                 int start = loc.bioStart();
                 int end = loc.bioEnd();
+                //get the int array for the current reference sequence
                 int[] seqMap = genomeMap.get(seqname);
                 //the location is 1-based, but the array is zero-based
                 for (int i = start - 1; i < end - 1; i++)
                 {
+                    //increment the location of the feature in the int [] by one
                     seqMap[i]++;
                 }
                 genomeMap.put(seqname, seqMap);
@@ -102,7 +142,7 @@ public class GFFFeatureStats
         }
 
         //feats will be an array list of feature lengths so we know the number of features and how long they are
-        ArrayList<Integer> feats = new ArrayList<Integer>();
+        ArrayList<Integer> feats = new ArrayList<>();
         double genomeLength = 0;
         int altSplicing = 0;
         for (Map.Entry<String, int[]> arraySet : genomeMap.entrySet())
@@ -162,19 +202,36 @@ public class GFFFeatureStats
         return meanLength;
     }
 
-    public double getMeanFeatureLength(FeatureList fl, HashMap<String, int[]> genomeMap, String featureName, File secretedProteinsFile, String attribute) throws IOException, Exception
+    /**
+     * Prints stats and mean feature length for a given feature, but restricts
+     * it to a list of geneIds of interest
+     *
+     * @param fl a org.biojava3.genome.parsers.gff.FeatureList
+     * @param genomeMap a HashMap where the keys are the reference sequence
+     * names and the values a zero-filled int [] the length of the associated
+     * reference sequence
+     * @param featureName the feature-type to analyse (e.g. mRNA, exon, CDS,
+     * etc)
+     * @param geneIds a file of gene IDs, one per line
+     * @param attribute the gff attribute that the gene IDs will be listed
+     * under, e.g. gene_id, transcript_id, etc
+     * @return prints out stats and returns the mean feature length of the
+     * featureName
+     * @throws IOException
+     * @throws Exception
+     */
+    public double getMeanFeatureLength(FeatureList fl, HashMap<String, int[]> genomeMap, String featureName, File geneIds, String attribute) throws IOException, Exception
     {
-
-        Set<String> secretedProteins = new HashSet<String>();
-        BufferedReader br = new BufferedReader(new FileReader(secretedProteinsFile));
+        Set<String> secretedProteins = new HashSet<>();
+        BufferedReader br = new BufferedReader(new FileReader(geneIds));
         String line = null; //not declared within while loop
         while ((line = br.readLine()) != null)
         {
             secretedProteins.add(line);
         }
-        System.out.println("Secretome contains "+secretedProteins.size()+" sequences");
+        System.out.println("Secretome contains " + secretedProteins.size() + " sequences");
 
-        //open the gff file and extract the CDS features
+        //open the gff file and extract the requested features
         FeatureList featTypes = new FeatureList(fl.selectByType(featureName));
 
         //iterate over the gff file
@@ -231,7 +288,7 @@ public class GFFFeatureStats
                     {
                         if (codingPositions[i] > 1)
                         {
-                            altSplicing += codingPositions[i]-1;
+                            altSplicing += codingPositions[i] - 1;
                         }
                         //advance along the array
                         i++;
@@ -254,7 +311,7 @@ public class GFFFeatureStats
         {
             codingSpace += featInt;
         }
-        
+
         System.out.println("Feature calculated: " + featureName);
         double meanLength = codingSpace / feats.size();
         System.out.println("Mean feature length = " + meanLength);
@@ -267,7 +324,15 @@ public class GFFFeatureStats
         return meanLength;
     }
 
-    //incase you're not interested in proportions
+    /**
+     * Calculates the mean feature length of a given feature
+     *
+     * @param fl a org.biojava3.genome.parsers.gff.FeatureList
+     * @param featureName the feature-type to analyse (e.g. mRNA, exon, CDS,
+     * etc)
+     * @return the mean feature length of the given feature
+     * @throws IOException
+     */
     public double getMeanFeatureLength(FeatureList fl, String featureName) throws IOException
     {
         FeatureList featTypes = new FeatureList(fl.selectByType(featureName));
@@ -280,8 +345,8 @@ public class GFFFeatureStats
             Location loc = fi.location();
             int start = loc.bioStart();
             int end = loc.bioEnd();
-            int cdsLength = end - start + 1;
-            combinedFeatureLength += cdsLength;
+            int featureLength = end - start + 1;
+            combinedFeatureLength += featureLength;
             numberOfFeatures++;
         }
         double meanLength = combinedFeatureLength / numberOfFeatures;
@@ -290,13 +355,21 @@ public class GFFFeatureStats
         return meanLength;
     }
 
-    //creates non-exon genome (i.e. intergenic and intron)
+    /**
+     * Writes the DNA sequence of the non-coding portion of the genome (i.e.
+     * intergenic and intron).
+     *
+     * @param fl a org.biojava3.genome.parsers.gff.FeatureList
+     * @param refSeq the reference sequence (in fasta format)
+     * @param nonCodingGenome the non-coding reference geneom (in fasta format)
+     * @throws Exception
+     */
     public void createNonCodingGenome(FeatureList fl, File refSeq, File nonCodingGenome) throws Exception
     {
         Writer output = new BufferedWriter(new FileWriter(nonCodingGenome));
         LinkedHashMap<String, DNASequence> genome = FastaFeatures.getParsedDNASequences(refSeq);
         //a HashMap for the sequence lengths, e.g. <Chr1><5500>
-        HashMap<String, Integer> seqLengths = new HashMap<String, Integer>(FastaFeatures.getSequenceLengths(refSeq));
+        HashMap<String, Integer> seqLengths = new HashMap<>(FastaFeatures.getSequenceLengths(refSeq));
         //a HashMap for the non-coding blocks, e.g. <Chr1><[1, 50, 55, 70....]>
         HashMap<String, ArrayList<Integer>> blocks = getBlocks(fl, "exon");
 
@@ -370,13 +443,20 @@ public class GFFFeatureStats
         output.close();
     }
 
-    //creates non-CDS/exon genome (i.e. intergenic and intron)
+    /**
+     *
+     * @param fl a org.biojava3.genome.parsers.gff.FeatureList
+     * @param feature the feature to use for the coding genome (e.g. exon, cds, mRNA)
+     * @param refSeq the reference sequence (in fasta format)
+     * @param codingGenome the non-coding reference genome (in fasta format)
+     * @throws Exception
+     */
     public void createCodingGenome(FeatureList fl, String feature, File refSeq, File codingGenome) throws Exception
     {
         Writer output = new BufferedWriter(new FileWriter(codingGenome));
         LinkedHashMap<String, DNASequence> genome = FastaFeatures.getParsedDNASequences(refSeq);
         //a HashMap for the non-coding blocks, e.g. <Chr1><[1, 50, 55, 70....]>
-        HashMap<String, ArrayList<String>> blocks = new HashMap<String, ArrayList<String>>();
+        HashMap<String, ArrayList<String>> blocks = new HashMap<>();
 
         //just select the exons
         FeatureList featTypes = new FeatureList(fl.selectByType(feature));
@@ -411,7 +491,7 @@ public class GFFFeatureStats
             //if it's a new sequence, get the array list...
             else
             {
-                ArrayList<String> al = new ArrayList<String>();
+                ArrayList<String> al = new ArrayList<>();
                 al.add(subseq);
                 blocks.put(seqName, al);
             }
@@ -425,7 +505,7 @@ public class GFFFeatureStats
             //get each arrayList...
             ArrayList<String> al = entry.getValue();
             String contig = entry.getKey();
-            nonCodingContig.append(">" + contig);
+            nonCodingContig.append(">").append(contig);
             nonCodingContig.append(System.getProperty("line.separator"));
 
             Iterator alit = al.iterator();
@@ -441,7 +521,17 @@ public class GFFFeatureStats
         output.close();
     }
 
-    //attribute is the name of the attribute (in column 9) that will make your genes unique (e.g. "name")
+    /**
+     *
+     * @param fl a org.biojava3.genome.parsers.gff.FeatureList
+     * @param attribute the name of the attribute that will make your genes
+     * unique (e.g. "name", gene_id, etc)
+     * @param genomeSize the size of the genome
+     * @return the mean intron length
+     * @throws IOException
+     * @throws FileNotFoundException
+     * @throws BioException
+     */
     public double getMeanIntronLength(FeatureList fl, String attribute, double genomeSize) throws IOException, FileNotFoundException, BioException
     {
         //String will be the attribute value. The HashMap will contain the strand Character and the ArrayList of exon start/stops
@@ -494,9 +584,19 @@ public class GFFFeatureStats
         return meanLength;
     }
 
+    /**
+     *
+     * @param fl a org.biojava3.genome.parsers.gff.FeatureList
+     * @param attribute the name of the attribute that will make the genes
+     * unique (e.g. "name", gene_id, etc)
+     * @param secretedProteinsFile a list of genes that you want to restrict
+     * your analysis to
+     * @return the mean intron length of your restricted gene list
+     * @throws IOException
+     */
     public double getMeanSecretedIntronLength(FeatureList fl, String attribute, File secretedProteinsFile) throws IOException
     {
-        Set<String> secretedProteins = new HashSet<String>();
+        Set<String> secretedProteins = new HashSet<>();
         BufferedReader br = new BufferedReader(new FileReader(secretedProteinsFile));
         String line = null; //not declared within while loop
         while ((line = br.readLine()) != null)
@@ -556,12 +656,24 @@ public class GFFFeatureStats
         return meanLength;
     }
 
+    /**
+     * Calculate the proportion of the genome that contains coding regions
+     * (exons)
+     *
+     * @param featList a org.biojava3.genome.parsers.gff.FeatureList
+     * @param codingMap a HashMap where the keys are the reference sequence
+     * names and the values a zero-filled int [] the length of the associated
+     * reference sequence
+     * @param attribute the name of the attribute that will make the genes
+     * unique (e.g. "name", gene_id, etc)
+     * @param genomeLength the length of the genome
+     * @return the proportion of the genome which contains exons
+     * @throws IOException
+     * @throws Exception
+     */
     public double calculateCodingRegion(FeatureList featList, HashMap<String, int[]> codingMap, String attribute, double genomeLength) throws IOException, Exception
     {
-        HashMap<String, HashMap<String, ArrayList<Integer>>> features = new HashMap<String, HashMap<String, ArrayList<Integer>>>();
-        //get the length of each refSeq and create an int [] array, the length of each sequence, with values set at zero
-        //HashMap<String, Integer> seqLengths = new HashMap<String, Integer>(fastautils.FastaFeatures.getSequenceLengths(refSeq));
-        System.out.println("Found sequence lengths");
+        HashMap<String, HashMap<String, ArrayList<Integer>>> features = new HashMap<>();
         //go across the gff file, note the sequence name, gene id and start/stop positions of each feature
         //store info e.g. <Chr1><gene_5><[5, 10, 30, 40, 100, 120]>
         FeatureList fl = featList.selectByType("exon");
@@ -598,7 +710,7 @@ public class GFFFeatureStats
                     else
                     {
                         //create a new ArrayList
-                        al = new ArrayList<Integer>();
+                        al = new ArrayList<>();
                         //add the start and stop positions to it
                         al.add(start);//e.g. 10
                         al.add(end);//e.g. 25
@@ -611,8 +723,8 @@ public class GFFFeatureStats
                 //if it's a new sequence, create a new HashMap<String, ArrayList<Integer>> and ArrayList<Integer>
                 else
                 {
-                    HashMap<String, ArrayList<Integer>> hm = new HashMap<String, ArrayList<Integer>>();
-                    ArrayList<Integer> al = new ArrayList<Integer>();
+                    HashMap<String, ArrayList<Integer>> hm = new HashMap<>();
+                    ArrayList<Integer> al = new ArrayList<>();
                     al.add(start);
                     al.add(end);
                     hm.put(geneId, al);
@@ -686,9 +798,18 @@ public class GFFFeatureStats
         return codingProportion;
     }
 
+    /**
+     * Creates start/end blocks of features
+     *
+     * @param fl a org.biojava3.genome.parsers.gff.FeatureList
+     * @param featureType the type of feature to make blocks from
+     * @return a HashMap of blocks where the keys are the names of the reference
+     * sequences and the values are arrays of Integers with the consecutive
+     * start and then finish co-ordinates of all the requested featureTypes
+     */
     public HashMap<String, ArrayList<Integer>> getBlocks(FeatureList fl, String featureType)
     {
-        HashMap<String, ArrayList<Integer>> blocks = new HashMap<String, ArrayList<Integer>>();
+        HashMap<String, ArrayList<Integer>> blocks = new HashMap<>();
         FeatureList featTypes = fl.selectByType(featureType);
         for (FeatureI currentfi : featTypes)
         {
@@ -710,7 +831,7 @@ public class GFFFeatureStats
             else
             {
                 //create a new ArrayList
-                ArrayList<Integer> al = new ArrayList<Integer>();
+                ArrayList<Integer> al = new ArrayList<>();
                 //add the coords to the arraylist
                 al.add(currentStart);
                 al.add(currentEnd);
@@ -721,9 +842,20 @@ public class GFFFeatureStats
         return blocks;
     }
 
+    /**
+     * Creates start/end blocks of features
+     *
+     * @param fl a org.biojava3.genome.parsers.gff.FeatureList
+     * @param featureType the type of feature to make blocks from
+     * @attribute the name of the attribute that will make the genes unique
+     * (e.g. "name", gene_id, etc)
+     * @return a HashMap of blocks where the keys are the names of the reference
+     * sequences and the values are arrays of Integers with the consecutive
+     * start and then finish co-ordinates of all the requested featureTypes
+     */
     public HashMap<String, ArrayList<Integer>> getBlocks(FeatureList fl, String featureType, String attribute)
     {
-        HashMap<String, ArrayList<Integer>> blocks = new HashMap<String, ArrayList<Integer>>();
+        HashMap<String, ArrayList<Integer>> blocks = new HashMap<>();
         FeatureList featTypes = fl.selectByType(featureType);
         for (FeatureI currentfi : featTypes)
         {
@@ -747,7 +879,7 @@ public class GFFFeatureStats
                 else
                 {
                     //create a new ArrayList
-                    ArrayList<Integer> al = new ArrayList<Integer>();
+                    ArrayList<Integer> al = new ArrayList<>();
                     //add the coords to the arraylist
                     al.add(currentStart);
                     al.add(currentEnd);
@@ -759,9 +891,22 @@ public class GFFFeatureStats
         return blocks;
     }
 
+    /**
+     * Creates start/end blocks of features
+     *
+     * @param fl a org.biojava3.genome.parsers.gff.FeatureList
+     * @param featureType the type of feature to make blocks from
+     * @param attribute the name of the attribute that will make the genes
+     * unique (e.g. "name", gene_id, etc)
+     * @param secretedProteins a list of genes that you want to restrict your
+     * analysis to
+     * @return a HashMap of blocks where the keys are the names of the reference
+     * sequences and the values are arrays of Integers with the consecutive
+     * start and then finish co-ordinates of all the requested featureTypes
+     */
     public HashMap<String, ArrayList<Integer>> getBlocks(FeatureList fl, String featureType, String attribute, Set secretedProteins)
     {
-        HashMap<String, ArrayList<Integer>> blocks = new HashMap<String, ArrayList<Integer>>();
+        HashMap<String, ArrayList<Integer>> blocks = new HashMap<>();
         FeatureList featTypes = fl.selectByType(featureType);
         for (FeatureI currentfi : featTypes)
         {
@@ -787,7 +932,7 @@ public class GFFFeatureStats
                     else
                     {
                         //create a new ArrayList
-                        ArrayList<Integer> al = new ArrayList<Integer>();
+                        ArrayList<Integer> al = new ArrayList<>();
                         //add the coords to the arraylist
                         al.add(currentStart);
                         al.add(currentEnd);
@@ -799,58 +944,5 @@ public class GFFFeatureStats
             }
         }
         return blocks;
-    }
-
-//    public double getGenomeLength(HashMap<String, Integer> hm)
-//    {
-//        double genomeLength = 0;
-//        for (Map.Entry<String, Integer> entry : hm.entrySet())
-//        {
-//            genomeLength += entry.getValue();
-//        }
-//        return genomeLength;
-//    }
-    public void testGFF(String gff, String attribute) throws IOException
-    {
-        FeatureList fl = GFF3Reader.read(gff);
-        //FeatureList fl = featList.selectByType("exon");
-        for (FeatureI fi : fl)
-        {
-            if (fi.hasAttribute(attribute))
-            {
-                //get the sequence name and the start and end position of the  exon
-                String seqName = fi.seqname();
-                //System.out.println(seqName);
-                Location loc = fi.location();
-                int start = loc.bioStart();
-                int end = loc.bioEnd();
-                String geneId = fi.getAttribute(attribute);
-                System.out.println("SeqName: " + seqName + " start: " + start + " end: " + end + " geneId: " + geneId);
-            }
-        }
-    }
-
-    public static void main(String[] args)
-    {
-        try
-        {
-            //String gff = "/Users/ethering/Papers/MyPapers/GenomeBiology/PlantGenomicsEffectors/data/pinfestans/Pi_T30-4_r2_2_cds.gff3";
-            String gff = "/Users/ethering/projects/oomycete_genomes/genome_biology/test_data/test.gff";
-            //File ref = new File("/Users/ethering/projects/oomycete_genomes/genome_biology/pinfestans/phytophthora_infestans_t30-4_1_supercontigs-3.fasta");
-            GFFFeatureStats gfs = new GFFFeatureStats();
-            gfs.testGFF(gff, "exon");
-
-
-        }
-        catch (IOException ex)
-        {
-            Logger.getLogger(GFFFeatureStats.class
-                    .getName()).log(Level.SEVERE, null, ex);
-        }
-        catch (Exception ex)
-        {
-            Logger.getLogger(GFFFeatureStats.class
-                    .getName()).log(Level.SEVERE, null, ex);
-        }
     }
 }

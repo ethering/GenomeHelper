@@ -25,14 +25,14 @@ public class FastaTranslator
     /**
      * Translates a DNA multi-fasta file into ammino acids
      * @param fastaDnaFile the input DNA multi-fasta file
-     * @param fastaDnaFile the output protein multi-fasta file
+     * @param fastaProteinFile the output protein multi-fasta file
      * @throws Exception 
      */
-    public void translateMultiFasta(File fastaDnaFile, File fastaProtienFile) throws Exception
+    public void translateMultiFasta(File fastaDnaFile, File fastaProteinFile) throws Exception
     {
         LinkedHashMap<String, DNASequence> dnaSeqs = FastaReaderHelper.readFastaDNASequence(fastaDnaFile);
         //FastaReaderHelper.readFastaDNASequence for DNA sequences
-        Writer out = new BufferedWriter(new FileWriter(fastaProtienFile));
+        Writer out = new BufferedWriter(new FileWriter(fastaProteinFile));
         for (Entry<String, DNASequence> entry : dnaSeqs.entrySet())
         {
             //System.out.println(entry.getValue().getOriginalHeader() + "=" + entry.getValue().getSequenceAsString());

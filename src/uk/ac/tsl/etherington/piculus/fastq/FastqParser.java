@@ -28,8 +28,6 @@ import org.biojava3.data.sequence.FastaSequence;
 
 
 /*
- * To change this template, choose Tools | Templates and open the template in
- * the editor.
  */
 /**
  *
@@ -44,19 +42,15 @@ public class FastqParser
      * @param fastqfile
      *
      */
-    public void getFastqReadNames(File fastqfile)
-    {
-        final FastqReader reader = new FastqReader(fastqfile);
-        while (reader.hasNext())
-        {
-            FastqRecord record = reader.next();
-            System.out.println(record.getReadHeader());
-
-        }
-
-    }
-
-        public HashSet readNamesToHashSet(File readNames) throws FileNotFoundException, IOException
+    /**
+     * Returns a HashSet of fastq read names.
+     *
+     * @param readNames a text file of read names, one per line
+     * @return HashSet of read names
+     * @throws FileNotFoundException
+     * @throws IOException
+     */
+    public HashSet readNamesToHashSet(File readNames) throws FileNotFoundException, IOException
     {
         HashSet reads = new HashSet();
         BufferedReader reader = new BufferedReader(new FileReader(readNames));
@@ -68,16 +62,27 @@ public class FastqParser
         return reads;
     }
 
-    public void getPairedFastqSeqsFromHashSet(HashSet list, String fastqFileInLeftString, String fastqFileInRightString,
-            String fastqFileOutLeftString, String fastqFileOutRightString) throws FileNotFoundException, IOException
+    /**
+     * Extract paired-end fastq sequences from a list of sequence names
+     *
+     * @param list a HashSet of read names
+     * @param fastqFileInLeft all left-handed reads
+     * @param fastqFileInRight all right-handed reads
+     * @param fastqFileOutLeft the left-handed reads in the list
+     * @param fastqFileOutRight the right-handed reads in the list
+     * @throws FileNotFoundException
+     * @throws IOException
+     */
+    public void getPairedFastqSeqsFromHashSet(HashSet list, String fastqFileInLeft, String fastqFileInRight,
+            String fastqFileOutLeft, String fastqFileOutRight) throws FileNotFoundException, IOException
     {
 
 
-        File fastqLeft = new File(fastqFileInLeftString);
-        File fastqRight = new File(fastqFileInRightString);
+        File fastqLeft = new File(fastqFileInLeft);
+        File fastqRight = new File(fastqFileInRight);
 
-        File fastqLeftOut = new File(fastqFileOutLeftString);
-        File fastqRightOut = new File(fastqFileOutRightString);
+        File fastqLeftOut = new File(fastqFileOutLeft);
+        File fastqRightOut = new File(fastqFileOutRight);
 
         final FastqReader readerLeft = new FastqReader(fastqLeft);
         final FastqReader readerRight = new FastqReader(fastqRight);
@@ -108,13 +113,12 @@ public class FastqParser
     }
 
     /**
-     * takes a File of fastq sequence ids (with no paired end info), goes
-     * through a single fastq file, chops off any 'handendness' info and writes
-     * any sequences found in the HashSet to a new file
+     * Extract fastq sequences in a list from a file of single-end fastq
+     * sequences
      *
-     * @param listFile
-     * @param fastqFileIn
-     * @param fastqFileOut
+     * @param listFile a file of read names, one per line
+     * @param fastqFileIn the fastq file to search for the read names
+     * @param fastqFileOut the fastq file of found read names
      *
      */
     public void getOneSideFastqSeqsFromList(File listFile, File fastqFileIn, File fastqFileOut) throws FileNotFoundException, IOException
@@ -156,85 +160,13 @@ public class FastqParser
         //return fastqFileOut;
     }
 
-    public void sortInterleavedFastq(File fastqFileIn, File fastqFileOut)
-    {
-        HashMap<String, PEFastqRead> reads = new HashMap<String, PEFastqRead>();
-        final FastqReader reader = new FastqReader(fastqFileIn);
-
-        while (reader.hasNext())
-        {
-            FastqRecord record = reader.next();
-
-            String pairedReadName = record.getReadHeader();
-
-            int hashIndex = pairedReadName.indexOf("#");
-            String readName = pairedReadName.substring(0, hashIndex);
-            String pair = pairedReadName.substring(pairedReadName.length() - 1, pairedReadName.length());
-            int end = Integer.parseInt(pair);
-
-            if (reads.containsKey(readName))
-            {
-                PEFastqRead pefr = reads.get(readName);
-
-                if (end == 1)
-                {
-                    pefr.setLeftRead(record);
-                }
-                else if (end == 2)
-                {
-                    pefr.setRightRead(record);
-                }
-                else
-                {
-                    System.err.println("Couldn't determine read pair");
-                    System.exit(0);
-                }
-                reads.put(readName, pefr);
-            }
-            else
-            {
-                PEFastqRead pefr = new PEFastqRead(readName, null, null);
-                if (end == 1)
-                {
-                    pefr.setLeftRead(record);
-                }
-                else if (end == 2)
-                {
-                    pefr.setRightRead(record);
-                }
-                else
-                {
-                    System.err.println("Couldn't determine read pair");
-                    System.exit(0);
-                }
-                reads.put(readName, pefr);
-            }
-
-        }
-        FastqWriterFactory writer = new FastqWriterFactory();
-        FastqWriter out = writer.newWriter(fastqFileOut);
-
-        Iterator itm = reads.entrySet().iterator();
-        while (itm.hasNext())
-        {
-            Map.Entry pairs = (Map.Entry) itm.next();
-            PEFastqRead fqpair = (PEFastqRead) pairs.getValue();
-            if (fqpair.getLeftRead() != null && fqpair.getRightRead() != null)
-            {
-                out.write(fqpair.getLeftRead());
-                out.write(fqpair.getRightRead());
-            }
-            else if (fqpair.getRightRead() == null)
-            {
-                System.out.println("Couldn't find left read for " + pairs.getKey().toString());
-            }
-            else
-            {
-                System.out.println("Couldn't find right read for " + pairs.getKey().toString());
-            }
-        }
-    }
-
+    /**
+     * Turns a fastq file into fasta format
+     *
+     * @param fastqIn the fastq intput file
+     * @param fastaOut the fasta output file
+     * @throws IOException
+     */
     public void fastqToFastaFile(File fastqIn, File fastaOut) throws IOException
     {
         final FastqReader reader = new FastqReader(fastqIn);
@@ -247,6 +179,14 @@ public class FastqParser
         out.close();
     }
 
+    /**
+     * Takes a net.sf.picard.fastq.FastqRecord and changes it into a
+     * org.biojava3.data.sequence.FastqSequence
+     *
+     * @param record the FastqRecord to change
+     * @return a FastaSequence object
+     * @throws IOException
+     */
     public FastaSequence fastqToFastaSeq(FastqRecord record) throws IOException
     {
         String readName = record.getReadHeader();
@@ -256,13 +196,21 @@ public class FastqParser
         return fasta;
     }
 
+    /**
+     * Creates a file of six-frame translations (in fasta format) from a fastq
+     * file
+     *
+     * @param fastqIn the fastq file to translate
+     * @param fastaOut the translation file
+     * @param includeDNASeq set to true if the original DNA sequence is required
+     * in the outfile
+     * @throws IOException
+     */
     public void fastqToFastaSixFrameTranslation(File fastqIn, File fastaOut, boolean includeDNASeq) throws IOException
     {
         DNASequence dna;
         RNASequence rna;
         ProteinSequence aa;
-        String strPattern = "VLV[VA][VL]P";
-        Pattern pattern = Pattern.compile(strPattern);
         final FastqReader reader = new FastqReader(fastqIn);
         Writer out = new BufferedWriter(new FileWriter(fastaOut));
         while (reader.hasNext())
@@ -279,50 +227,12 @@ public class FastqParser
             {
                 rna = dna.getRNASequence(frame);
                 aa = rna.getProteinSequence();
-                Matcher matcher = pattern.matcher(aa.toString());
-
-                //if a match is found
-                if (matcher.find())
-                {
-                    String aaSeq = (">" + record.getReadHeader() + "_" + (frame.ordinal() + 1) + "\n" + aa.toString() + "\n");
-                    out.write(aaSeq);
-                }
+                String aaSeq = (">" + record.getReadHeader() + "_" + (frame.ordinal() + 1) + "\n" + aa.toString() + "\n");
+                out.write(aaSeq);
             }
             out.write("\n");
         }
         out.close();
     }
-
-    public void catFastqFiles(File outfile, File[] files)
-    {
-        FastqWriterFactory writer = new FastqWriterFactory();
-        FastqWriter out = writer.newWriter(outfile);
-        for (File file : files)
-        {
-            System.out.println(file);
-            FastqReader reader = new FastqReader(file);
-            while (reader.hasNext())
-            {
-                FastqRecord record = reader.next();
-                out.write(record);
-
-            }
-            reader.close();
-        }
-    }
-
-//    public static void main(String[] args)
-//    {
-//        FastqParser fp = new FastqParser();
-//        File fq1 = new File("/Users/ethering/temp/solexa/lane1_NoIndex_R1_2000.fastq");
-//        File fq2 = new File("/Users/ethering/temp/lane1_NoIndex_R2_2000.fastq");
-//        File [] fileArray = new File [args.length];
-//        for (int i = 0; i < args.length; i++)
-//        {
-//            fileArray[i]=new File(args[i]);
-//        }
-//        
-//            fp.catFastqFiles(fileArray);
-//       
-//    }
+    
 }

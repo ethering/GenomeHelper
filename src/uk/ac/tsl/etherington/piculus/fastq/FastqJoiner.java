@@ -14,7 +14,7 @@ import net.sf.picard.fastq.FastqWriter;
 import net.sf.picard.fastq.FastqWriterFactory;
 
 /**
- *
+ *A class to join and split fastq files
  * @author ethering
  */
 public class FastqJoiner
@@ -25,6 +25,13 @@ public class FastqJoiner
     File fastqInterlacedFile;
     File fastqSinglesFile;
 
+    /**
+     * 
+     * @param leftReads the left-handed fastq reads
+     * @param rightReads the right-handed fastq reads
+     * @param fastqJoinedFile the joined pairs
+     * @param fastqSinglesFile single reads that don't have mates
+     */
     public void join(File leftReads, File rightReads, File fastqJoinedFile, File fastqSinglesFile)
     {
         FastqReader fql = new FastqReader(leftReads);
@@ -34,7 +41,7 @@ public class FastqJoiner
         FastqWriter pairedSeqs = writer.newWriter(fastqJoinedFile);
         //for unpaired singles
         FastqWriter singleSeqs = writer.newWriter(fastqSinglesFile);
-        Set<String> pairs = new HashSet<String>();
+        Set<String> pairs = new HashSet<>();
         int peCounter = 0;
         int singleCounter = 0;
 
@@ -105,7 +112,12 @@ public class FastqJoiner
         System.out.println("Completed writing " + singleCounter + " singles");
     }
 
-    
+    /**
+     * 
+     * @param fastqFile a fastq file of joined left-handed and right-handed reads
+     * @param leftPairdReads the split left-handed reads
+     * @param rightPairedReads the split right-handed reads
+     */
     public void split(File fastqFile, File leftPairdReads, File rightPairedReads)
     {
         FastqReader fqr = new FastqReader(fastqFile);
@@ -148,32 +160,5 @@ public class FastqJoiner
         rightPairedSeqs.close();
         System.out.println("Completed spliting " + peCounter + " paired-reads");
     
-    }
-    
-    
-
-    public static void main(String args[])
-    {
-
-//        File leftReads = new File("/Users/ethering/temp/fastqapp_data/new_format_paired_left.fastq");
-//        File rightReads = new File("/Users/ethering/temp/fastqapp_data/new_format_paired_right.fastq");
-//        File fastqJoined = new File("/Users/ethering/temp/fastqapp_data/joined.fq");
-//        File fastqSingles = new File("/Users/ethering/temp/fastqapp_data/unjoined.fq");
-//        Date start = new Date();
-//        long l1 = start.getTime();
-//        FastqJoiner fj = new FastqJoiner();
-//        fj.join(leftReads, rightReads, fastqJoined, fastqSingles);
-//        Date stop = new Date();
-//
-//        long l2 = stop.getTime();
-//        long diff = l2 - l1;
-//        System.out.println("Took " + diff);
-//        
-//        File joined = new File("/Users/ethering/temp/fastqapp_data/joined.fq");
-//        File splitLeft = new File("/Users/ethering/temp/fastqapp_data/split_left.fq");
-//        File splitRight = new File("/Users/ethering/temp/fastqapp_data/split_right.fq");
-//        
-//        fj.split(joined, splitLeft, splitRight);
-        
     }
 }

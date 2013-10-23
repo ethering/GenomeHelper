@@ -40,23 +40,26 @@ public class FastqQC
         {
             goodFormat = false;
             System.err.print("format must be either 'sanger' or 'illumina'");
-            System.exit(0);
+
         }
         return goodFormat;
     }
 
     /**
      * Quality controls a fastq read
+     *
      * @param seqRecord a net.sf.picard.fastq.FastqRecord to QC
      * @param singleEndReadLength the expected length of a single end read
-     * @return true if the read is the correct length and contains no 'N's
+     * @return true if the read is the correct length and contains no 'N's,
+     * false otherwise
      */
     public boolean qcFastq(FastqRecord seqRecord, int singleEndReadLength)
     {
         //get the length of them
         int seqLength = seqRecord.getReadString().length();
         String readString = seqRecord.getReadString();
-        boolean containsN = readString.contains("N");
+        boolean containsN = readString.toLowerCase().contains("n");
+
         if (seqLength == singleEndReadLength && containsN == false)
         {
             return true;
@@ -65,6 +68,22 @@ public class FastqQC
         {
             return false;
         }
+    }
+    /**
+     * Creates a FastqWriter for bad reads that fail Quality Control
+     * @param fastqFileOut a FastqWriter to write bad reads to
+     * @param writer a FastqWriterFactory. Multiple FastqWriters can be generated from a single FastqWriterFactory
+     * @return a FastqWriter to write bad reads to. The bad reads file will start with 'bad_', followed by the outfile name.
+     */
+    public FastqWriter getBadSeqFastqWriter(File fastqFileOut, FastqWriterFactory writer)
+    {
+        FastqWriter badSeqWriter = null;
+        String parentFilePath = fastqFileOut.getParent();
+        String file = fastqFileOut.getName();
+        String badStr = "bad_".concat(file);
+        File badFile = new File(parentFilePath, badStr);
+        badSeqWriter = writer.newWriter(badFile);
+        return badSeqWriter;
     }
 
     /**
@@ -90,20 +109,12 @@ public class FastqQC
         FastqWriter goodLeftSeqs = writer.newWriter(leftReadsOut);
         FastqWriter goodRightSeqs = writer.newWriter(rightReadsOut);
 
-        FastqWriter badLeftSeqs = null;
-        FastqWriter badRightSeqs = null;
+        FastqWriter badLeftSeqs = getBadSeqFastqWriter(leftFastqFileIn, writer);
+        FastqWriter badRightSeqs = getBadSeqFastqWriter(rightFastqFileIn, writer);
         int itCounter = 0;
         if (checkFormat(format) == true)
         {
-            if (writeBadSeqs == true)
-            {
-                String badLeftString = "bad_".concat(leftReadsOut.toString());
-                String badRightString = "bad_".concat(rightReadsOut.toString());
-                File badLeftFile = new File(badLeftString);
-                File badRightFile = new File(badRightString);
-                badLeftSeqs = writer.newWriter(badLeftFile);
-                badRightSeqs = writer.newWriter(badRightFile);
-            }
+
             //create an interator for each file
             Iterator itl = fql.iterator();
             Iterator itr = fqr.iterator();
@@ -151,18 +162,11 @@ public class FastqQC
 
         FastqWriterFactory writer = new FastqWriterFactory();
         FastqWriter goodSeqs = writer.newWriter(fastqFileOut);
-        FastqWriter badSeqs = null;
+        FastqWriter badSeqs = getBadSeqFastqWriter(fastqFileOut, writer);
         int itCounter = 0;
 
         if (checkFormat(format) == true)
         {
-            if (writeBadSeqs == true)
-            {
-                String badString = "bad_".concat(fastqFileOut.toString());
-                File badFile = new File(badString);
-                badSeqs = writer.newWriter(badFile);
-            }
-
             //create an interator for the interlaced file
             Iterator it = fq.iterator();
             while (it.hasNext())
@@ -213,22 +217,12 @@ public class FastqQC
         FastqWriter goodLeftSeqs = writer.newWriter(leftReadsOut);
         FastqWriter goodRightSeqs = writer.newWriter(rightReadsOut);
 
-        FastqWriter badLeftSeqs = null;
-        FastqWriter badRightSeqs = null;
+        FastqWriter badLeftSeqs = getBadSeqFastqWriter(leftReadsOut, writer);
+        FastqWriter badRightSeqs = getBadSeqFastqWriter(rightReadsOut, writer);
         int itCounter = 0;
 
         if (checkFormat(format) == true)
         {
-            if (writeBadSeqs == true)
-            {
-                String badLeftString = "bad_".concat(leftReadsOut.toString());
-                String badRightString = "bad_".concat(rightReadsOut.toString());
-                File badLeftFile = new File(badLeftString);
-                File badRightFile = new File(badRightString);
-                badLeftSeqs = writer.newWriter(badLeftFile);
-                badRightSeqs = writer.newWriter(badRightFile);
-            }
-
             //create an interator for the interlaced file
             Iterator it = fq.iterator();
             while (it.hasNext())
@@ -280,17 +274,11 @@ public class FastqQC
         FastqWriterFactory writer = new FastqWriterFactory();
         FastqWriter goodLeftSeqs = writer.newWriter(leftReadsOut);
         FastqWriter goodRightSeqs = writer.newWriter(rightReadsOut);
-        FastqWriter badSeqs = null;
+        FastqWriter badSeqs = getBadSeqFastqWriter(fastqFileIn, writer);
         int itCounter = 0;
 
         if (checkFormat(format) == true)
         {
-            if (writeBadSeqs == true)
-            {
-                String badString = "bad_".concat(fastqFileIn.toString());
-                File badFile = new File(badString);
-                badSeqs = writer.newWriter(badFile);
-            }
             //create an interator for each file
             Iterator it = fq.iterator();
             while (it.hasNext())
@@ -300,9 +288,6 @@ public class FastqQC
                 int seqLength = seqRecord.getReadString().length();
                 String readString = seqRecord.getReadString();
                 boolean containsN = readString.contains("N");
-
-
-
 
                 if (seqLength / 2 == readLength && containsN == false)
                 {
@@ -347,18 +332,11 @@ public class FastqQC
         FastqWriterFactory writer = new FastqWriterFactory();
         FastqWriter goodSeqs = writer.newWriter(readsOut);
 
-        FastqWriter badSeqs = null;
+        FastqWriter badSeqs = getBadSeqFastqWriter(readsOut, writer);
         int itCounter = 0;
 
         if (checkFormat(format) == true)
         {
-            if (writeBadSeqs == true)
-            {
-                String badString = "bad_".concat(readsOut.toString());
-                File badFile = new File(badString);
-                badSeqs = writer.newWriter(badFile);
-            }
-
             //create an interator for the interlaced file
             Iterator it = fq.iterator();
 
@@ -539,5 +517,19 @@ public class FastqQC
         }
 
         System.out.println("Counted " + itCounter + " reads which were all in order");
+    }
+
+    public static void main(String[] args)
+    {
+        File leftFastqFileIn = new File("/Users/ethering/NetBeansProjects/Piculus/test/test_data_in/lane1_NoIndex_R1_2000.fastq");
+        File rightFastqFileIn = new File("/Users/ethering/NetBeansProjects/Piculus/test/test_data_in/lane1_NoIndex_R2_2000.fastq");
+        File leftReadsOut = new File("/Users/ethering/NetBeansProjects/Piculus/test/test_data_out/lane1_NoIndex_R1_2000_QC.fastq");
+        File rightReadsOut = new File("/Users/ethering/NetBeansProjects/Piculus/test/test_data_out/lane1_NoIndex_R2_2000_QC.fastq");
+        int singleEndReadLength = 80;
+        String format = "sanger";
+        boolean writeBadSeqs = false;
+        FastqQC instance = new FastqQC();
+        instance.qcPairedReads(leftFastqFileIn, rightFastqFileIn, leftReadsOut, rightReadsOut, singleEndReadLength, format, writeBadSeqs);
+
     }
 }

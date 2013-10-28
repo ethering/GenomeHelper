@@ -6,14 +6,17 @@ import java.util.Objects;
 import net.sf.samtools.SAMRecord;
 
 /**
- *This class represents the co-ordinates of any feature or region of a contig, chromosome, scaffold, etc. 
- * It contains a reference name (contigId) and start and end position and a strand ('+' by default). 
- * The start and end positions are the 1-based co-ordinates of the first and last nucleotide, so the length of a given ContigPosition can be calculated as end-start+1.
- * 
+ * This class represents the co-ordinates of any feature or region of a contig,
+ * chromosome, scaffold, etc. It contains a reference name (contigId) and start
+ * and end position and a strand ('+' by default). The start and end positions
+ * are the 1-based co-ordinates of the first and last nucleotide, so the length
+ * of a given ContigPosition can be calculated as end-start+1.
+ *
  * @author Graham Etherington
  */
-public class ContigPosition 
+public class ContigPosition
 {
+
     String contigid;
     int start;
     int end;
@@ -22,9 +25,9 @@ public class ContigPosition
     /**
      * Creates a new ContigPosition object with strand set to '+'
      *
-     * @param contigid  the name of the reference
-     * @param start  the nucleotide start position on the reference
-     * @param end  the nucleotide end position on the reference
+     * @param contigid the name of the reference
+     * @param start the nucleotide start position on the reference
+     * @param end the nucleotide end position on the reference
      *
      */
     public ContigPosition(String contigid, int start, int end)
@@ -38,15 +41,15 @@ public class ContigPosition
     /**
      * Creates a ContigPosition with a defined strand
      *
-     * @param contigid  the name of the reference
-     * @param start  the nucleotide start position on the reference
-     * @param end  the nucleotide end position on the reference
-     * @param strand  the strand on which the contig sits (can only be '+' or
+     * @param contigid the name of the reference
+     * @param start the nucleotide start position on the reference
+     * @param end the nucleotide end position on the reference
+     * @param strand the strand on which the contig sits (can only be '+' or
      * '-')
      */
     public ContigPosition(String contigid, int start, int end, char strand)
     {
-        boolean goodChar = validateStrand(strand);
+        boolean goodChar = validateNewStrand(strand);
         if (goodChar)
         {
             this.contigid = contigid;
@@ -59,7 +62,7 @@ public class ContigPosition
     /**
      * Creates a ContigPosition from a net.sf.samtools.SAMRecord object
      *
-     * @param samRecord  a net.sf.samtools.SAMRecord object
+     * @param samRecord a net.sf.samtools.SAMRecord object
      */
     public ContigPosition(SAMRecord samRecord)
     {
@@ -78,42 +81,63 @@ public class ContigPosition
             this.strand = '+';
         }
     }
-    
-     /**
+
+    /**
      * Validates that the strand char is '+' or '-'
-     * @return  returns true if the strand is '+' or '-'. Otherwise returns
-     * false
+     *
+     * @return returns true if the strand is '+' or '-'. Otherwise returns false
      */
-    public final boolean validateStrand(char strand)
+    public final boolean validateNewStrand(char strand)
     {
-        if (strand != '+' || strand != '-')
-        {
-            System.err.println("Error: strand must be '+' or '-' ");
-            return false;
-        }
-        else
+        if (strand == '+' || strand == '-')
         {
             return true;
         }
+        else
+        {
+            System.err.println("Error: strand for must be '+' or '-' ");
+            return false;
+        }
+        
+    }
+    /**
+     * Validates that the strand char is '+' or '-'
+     *
+     * @return returns true if the strand is '+' or '-'. Otherwise returns false
+     */
+    public final boolean validateCurrentStrand()
+    {
+        if (this.strand == '+' || this.strand == '-')
+        {
+            return true;
+        }
+        else
+        {
+            System.err.println("Error: strand for must be '+' or '-' ");
+            return false;
+        }
+        
     }
 
     /**
      * Sets the strand of the ContigPosition
      *
-     * @param strand  '+' for plus strand or '-' for minus strand
+     * @param strand '+' for plus strand or '-' for minus strand
+     * @return goodStrand true if the new strand valid, otherwise false
      */
-    public void setStrand(char strand)
+    public boolean setStrand(char strand)
     {
-        boolean goodChar = validateStrand(strand);
-        if (goodChar)
+        boolean goodStrand = this.validateNewStrand(strand);
+        if (goodStrand)
         {
             this.strand = strand;
-        }      
+        }
+        return goodStrand;
     }
 
     /**
-     * 
-     * @return  returns the strand char ('+' or '-')
+     *
+     * @return returns the strand char ('+' or '-')
      */
     public char getStrand()
     {
@@ -149,6 +173,7 @@ public class ContigPosition
 
     /**
      * Sets the name of the reference sequence for a given ContigPosition
+     *
      * @param contigid The reference name
      */
     public void setContigid(String contigid)
@@ -158,6 +183,7 @@ public class ContigPosition
 
     /**
      * Sets the start position for a given ContigPosition
+     *
      * @param start The start position on the reference
      */
     public void setStart(int start)
@@ -166,14 +192,15 @@ public class ContigPosition
     }
 
     /**
-     *Sets the end positions for a given ContigPosition
+     * Sets the end positions for a given ContigPosition
+     *
      * @param end The end position on the reference
      */
     public void setEnd(int end)
     {
         this.end = end;
     }
-    
+
     @Override
     public int hashCode()
     {
@@ -184,13 +211,12 @@ public class ContigPosition
         hash = 79 * hash + this.strand;
         return hash;
     }
-     
+
     /**
      *
      * @param obj the ContigPosition object to compare
      * @return true if the two ContigPosition objects are equal, false if not
      */
-
     @Override
     public boolean equals(Object obj)
     {
@@ -211,6 +237,10 @@ public class ContigPosition
         {
             return false;
         }
+        if (this.end != other.end)
+        {
+            return false;
+        }
         if (this.strand != other.strand)
         {
             return false;
@@ -218,15 +248,12 @@ public class ContigPosition
         return true;
     }
 
-
-
-
     /**
      * Tests to see if two ContigPosition objects overlap on the same strand
+     *
      * @param contigPositionToCompare the ContigPosition object to compare
      * @return true if they overlap, false if they don't
      */
-    
     public boolean overlaps(ContigPosition contigPositionToCompare)
     {
         if (this.getContigid().equalsIgnoreCase(contigPositionToCompare.getContigid()) && this.getStrand() == contigPositionToCompare.getStrand() && ((this.getStart() >= contigPositionToCompare.getStart() && this.getStart() <= contigPositionToCompare.getEnd()) || (this.getEnd() <= contigPositionToCompare.getEnd() && this.getEnd() >= contigPositionToCompare.getStart()) || (this.getStart() <= contigPositionToCompare.getStart() && this.getEnd() >= contigPositionToCompare.getEnd()) || (this.getStart() >= contigPositionToCompare.getStart() && this.getEnd() <= contigPositionToCompare.getEnd())))
@@ -238,13 +265,15 @@ public class ContigPosition
             return false;
         }
     }
-    
+
     /**
-     * Tests if a ContigPosition object already exists in an ArrayList of ContigPosition objects
-     * @param cpArray  an ArrayList of ContigPosition objects
-     * @return true if the ContigPosition exists in the ArrayList, false if it doesn't
+     * Tests if a ContigPosition object already exists in an ArrayList of
+     * ContigPosition objects
+     *
+     * @param cpArray an ArrayList of ContigPosition objects
+     * @return true if the ContigPosition exists in the ArrayList, false if it
+     * doesn't
      */
-    
     public boolean exists(ArrayList<ContigPosition> cpArray)
     {
         Iterator it = cpArray.iterator();
@@ -258,11 +287,12 @@ public class ContigPosition
         return false;
 
     }
+
     /**
      * Creates a human readable version of a ContigPosition
+     *
      * @return a human readable version of a ContigPosition
      */
-
     @Override
     public String toString()
     {

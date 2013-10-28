@@ -53,10 +53,9 @@ public class FastaTranslator
     {
         RNASequence rna = dna.getRNASequence();
         ProteinSequence aa = rna.getProteinSequence();
-        System.out.println(dna.getOriginalHeader());
+        System.out.println(dna.getAccession());
         System.out.println(aa);
-        AccessionID id = new AccessionID(dna.getOriginalHeader());
-        aa.setAccession(id);
+        aa.setAccession(dna.getAccession());
         return aa;
     }
    

@@ -1,0 +1,4 @@
+atgagat	35
+atgagaa	33
+atgtgat	22
+atgtgaa	18

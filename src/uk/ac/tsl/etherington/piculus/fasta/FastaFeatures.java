@@ -37,26 +37,23 @@ public class FastaFeatures
      * @throws FileNotFoundException
      * @throws BioException 
      */
-    public static HashMap getSequenceLengths(File refSeq) throws FileNotFoundException, BioException
+    public static HashMap getSequenceLengths(File refSeq) throws FileNotFoundException, BioException, Exception
     {
 
         HashMap<String, Integer> seqLengths = new HashMap<>();
-        BufferedReader br = new BufferedReader(new FileReader(refSeq));
-        Alphabet alpha = AlphabetManager.alphabetForName("DNA");
-        SimpleNamespace ns = new SimpleNamespace("biojava");
-
-        RichSequenceIterator iterator = RichSequence.IOTools.readFasta(br,
-                alpha.getTokenization("token"), ns);
-        while (iterator.hasNext())
+        LinkedHashMap<String, DNASequence> seqs = FastaReaderHelper.readFastaDNASequence(refSeq);
+        
+        for (Map.Entry<String, DNASequence> entry : seqs.entrySet())
         {
-            RichSequence rec = iterator.nextRichSequence();
-            seqLengths.put(rec.getName(), rec.length());
+            String seqName = entry.getKey();
+            DNASequence dna = entry.getValue();
+            seqLengths.put(seqName, dna.getLength());
         }
         return seqLengths;
     }
     
     /**
-     * 
+     * Parses a multi-fasta file into a LinkedHashMap of sequence names and DNASequences
      * @param refSeq a multi-fasta file of DNA sequences
      * @return a LinkedHashMap of Accession numbers as keys with their DNA sequences as values. All sequence names will have any non-accession information stripped
      * (e.g. ">gi|2033910|gb|AA381581.1|AA381581 EST94688 Activated T-cells I Homo sapiens" would become ">gi|2033910|gb|AA381581.1|AA381581")
@@ -72,7 +69,6 @@ public class FastaFeatures
             String newSeqName = seqName.split(" ")[0];
             DNASequence dna = entry.getValue();
             genome.put(newSeqName, dna);
-            System.out.println(newSeqName + " : " + entry.getKey());
         }
         tempgenome.clear();
         return genome;
@@ -86,7 +82,7 @@ public class FastaFeatures
      * @throws BioException 
      */
     
-    public static double getGenomeSize(File refSeq) throws FileNotFoundException, BioException
+    public static double getGenomeSize(File refSeq) throws FileNotFoundException, BioException, Exception
     {
         double genomeSize = 0;
         HashMap<String, Integer> seqLengths = new HashMap<>(FastaFeatures.getSequenceLengths(refSeq));
@@ -105,7 +101,7 @@ public class FastaFeatures
      * @throws FileNotFoundException
      * @throws BioException 
      */
-    public static HashMap getSequenceAsIntArray(File refSeq) throws FileNotFoundException, BioException
+    public static HashMap getSequenceAsIntArray(File refSeq) throws FileNotFoundException, BioException, Exception
     {
 
         HashMap<String, Integer> seqLengths = new HashMap<>(FastaFeatures.getSequenceLengths(refSeq));
@@ -123,7 +119,7 @@ public class FastaFeatures
         return codingMap;
     }
     
-    public void getGCContent(String fileName) throws FileNotFoundException, NoSuchElementException, BioException
+    public double getGCContent(File fileName) throws FileNotFoundException, NoSuchElementException, BioException
     {
         // Set up sequence iterator
         double noSeqs = 0;
@@ -135,7 +131,6 @@ public class FastaFeatures
         RichSequenceIterator stream = RichSequence.IOTools.readFastaDNA(br, ns);
 
         // Iterate over all sequences in the stream
-
         while (stream.hasNext())
         {
             Sequence seq = stream.nextSequence();
@@ -155,5 +150,6 @@ public class FastaFeatures
         }
         double gcCount = (combinedGcTally/noSeqs)/100;
         System.out.println("Overall gcCount = "+gcCount);
+        return gcCount;
     }
 }

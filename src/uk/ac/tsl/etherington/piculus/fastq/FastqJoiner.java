@@ -5,6 +5,7 @@
 package uk.ac.tsl.etherington.piculus.fastq;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -160,4 +161,15 @@ public class FastqJoiner
         rightPairedSeqs.close();
         System.out.println("Completed spliting " + peCounter + " paired-reads");
     }
+    
+//    public static void main(String[] args) throws IOException
+//    {
+//        File leftFastqFileIn = new File("/Users/ethering/NetBeansProjects/Piculus/test/test_data_in/piculus_test_left.fastq");
+//        File rightFastqFileIn = new File("/Users/ethering/NetBeansProjects/Piculus/test/test_data_in/piculus_test_right.fastq");
+//        File out = new File("/Users/ethering/NetBeansProjects/Piculus/test/test_data_in/piculus_test_joined.fastq");
+//        File singles = new File("/Users/ethering/NetBeansProjects/Piculus/test/test_data_out/piculus_test_joined_singles.fastq");
+//
+//        FastqJoiner fqj = new FastqJoiner();
+//        fqj.join(leftFastqFileIn, rightFastqFileIn, out, singles);
+//    }
 }

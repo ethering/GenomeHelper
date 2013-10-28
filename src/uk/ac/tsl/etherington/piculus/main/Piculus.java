@@ -176,7 +176,7 @@ public class Piculus
             }
             else
             {
-                String fastaFile = args[1];
+                File fastaFile = new File(args[1]);
                 FastaFeatures ff = new FastaFeatures();
                 ff.getGCContent(fastaFile);
             }
@@ -253,7 +253,7 @@ public class Piculus
                 boolean includeDNA = false;
                 File in = new File(args[1]);
                 File out = new File(args[2]);
-                if (args.length == 3)
+                if (args.length == 4)
                 {
                     includeDNA = Boolean.parseBoolean(args[3]);
                 }
@@ -336,10 +336,10 @@ public class Piculus
             else
             {
                 File listFile = new File(args[1]);
-                String leftIn = args[2];
-                String rightIn = args[3];
-                String leftOut = args[4];
-                String rightOut = args[5];
+                File leftIn = new File(args[2]);
+                File rightIn = new File(args[3]);
+                File leftOut = new File(args[4]);
+                File rightOut = new File(args[5]);
                 FastqParser fp = new FastqParser();
                 HashSet readNames = fp.readNamesToHashSet(listFile);
                 fp.getPairedFastqSeqsFromHashSet(readNames, leftIn, rightIn, leftOut, rightOut);
@@ -572,7 +572,7 @@ public class Piculus
                 File fastRightOut = new File(args[3]);
                 int readLength = Integer.parseInt(args[4]);
                 String format = args[5];
-                if (args.length == 6)
+                if (args.length == 7)
                 {
                     writeBadReads = Boolean.parseBoolean(args[6]);
                 }
@@ -604,7 +604,7 @@ public class Piculus
                 File fastqOut = new File(args[2]);
                 int readLength = Integer.parseInt(args[3]);
                 String format = args[4];
-                if (args.length == 5)
+                if (args.length == 6)
                 {
                     writeBadReads = Boolean.parseBoolean(args[5]);
                 }
@@ -636,7 +636,7 @@ public class Piculus
                 File fastqOut = new File(args[2]);
                 int readLength = Integer.parseInt(args[4]);
                 String format = args[5];
-                if (args.length == 6)
+                if (args.length == 7)
                 {
                     writeBadReads = Boolean.parseBoolean(args[6]);
                 }
@@ -672,7 +672,7 @@ public class Piculus
                 File fastqOutRight = new File(args[4]);
                 int readLength = Integer.parseInt(args[5]);
                 String format = args[6];
-                if (args.length == 7)
+                if (args.length == 8)
                 {
                     writeBadReads = Boolean.parseBoolean(args[7]);
                 }

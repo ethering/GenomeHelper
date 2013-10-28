@@ -48,7 +48,7 @@ public class GFFFeatureStats
      * @throws BioException
      * @throws IOException
      */
-    public void getStats(String gff, File refSeq, String attribute) throws FileNotFoundException, BioException, IOException
+    public void getStats(String gff, File refSeq, String attribute) throws FileNotFoundException, BioException, IOException, Exception
     {
 
         HashMap<String, int[]> genomeMap = new HashMap<>(FastaFeatures.getSequenceAsIntArray(refSeq));

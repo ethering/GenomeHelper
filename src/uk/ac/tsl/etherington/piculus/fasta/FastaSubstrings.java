@@ -15,9 +15,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.biojava.bio.symbol.Alphabet;
@@ -36,32 +38,29 @@ import org.jtr.transliterate.CharacterParseException;
  */
 public class FastaSubstrings
 {
+
     /**
      * Extract a single fasta sequence from a multi-fasta file
+     *
      * @param fastaIn the input multi-fasta file
      * @param outfile the output file for the requested fasta sequence
-     * @param seqid the name of the sequence to be extracted from the multi-fasta file
+     * @param seqid the name of the sequence to be extracted from the
+     * multi-fasta file
      * @throws FileNotFoundException
-     * @throws Exception 
+     * @throws Exception
      */
     public void seqFromCommandLine(File fastaIn, File outfile, String seqid) throws FileNotFoundException, Exception
     {
         boolean seqFound = false;
         Writer out = new BufferedWriter(new FileWriter(outfile));
 
-        BufferedReader br = new BufferedReader(new FileReader(fastaIn));
-        Alphabet alpha = AlphabetManager.alphabetForName("DNA");
-        SimpleNamespace ns = new SimpleNamespace("biojava");
-
-        RichSequenceIterator iterator = RichSequence.IOTools.readFasta(br,
-                alpha.getTokenization("token"), ns);
-        while (iterator.hasNext())
+        LinkedHashMap<String, DNASequence> seqs = FastaReaderHelper.readFastaDNASequence(fastaIn);
+        for (Map.Entry<String, DNASequence> entry : seqs.entrySet())
         {
-            RichSequence rec = iterator.nextRichSequence();
-            String id = rec.getName();
+            String id = entry.getKey();
             if (id.equalsIgnoreCase(seqid))
             {
-                String seq = rec.seqString();
+                String seq = entry.getValue().getSequenceAsString();
                 out.write(">" + id + "\n");
                 out.write(seq + "\n");
                 seqFound = true;
@@ -74,39 +73,39 @@ public class FastaSubstrings
             System.out.println("Couldn't find a sequence with that name");
         }
     }
+
     /**
      * Extract a sub-sequence of a single fasta sequence from a multi-fasta file
+     *
      * @param fastaIn the input multi-fasta file
      * @param outfile the output file for the requested fasta sequence
-     * @param seqid the name of the sequence to be extracted from the multi-fasta file
-     * @param start the 1-based inclusive start position of the requested sub-sequence
-     * @param end the 1-based inclusive end position of the requested sub-sequence
+     * @param seqid the name of the sequence to be extracted from the
+     * multi-fasta file
+     * @param start the 1-based inclusive start position of the requested
+     * sub-sequence
+     * @param end the 1-based inclusive end position of the requested
+     * sub-sequence
      * @throws FileNotFoundException
-     * @throws Exception 
+     * @throws Exception
      */
     public void seqFromCommandLine(File fastaIn, File outfile, String seqid, int start, int end) throws FileNotFoundException, Exception
     {
         boolean seqFound = false;
-        int subseqLength = end - start+1;
+        int subseqLength = end - start + 1;
         //the String.substring method is zero-based and is inclusive for the start and exclusive for the end.
         //Changing it to 1-based means that we need to subtract 1 from the start index, but leave the end index alone.
         start--;
         System.out.println("Requested subsequence length is " + subseqLength);
         Writer out = new BufferedWriter(new FileWriter(outfile));
 
-        BufferedReader br = new BufferedReader(new FileReader(fastaIn));
-        Alphabet alpha = AlphabetManager.alphabetForName("DNA");
-        SimpleNamespace ns = new SimpleNamespace("biojava");
-
-        RichSequenceIterator iterator = RichSequence.IOTools.readFasta(br,
-                alpha.getTokenization("token"), ns);
-        while (iterator.hasNext())
+        LinkedHashMap<String, DNASequence> seqs = FastaReaderHelper.readFastaDNASequence(fastaIn);
+        for (Map.Entry<String, DNASequence> entry : seqs.entrySet())
         {
-            RichSequence rec = iterator.nextRichSequence();
-            String id = rec.getName();
+            String id = entry.getKey();
             if (id.equalsIgnoreCase(seqid))
             {
-                String seq = rec.seqString();
+                String seq = entry.getValue().getSequenceAsString();
+
                 String subseq = seq.substring(start, end);
                 subseqLength = subseq.length();
                 System.out.println("Provided subsequence length is " + subseqLength);
@@ -117,6 +116,7 @@ public class FastaSubstrings
                 break;
             }
         }
+
         out.close();
         if (seqFound == false)
         {
@@ -125,7 +125,9 @@ public class FastaSubstrings
     }
 
     /**
-     *Takes a list of fasta files and finds the longest subsequences that are common to all files
+     * Takes a list of fasta files and finds the longest subsequences that are
+     * common to all files
+     *
      * @param al an ArrayList of fasta file paths
      * @param outfile the list of longest subsequences found in all files
      * @throws FileNotFoundException
@@ -137,6 +139,7 @@ public class FastaSubstrings
         int numberOfDataSets = al.size();
         //this will contain the String fileName and LinkedHashSet of the ordered-by-length subseqs
         HashMap<String, LinkedHashSet> fastaSeqs = new HashMap<>();
+        HashSet<String> uniqueCommonSeqs = new HashSet<>();
         //for each fasta file
         for (String fastaIn : al)
         {
@@ -186,17 +189,33 @@ public class FastaSubstrings
                 //if the subseq is found in all the other datasets, write it to file
                 if (subSeqsFound == (numberOfDataSets - 1))
                 {
-                    out.write(fastaSub + "\n");
+
+                    uniqueCommonSeqs.add(fastaSub);
                 }
             }
         }
+
+        ArrayList<String> seqList = new ArrayList<>();
+        for (String subset : uniqueCommonSeqs)
+        {
+            seqList.add(subset);
+        }
+        //sort the arrayList by length
+        Collections.sort(seqList, new StringLengthComparator());
+        for (String uniqueCommonSeq : seqList)
+        {
+            out.write(uniqueCommonSeq + "\n");
+        }
+        out.close();
     }
+
     /**
-     * 
+     *
      * @param fastaIn the path to a fasta file
-     * @return all possible substrings (including reverse complements) found within the fasta file
+     * @return all possible substrings (including reverse complements) found
+     * within the fasta file
      * @throws CharacterParseException
-     * @throws Exception 
+     * @throws Exception
      */
     public ArrayList<String> getAllSubStrings(String fastaIn) throws CharacterParseException, Exception
     {
@@ -217,7 +236,6 @@ public class FastaSubstrings
                 {
                     int end = j;
                     String str = fastaSeq.substring(start, end);
-                    //System.out.println(str);
                     //add the string to an arrayList
                     substr.add(str);
 
@@ -232,7 +250,6 @@ public class FastaSubstrings
                 {
                     int end = j;
                     String str = revcom.substring(start, end);
-                    //System.out.println(str);
                     substr.add(str);
 
                 }

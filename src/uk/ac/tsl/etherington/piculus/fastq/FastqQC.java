@@ -12,6 +12,8 @@ import net.sf.picard.fastq.FastqReader;
 import net.sf.picard.fastq.FastqRecord;
 import net.sf.picard.fastq.FastqWriter;
 import net.sf.picard.fastq.FastqWriterFactory;
+import net.sf.picard.util.FastqQualityFormat;
+import net.sf.picard.util.QualityEncodingDetector;
 import net.sf.picard.util.SolexaQualityConverter;
 
 /**
@@ -69,11 +71,15 @@ public class FastqQC
             return false;
         }
     }
+
     /**
      * Creates a FastqWriter for bad reads that fail Quality Control
+     *
      * @param fastqFileOut a FastqWriter to write bad reads to
-     * @param writer a FastqWriterFactory. Multiple FastqWriters can be generated from a single FastqWriterFactory
-     * @return a FastqWriter to write bad reads to. The bad reads file will start with 'bad_', followed by the outfile name.
+     * @param writer a FastqWriterFactory. Multiple FastqWriters can be
+     * generated from a single FastqWriterFactory
+     * @return a FastqWriter to write bad reads to. The bad reads file will
+     * start with 'bad_', followed by the outfile name.
      */
     public FastqWriter getBadSeqFastqWriter(File fastqFileOut, FastqWriterFactory writer)
     {
@@ -109,8 +115,8 @@ public class FastqQC
         FastqWriter goodLeftSeqs = writer.newWriter(leftReadsOut);
         FastqWriter goodRightSeqs = writer.newWriter(rightReadsOut);
 
-        FastqWriter badLeftSeqs = getBadSeqFastqWriter(leftFastqFileIn, writer);
-        FastqWriter badRightSeqs = getBadSeqFastqWriter(rightFastqFileIn, writer);
+        FastqWriter badLeftSeqs = getBadSeqFastqWriter(leftReadsOut, writer);
+        FastqWriter badRightSeqs = getBadSeqFastqWriter(rightReadsOut, writer);
         int itCounter = 0;
         if (checkFormat(format) == true)
         {
@@ -142,6 +148,10 @@ public class FastqQC
                 }
             }
         }
+        goodLeftSeqs.close();
+        goodRightSeqs.close();
+        badLeftSeqs.close();
+        badRightSeqs.close();
         System.out.println("Completed writing " + itCounter + " good reads");
     }
 
@@ -193,7 +203,8 @@ public class FastqQC
                 }
             }
         }
-
+        goodSeqs.close();
+        badSeqs.close();
         System.out.println("Completed writing " + itCounter + " good reads");
     }
 
@@ -249,7 +260,10 @@ public class FastqQC
                 }
             }
         }
-
+        goodLeftSeqs.close();
+        goodRightSeqs.close();
+        badLeftSeqs.close();
+        badRightSeqs.close();
         System.out.println("Completed writing " + itCounter + " good reads");
     }
 
@@ -274,7 +288,9 @@ public class FastqQC
         FastqWriterFactory writer = new FastqWriterFactory();
         FastqWriter goodLeftSeqs = writer.newWriter(leftReadsOut);
         FastqWriter goodRightSeqs = writer.newWriter(rightReadsOut);
-        FastqWriter badSeqs = getBadSeqFastqWriter(fastqFileIn, writer);
+
+        FastqWriter badSeqs = getBadSeqFastqWriter(leftReadsOut, writer);
+
         int itCounter = 0;
 
         if (checkFormat(format) == true)
@@ -287,7 +303,7 @@ public class FastqQC
                 FastqRecord seqRecord = (FastqRecord) it.next();
                 int seqLength = seqRecord.getReadString().length();
                 String readString = seqRecord.getReadString();
-                boolean containsN = readString.contains("N");
+                boolean containsN = readString.toLowerCase().contains("n");
 
                 if (seqLength / 2 == readLength && containsN == false)
                 {
@@ -297,7 +313,7 @@ public class FastqQC
                     String leftQual = qual.substring(0, (seqLength / 2));
                     String rightQual = qual.substring(seqLength / 2, seqLength);
                     FastqRecord leftSeq = new FastqRecord(seqRecord.getReadHeader() + " 1:N:0:", leftRead, "", leftQual);
-                    FastqRecord rightSeq = new FastqRecord(seqRecord.getReadHeader() + " 2:N:0", rightRead, "", rightQual);
+                    FastqRecord rightSeq = new FastqRecord(seqRecord.getReadHeader() + " 2:N:0:", rightRead, "", rightQual);
                     FastqRecord newLeftSeq = groomRead(leftSeq, format);
                     FastqRecord newRightSeq = groomRead(rightSeq, format);
                     goodLeftSeqs.write(newLeftSeq);
@@ -311,6 +327,9 @@ public class FastqQC
                 }
             }
         }
+        goodLeftSeqs.close();
+        goodRightSeqs.close();
+        badSeqs.close();
         System.out.println("Completed writing " + itCounter + " good reads");
     }
 
@@ -325,7 +344,7 @@ public class FastqQC
      * @param writeBadSeqs whether to write the bad reads to a file (bad reads
      * file name will start with 'bad_')
      */
-    public void qcSingleEndReads(File fastqFileIn, File readsOut, int readLength, String format, boolean writeBadSeqs)
+    public void qcSingleEndReads(File fastqFileIn, File readsOut, int singleEndReadLength, String format, boolean writeBadSeqs)
     {
         FastqReader fq = new FastqReader(fastqFileIn);
 
@@ -344,26 +363,22 @@ public class FastqQC
             {
                 //get the corresponding reads
                 FastqRecord seqRecord = (FastqRecord) it.next();
+                boolean goodRead = qcFastq(seqRecord, singleEndReadLength);
 
-                //get the length of them
-                int seqLength = seqRecord.getReadString().length();
-
-                //check for N's
-                String readString = seqRecord.getReadString();
-
-                boolean containsN = readString.contains("N");
-                if (seqLength == readLength && containsN == false)
+                if (goodRead)
                 {
                     FastqRecord newSeq = groomRead(seqRecord, format);
                     goodSeqs.write(newSeq);
                     itCounter++;
                 }
-                if (writeBadSeqs == true && (seqLength != readLength || containsN == true))
+                else if (writeBadSeqs == true)
                 {
                     badSeqs.write(seqRecord);
                 }
             }
         }
+        goodSeqs.close();
+        badSeqs.close();
         System.out.println("Completed writing " + itCounter + " good reads");
     }
 
@@ -394,9 +409,22 @@ public class FastqQC
             System.err.print("format must be either 'sanger' or 'illumina'");
             System.exit(1);
         }
-
         return newseq;
+    }
 
+    /**
+     * Guesses the format of a FastqRecord
+     *
+     * @param record a FastqRecord of unknown format
+     * @return the best guess;
+     */
+    public FastqQualityFormat guessFormat(FastqRecord record)
+    {
+        QualityEncodingDetector detector = new QualityEncodingDetector();
+        detector.add(record);
+        FastqQualityFormat qual = detector.generateBestGuess(QualityEncodingDetector.FileContext.FASTQ);
+        System.out.println("Qualaty encoding: " + qual.toString());
+        return qual;
     }
 
     /**
@@ -405,7 +433,7 @@ public class FastqQC
      *
      * @param fastq the fastq file to analyse
      */
-    public void countLengthsAndNs(File fastq)
+    public int countLengthsAndNs(File fastq)
     {
         FastqReader fq = new FastqReader(fastq);
         int readsWithNs = 0;
@@ -436,7 +464,7 @@ public class FastqQC
             //check for N's
             String readString = seqRecord.getReadString();
 
-            boolean containsN = readString.contains("N");
+            boolean containsN = readString.toLowerCase().contains("n");
 
             if (containsN == true)
             {
@@ -454,6 +482,7 @@ public class FastqQC
             System.out.println("length: " + key + " count: " + value);
         }
         System.out.println("Found " + readsWithNs + " read with at least one 'N'");
+        return readsWithNs;
 
     }
     //just counts the reads and makes sure they look right
@@ -521,15 +550,10 @@ public class FastqQC
 
     public static void main(String[] args)
     {
-        File leftFastqFileIn = new File("/Users/ethering/NetBeansProjects/Piculus/test/test_data_in/lane1_NoIndex_R1_2000.fastq");
-        File rightFastqFileIn = new File("/Users/ethering/NetBeansProjects/Piculus/test/test_data_in/lane1_NoIndex_R2_2000.fastq");
-        File leftReadsOut = new File("/Users/ethering/NetBeansProjects/Piculus/test/test_data_out/lane1_NoIndex_R1_2000_QC.fastq");
-        File rightReadsOut = new File("/Users/ethering/NetBeansProjects/Piculus/test/test_data_out/lane1_NoIndex_R2_2000_QC.fastq");
-        int singleEndReadLength = 80;
-        String format = "sanger";
-        boolean writeBadSeqs = false;
+        FastqRecord newseq = new FastqRecord("@HWI-EAS396_0001:5:1:10468:1298#0/1", "CTTTTAGCAAGATATCTTATCCATTCCATCTTCGATCCACACAATTGAATCATGTAATTCTCCAATGTAACGCAAT",
+                "+HWI-EAS396_0001:5:1:10468:1298#0/1", "ddc_cfcccfa[ddab\\_a`cfffdffS_ffc^fYddcWe]`]X^bcbadcffccW^ae[ffffffcdffdfaWcc");
         FastqQC instance = new FastqQC();
-        instance.qcPairedReads(leftFastqFileIn, rightFastqFileIn, leftReadsOut, rightReadsOut, singleEndReadLength, format, writeBadSeqs);
+        instance.guessFormat(newseq);
 
     }
 }

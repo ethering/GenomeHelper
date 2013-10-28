@@ -50,8 +50,9 @@ public class FastqInterlacer
             String[] leftArray = leftReadHeader.split(" ");
             //..and remove the pairing info (e.g. 1:N:0:)
             String leftReadName = leftArray[0];
+            
+            //loop thru the right hand reads
             fqr = new FastqReader(rightReads);
-
             Iterator rit1 = fqr.iterator();
             boolean pairFound = false;
             while (rit1.hasNext() && pairFound == false)

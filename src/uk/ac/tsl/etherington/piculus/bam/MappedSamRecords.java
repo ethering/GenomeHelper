@@ -14,6 +14,7 @@ import net.sf.picard.fastq.FastqWriterFactory;
 import net.sf.samtools.SAMFileReader;
 import net.sf.samtools.SAMRecord;
 import net.sf.samtools.SAMRecordIterator;
+import uk.ac.tsl.etherington.piculus.fastq.FastqParser;
 
 /**
  *
@@ -22,22 +23,7 @@ import net.sf.samtools.SAMRecordIterator;
 public class MappedSamRecords
 {
 
-    public void writeRecords(FastqReader fastqReader, FastqWriter out, HashSet<String> mappedReads)
-    {
-        while (fastqReader.hasNext())
-        {
-            FastqRecord record = fastqReader.next();
-            String readName = record.getReadHeader();
-            int hashIndex = readName.indexOf(" ");
-            readName = readName.substring(0, hashIndex);
-            if (mappedReads.contains(readName))
-            {
-                out.write(record);
-            }
-        }
-        out.close();
-    }
-
+ 
     /**
      * Returns the fastq sequences that have been mapped to a genome. All fastq
      * reads must either be left-handed or right-handed
@@ -85,7 +71,7 @@ public class MappedSamRecords
         samReader.close();
 
         final FastqReader fastqReader = new FastqReader(fastqIn);
-        writeRecords(fastqReader, out, mappedReads);
+        FastqParser.writeRecords(fastqReader, out, mappedReads);
     }
 
     /**
@@ -136,7 +122,7 @@ public class MappedSamRecords
         samReader.close();
 
         final FastqReader fastqReader = new FastqReader(fastqIn);
-        writeRecords(fastqReader, out, unMappedReads);
+        FastqParser.writeRecords(fastqReader, out, unMappedReads);
     }
 
     /**

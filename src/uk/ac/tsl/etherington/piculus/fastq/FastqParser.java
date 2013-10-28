@@ -54,6 +54,29 @@ public class FastqParser
         }
         return reads;
     }
+    
+       /**
+     * 
+     * @param fastqReader
+     * @param out
+     * @param mappedReads 
+     */
+    public static void writeRecords(FastqReader fastqReader, FastqWriter out, HashSet<String> mappedReads)
+    {
+        while (fastqReader.hasNext())
+        {
+            FastqRecord record = fastqReader.next();
+            String readName = record.getReadHeader();
+            int hashIndex = readName.indexOf(" ");
+            readName = readName.substring(0, hashIndex);
+            if (mappedReads.contains(readName))
+            {
+                out.write(record);
+            }
+        }
+        out.close();
+    }
+
 
     /**
      * Extract paired-end fastq sequences from a list of sequence names
@@ -66,17 +89,9 @@ public class FastqParser
      * @throws FileNotFoundException
      * @throws IOException
      */
-    public void getPairedFastqSeqsFromHashSet(HashSet list, String fastqFileInLeft, String fastqFileInRight,
-            String fastqFileOutLeft, String fastqFileOutRight) throws FileNotFoundException, IOException
+    public void getPairedFastqSeqsFromHashSet(HashSet list, File fastqLeft, File fastqRight,
+            File fastqLeftOut, File fastqRightOut) throws FileNotFoundException, IOException
     {
-
-
-        File fastqLeft = new File(fastqFileInLeft);
-        File fastqRight = new File(fastqFileInRight);
-
-        File fastqLeftOut = new File(fastqFileOutLeft);
-        File fastqRightOut = new File(fastqFileOutRight);
-
         final FastqReader readerLeft = new FastqReader(fastqLeft);
         final FastqReader readerRight = new FastqReader(fastqRight);
 
@@ -92,7 +107,7 @@ public class FastqParser
             FastqRecord recordRight = readerRight.next();
             String leftRead = recordLeft.getReadHeader();
 
-            int hashIndex = leftRead.indexOf("#");
+            int hashIndex = leftRead.indexOf(" ");
             leftRead = leftRead.substring(0, hashIndex);
             if (list.contains(leftRead))
             {
@@ -123,9 +138,25 @@ public class FastqParser
         //System.out.println("List:");
         while ((line = input.readLine()) != null)
         {
-            int hashIndex = line.indexOf("#");
-            line = line.substring(0, hashIndex);
-            list.add(line);
+            String[] array = line.split(" ");
+            //if there's a space in the seq id then it will contain the 'handedness' of the read, e.g. 1:N:0:
+            if (array.length > 1)
+            {
+                //split it up and get the sequence id
+                int hashIndex = line.indexOf(" ");
+                line = line.substring(0, hashIndex);
+                if (line.startsWith("@"))
+                {
+                    //get rid of the @ sign
+                    line = line.substring(1, line.length());
+                }
+                list.add(line);
+            }
+            else
+            {
+                list.add(line);
+            }
+
             //System.out.println(line);
         }
         FastqWriterFactory writer = new FastqWriterFactory();
@@ -140,7 +171,7 @@ public class FastqParser
             FastqRecord record = reader.next();
 
             String readName = record.getReadHeader();
-            int hashIndex = readName.indexOf("#");
+            int hashIndex = readName.indexOf(" ");
             readName = readName.substring(0, hashIndex);
             //System.out.println(readName);
             if (list.contains(readName))
@@ -185,7 +216,6 @@ public class FastqParser
         String readName = record.getReadHeader();
         String seq = record.getReadString();
         FastaSequence fasta = new FastaSequence(readName, seq);
-
         return fasta;
     }
 
@@ -223,7 +253,6 @@ public class FastqParser
                 String aaSeq = (">" + record.getReadHeader() + "_" + (frame.ordinal() + 1) + "\n" + aa.toString() + "\n");
                 out.write(aaSeq);
             }
-            out.write("\n");
         }
         out.close();
     }

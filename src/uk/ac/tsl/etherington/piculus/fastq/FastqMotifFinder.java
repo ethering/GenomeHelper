@@ -34,10 +34,13 @@ public class FastqMotifFinder
 {
 
     /**
-     *Looks through a DNA fastq file for a given motif. The motif can contain regular expressions, such as ATG[CG]G[AT], 
-     * which will search for ATGCGA, ATGCGT, ATGGGA and ATGGGT. Refer to java.util.regex.Pattern for more details. 
-     * The output is two files, one a tab-delimited file of DNA motif counts, the other a count of the corresponding ammino acid translations. 
+     * Looks through a DNA fastq file for a given motif. The motif can contain
+     * regular expressions, such as ATG[CG]G[AT], which will search for ATGCGA,
+     * ATGCGT, ATGGGA and ATGGGT. Refer to java.util.regex.Pattern for more
+     * details. The output is two files, one a tab-delimited file of DNA motif
+     * counts, the other a count of the corresponding ammino acid translations.
      * The reverse complement is also examined for the motif.
+     *
      * @param fastqFile the input file of DNA sequences in fastq format
      * @param strPattern the pattern to be searched for
      * @param motifCounts a tab-delimited file of the occurrence of each pattern
@@ -61,7 +64,7 @@ public class FastqMotifFinder
         TreeMap<String, Integer> sorted_dna_map = new TreeMap<>(dbvc);
         TreeMap<String, Integer> sorted_aa_map = new TreeMap<>(abvc);
         //a compiler for out
-        Pattern pattern = Pattern.compile(strPattern);
+        Pattern pattern = Pattern.compile(strPattern.toLowerCase());
         //Writers for the dna motif counts and protein motif counts
 
         Writer dnaMotifWriter = new BufferedWriter(new FileWriter(motifCounts));
@@ -75,12 +78,12 @@ public class FastqMotifFinder
         while (it.hasNext())
         {
             FastqRecord seqRecord = (FastqRecord) it.next();
-            String seq = seqRecord.getReadString();
+            String seq = seqRecord.getReadString().toLowerCase();
             //store the sequence in a matcher
             Matcher matcher = pattern.matcher(seq);
 
             //if a match is found
-            if (matcher.find())
+            while (matcher.find())
             {
                 matchesOnPlus++;
                 //get the occurance of the first match and create a subsequence from there
@@ -99,32 +102,31 @@ public class FastqMotifFinder
                     dnaMotifs.put(subs, 1);
                 }
             }
-            else
+
+            //get the reverse complement
+            String revSeq = FastaMotifFinder.revcom(seq).toLowerCase();
+            Matcher revMatcher = pattern.matcher(revSeq);
+            //if a reverse complement match is found is found
+            while (revMatcher.find())
             {
-                //get the reverse complement
-                String revSeq = FastaMotifFinder.revcom(seq);
-                Matcher revMatcher = pattern.matcher(revSeq);
-                //if a reverse complement match is found is found
-                if (revMatcher.find())
+                //get the occurance of the first match and create a subsequence from there
+                String subs = revSeq.substring(revMatcher.start(), revSeq.length());
+                matchCounter++;
+                matchesOnMinus++;
+                //if the dna sequence alread exists, increment it by one
+                if (dnaMotifs.containsKey(subs))
                 {
-                    //get the occurance of the first match and create a subsequence from there
-                    String subs = revSeq.substring(revMatcher.start(), revSeq.length());
-                    matchCounter++;
-                    matchesOnMinus++;
-                    //if the dna sequence alread exists, increment it by one
-                    if (dnaMotifs.containsKey(subs))
-                    {
-                        Integer count = dnaMotifs.get(subs);
-                        count = count + 1;
-                        dnaMotifs.put(subs, count);
-                    }
-                    //else put in a new entry
-                    else
-                    {
-                        dnaMotifs.put(subs, 1);
-                    }
+                    Integer count = dnaMotifs.get(subs);
+                    count = count + 1;
+                    dnaMotifs.put(subs, count);
+                }
+                //else put in a new entry
+                else
+                {
+                    dnaMotifs.put(subs, 1);
                 }
             }
+
         }
         System.out.println("Found " + matchCounter + " matches");
         System.out.println("Found " + matchesOnPlus + " matches on plus");
@@ -176,9 +178,11 @@ public class FastqMotifFinder
 
     /**
      *
-     * @param fastqIn single interlaced or concatenated paired-end fastq sequence file
+     * @param fastqIn single interlaced or concatenated paired-end fastq
+     * sequence file
      * @param strPattern the pattern for which you are searching
-     * @param fastqOut the file of paired-end sequences which have a match in one of the pairs
+     * @param fastqOut the file of paired-end sequences which have a match in
+     * one of the pairs
      * @throws IOException
      * @throws CharacterParseException
      */
@@ -188,7 +192,7 @@ public class FastqMotifFinder
         HashSet<String> matches = new HashSet<>();
 
         //a compiler for out
-        Pattern pattern = Pattern.compile(strPattern);
+        Pattern pattern = Pattern.compile(strPattern.toLowerCase());
         //Writers for matching reads
 
         //open the fastq file and loop thru it
@@ -200,12 +204,12 @@ public class FastqMotifFinder
         while (it.hasNext())
         {
             FastqRecord seqRecord = (FastqRecord) it.next();
-            String seq = seqRecord.getReadString();
+            String seq = seqRecord.getReadString().toLowerCase();
             //store the sequence in a matcher
             Matcher matcher = pattern.matcher(seq);
 
             //if a match is found
-            if (matcher.find())
+            while (matcher.find())
             {
                 String read = seqRecord.getReadHeader();
                 int spaceIndex = read.indexOf(" ");
@@ -214,23 +218,22 @@ public class FastqMotifFinder
                 matchCounter++;
                 matchesOnPlus++;
             }
-            else
+
+            //get the reverse complement
+            String revSeq = FastaMotifFinder.revcom(seq).toLowerCase();
+            Matcher revMatcher = pattern.matcher(revSeq);
+            //if a reverse complement match is found is found
+            while (revMatcher.find())
             {
-                //get the reverse complement
-                String revSeq = FastaMotifFinder.revcom(seq);
-                Matcher revMatcher = pattern.matcher(revSeq);
-                //if a reverse complement match is found is found
-                if (revMatcher.find())
-                {
-                    String read = seqRecord.getReadHeader();
-                    //System.out.println(read);
-                    int spaceIndex = read.indexOf(" ");
-                    String readName = read.substring(0, spaceIndex);
-                    matches.add(readName);
-                    matchCounter++;
-                    matchesOnMinus++;
-                }
+                String read = seqRecord.getReadHeader();
+                //System.out.println(read);
+                int spaceIndex = read.indexOf(" ");
+                String readName = read.substring(0, spaceIndex);
+                matches.add(readName);
+                matchCounter++;
+                matchesOnMinus++;
             }
+
         }
         fq.close();
 
@@ -259,8 +262,6 @@ public class FastqMotifFinder
         fqWriter.close();
     }
 
-    
-
     class ValueComparator implements Comparator<String>
     {
 
@@ -286,9 +287,6 @@ public class FastqMotifFinder
         }
     }
 
-   
-
-   
     public class StringLengthComparator implements Comparator<String>
     {
 

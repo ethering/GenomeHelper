@@ -1,11 +1,11 @@
 ##gff-version 3
 chr1	piculus	mRNA	1	100	.	+	.	ID=001
-chr1	piculus	exon	1	10	.	+	.	ID=exon_001 Parent=001
-chr1	piculus	exon	30	40	.	+	.	ID=exon_002 Parent=001
-chr1	piculus	exon	60	70	.	+	.	ID=exon_003 Parent=001
-chr1	piculus	exon	90	100	.	+	.	ID=exon_004 Parent=001
-chr1	piculus	mRNA	201	300	.	+	.	ID=002
-chr1	piculus	exon	201	210	.	+	.	ID=exon_001 Parent=002
-chr1	piculus	exon	230	240	.	+	.	ID=exon_002 Parent=002
-chr1	piculus	exon	260	270	.	+	.	ID=exon_003 Parent=002
-chr1	piculus	exon	290	300	.	+	.	ID=exon_004 Parent=002
+chr1	piculus	exon	1	10	.	+	.	Parent=001
+chr1	piculus	exon	31	40	.	+	.	Parent=001
+chr1	piculus	exon	61	70	.	+	.	Parent=001
+chr1	piculus	exon	91	100	.	+	.	Parent=001
+chr1	piculus	mRNA	101	200	.	+	.	ID=002
+chr1	piculus	exon	101	110	.	+	.	Parent=002
+chr1	piculus	exon	131	140	.	+	.	Parent=002
+chr1	piculus	exon	161	170	.	+	.	Parent=002
+chr1	piculus	exon	191	200	.	+	.	Parent=002

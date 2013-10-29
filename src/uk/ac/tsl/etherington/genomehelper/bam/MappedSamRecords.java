@@ -1,4 +1,4 @@
-package uk.ac.tsl.etherington.piculus.bam;
+package uk.ac.tsl.etherington.genomehelper.bam;
 
 /*
  * Takes a SAM File, prints the header and then prints any entries where the
@@ -14,7 +14,7 @@ import net.sf.picard.fastq.FastqWriterFactory;
 import net.sf.samtools.SAMFileReader;
 import net.sf.samtools.SAMRecord;
 import net.sf.samtools.SAMRecordIterator;
-import uk.ac.tsl.etherington.piculus.fastq.FastqParser;
+import uk.ac.tsl.etherington.genomehelper.fastq.FastqParser;
 
 /**
  *

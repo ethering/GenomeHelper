@@ -1,4 +1,4 @@
-package uk.ac.tsl.etherington.piculus.gff;
+package uk.ac.tsl.etherington.genomehelper.gff;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -25,7 +25,7 @@ import org.biojava3.genome.parsers.gff.FeatureI;
 import org.biojava3.genome.parsers.gff.FeatureList;
 import org.biojava3.genome.parsers.gff.GFF3Reader;
 import org.biojava3.genome.parsers.gff.Location;
-import uk.ac.tsl.etherington.piculus.fasta.FastaFeatures;
+import uk.ac.tsl.etherington.genomehelper.fasta.FastaFeatures;
 
 /*
  *Contains a range of methods that calculate a number of genome statistics for a requested feature type (the 3rd column in a gff file)
@@ -90,9 +90,10 @@ public class GFFFeatureStats
 
     /**
      * Gets all the features from a gff file
+     *
      * @param gffFile the gff file from which to extract the features
      * @return a org.biojava3.genome.parsers.gff.FeatureList
-     * @throws IOException 
+     * @throws IOException
      */
     public FeatureList getFeatureList(String gffFile) throws IOException
     {
@@ -345,7 +346,8 @@ public class GFFFeatureStats
             Location loc = fi.location();
             int start = loc.bioStart();
             int end = loc.bioEnd();
-            int featureLength = end - start + 1;
+            int featureLength = end - start;
+            System.out.println("Start = "+start+" End = "+end+" Length = "+featureLength);
             combinedFeatureLength += featureLength;
             numberOfFeatures++;
         }
@@ -374,31 +376,41 @@ public class GFFFeatureStats
         HashMap<String, ArrayList<Integer>> blocks = getBlocks(fl, "exon");
 
 
+
         //iterate over the blocks HashMap and put, as the final array list entry for each sequence
         //the length of the sequence (so as to include the very last bit of intergenic sequence
         for (Map.Entry<String, ArrayList<Integer>> entry : blocks.entrySet())
         {
+            boolean exonStartsAtOne = false;
+            boolean exonEndsAtGenomeLength = false;
             String chr = entry.getKey();
+            System.out.println("Chr " + chr);
             ArrayList<Integer> al = entry.getValue();
             Collections.sort(al);
-            int lastPosition = al.get(al.size() - 1);
             int firstPosition = al.get(0);
+            System.out.println("first pos = " + firstPosition);
+            int lastPosition = al.get(al.size() - 1);
+            System.out.println("last pos = " + lastPosition);
+            
             //check to see if the current contig is included in the seqLengths list (it should be!)
-            //and that the seqlength isn't the same as the last coordinate in the blocks list
-            //(this will cause an error when fetching the subequence later)
+
             if (seqLengths.containsKey(chr))
             {
                 if (lastPosition != seqLengths.get(chr))
                 {
-                    al.add(seqLengths.get(chr) + 1);
+                    al.add(seqLengths.get(chr));
                 }
-                //..add 0 as the first index so that the first intergenic block starts at the 
-                //start of the referene sequence and ends at the start of the first exon (zero will
-                //be turned into 1 later)
+                //if the first block is not '1' add 0 as the first index (this will get incremented to '1' later) so that the first intergenic block starts at the 
+                //start of the referene sequence and ends at the start of the first exon 
                 if (firstPosition != 1)
                 {
                     al.add(0);
                 }
+                else//the first block starts at '1', so we need to remove it so that the first element is the end of the first exon
+                {
+                    al.remove(0);
+                }
+                               
             }
         }
 
@@ -406,7 +418,7 @@ public class GFFFeatureStats
         for (Map.Entry<String, ArrayList<Integer>> entry : blocks.entrySet())
         {
             StringBuilder nonCodingContig = new StringBuilder();
-            //System.out.println(entry.getKey());
+            System.out.println(entry.getKey());
             //get each arrayList...
             ArrayList<Integer> al = entry.getValue();
             String contig = entry.getKey();
@@ -422,15 +434,17 @@ public class GFFFeatureStats
             {
                 //get the start of the first block..
                 int startBlock = (Integer) alit.next();
+                //System.out.println("Start block = "+startBlock);
                 //and then the start of the next block
                 if (alit.hasNext())
                 {
                     int endBlock = (Integer) alit.next();
-                    //System.out.println("Contig = " + contig + " Start = " + (startBlock + 1) + " End = " + (endBlock - 1));
+                    //System.out.println("end block = "+endBlock);
+                    System.out.println("Contig = " + contig + " Start = " + (startBlock +1) + " End = " + (endBlock-1));
                     //the block start/end coords are both part of the coding sequence,
                     //so to get the intergenic region +1 to the start and -1 to the end
                     //Also, check for consecutive exons (where one exon starts straight after the other)
-                    if (((endBlock - 1) - (startBlock + 1)) > 0)
+                    if ((endBlock - (startBlock + 1)) > 0)
                     {
                         String subseq = seq.getSequenceAsString((startBlock + 1), (endBlock - 1), Strand.POSITIVE);
                         nonCodingContig.append(subseq);
@@ -446,7 +460,8 @@ public class GFFFeatureStats
     /**
      *
      * @param fl a org.biojava3.genome.parsers.gff.FeatureList
-     * @param feature the feature to use for the coding genome (e.g. exon, cds, mRNA)
+     * @param feature the feature to use for the coding genome (e.g. exon, cds,
+     * mRNA)
      * @param refSeq the reference sequence (in fasta format)
      * @param codingGenome the non-coding reference genome (in fasta format)
      * @throws Exception
@@ -560,17 +575,20 @@ public class GFFFeatureStats
             while (alit.hasNext())
             {
                 int startBlock = (Integer) alit.next();//ergo the end of the exon
+                //System.out.print(startBlock);
                 if (alit.hasNext())
                 {
                     int endBlock = (Integer) alit.next();//the start of the next exon
+                    //System.out.print("\t"+endBlock);
                     //the block start/end coords are both part of the exon sequence,
                     //so to get the intron length calculate end - start -1
                     int blockLength = endBlock - startBlock - 1;
-                    //System.out.print("\t" + blockLength);
+                    //System.out.println("\t" + blockLength);
                     combinedIntronLength += blockLength;
                     nIntrons++;
                 }
             }
+            //System.out.println("");
         }
 
         double meanLength = combinedIntronLength / nIntrons;
@@ -657,8 +675,8 @@ public class GFFFeatureStats
     }
 
     /**
-     * Calculate the proportion of the genome that contains coding regions
-     * (exons)
+     * Calculate the proportion of the genome that contains coding regions (from
+     * the start of the first exon to the end of the last exon)
      *
      * @param featList a org.biojava3.genome.parsers.gff.FeatureList
      * @param codingMap a HashMap where the keys are the reference sequence
@@ -745,6 +763,7 @@ public class GFFFeatureStats
         {
             //for each chromosome
             String seqName = entry.getKey();
+            //System.out.println("SeqName = "+seqName);
             //get the int [] array from the codingMap
             int[] seqMap = codingMap.get(seqName);
             //get the hashMap of gene ids and their associated arraylist of start/stop features
@@ -752,6 +771,7 @@ public class GFFFeatureStats
             //iterate over that hashMap
             for (Map.Entry<String, ArrayList<Integer>> geneArray : hm.entrySet())
             {
+                //System.out.println("Feature id = "+geneArray.getKey());
                 //and get the arrayList
                 ArrayList<Integer> al = geneArray.getValue();
                 //sort the arrayList and get the first and last element.
@@ -759,12 +779,14 @@ public class GFFFeatureStats
                 Collections.sort(al);
                 int lowest = al.get(0);
                 int highest = al.get(al.size() - 1);
-
+                //System.out.println("lowest = "+lowest);
+                //System.out.println("highest = "+highest);
                 //and set the coding region to '1'
-                for (int i = lowest - 1; i < highest - 1; i++)
+                for (int i = lowest - 1; i < highest; i++)
                 {
                     seqMap[i] = 1;
                 }
+
             }
             //put the int [] array back into codingMap
             codingMap.put(seqName, seqMap);
@@ -776,7 +798,7 @@ public class GFFFeatureStats
         {
             //String chr = arraySet.getKey();
             int[] codingPositions = arraySet.getValue();
-            //System.out.println(chr);//and set the coding region to '1'
+            // System.out.println(chr);//and set the coding region to '1'
             for (int i = 0; i < codingPositions.length; i++)
             {
                 //System.out.print(" " + codingPositions[i]);
@@ -847,8 +869,8 @@ public class GFFFeatureStats
      *
      * @param fl a org.biojava3.genome.parsers.gff.FeatureList
      * @param featureType the type of feature to make blocks from
-     * @param attribute the name of the attribute that will make the genes unique
-     * (e.g. "name", gene_id, etc)
+     * @param attribute the name of the attribute that will make the genes
+     * unique (e.g. "name", gene_id, etc)
      * @return a HashMap of blocks where the keys are the names of the reference
      * sequences and the values are arrays of Integers with the consecutive
      * start and then finish co-ordinates of all the requested featureTypes
@@ -945,4 +967,6 @@ public class GFFFeatureStats
         }
         return blocks;
     }
+
+    
 }

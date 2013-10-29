@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package uk.ac.tsl.etherington.piculus.fastq;
+package uk.ac.tsl.etherington.genomehelper.fastq;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -23,7 +23,7 @@ import net.sf.picard.fastq.FastqWriter;
 import net.sf.picard.fastq.FastqWriterFactory;
 import org.biojava3.core.sequence.*;
 import org.jtr.transliterate.CharacterParseException;
-import uk.ac.tsl.etherington.piculus.fasta.FastaMotifFinder;
+import uk.ac.tsl.etherington.genomehelper.fasta.FastaMotifFinder;
 
 /**
  * A class to identify motifs in FASTQ formatted reads

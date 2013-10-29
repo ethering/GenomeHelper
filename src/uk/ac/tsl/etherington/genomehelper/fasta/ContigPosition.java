@@ -1,4 +1,4 @@
-package uk.ac.tsl.etherington.piculus.fasta;
+package uk.ac.tsl.etherington.genomehelper.fasta;
 
 import java.util.ArrayList;
 import java.util.Iterator;

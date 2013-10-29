@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package uk.ac.tsl.etherington.piculus.main;
+package uk.ac.tsl.etherington.genomehelper.main;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,25 +11,25 @@ import java.util.HashMap;
 import java.util.HashSet;
 import org.biojava3.genome.parsers.gff.FeatureList;
 import org.jtr.transliterate.CharacterParseException;
-import uk.ac.tsl.etherington.piculus.fasta.FastaFeatures;
-import uk.ac.tsl.etherington.piculus.fasta.FastaMotifFinder;
-import uk.ac.tsl.etherington.piculus.fasta.FastaSubstrings;
-import uk.ac.tsl.etherington.piculus.fasta.FastaTranslator;
-import uk.ac.tsl.etherington.piculus.fasta.RandomFasta;
-import uk.ac.tsl.etherington.piculus.fastq.FastqCompression;
-import uk.ac.tsl.etherington.piculus.fastq.FastqInterlacer;
-import uk.ac.tsl.etherington.piculus.fastq.FastqJoiner;
-import uk.ac.tsl.etherington.piculus.fastq.FastqMotifFinder;
-import uk.ac.tsl.etherington.piculus.fastq.FastqParser;
-import uk.ac.tsl.etherington.piculus.fastq.FastqQC;
-import uk.ac.tsl.etherington.piculus.bam.MappedSamRecords;
-import uk.ac.tsl.etherington.piculus.gff.GFFFeatureStats;
+import uk.ac.tsl.etherington.genomehelper.fasta.FastaFeatures;
+import uk.ac.tsl.etherington.genomehelper.fasta.FastaMotifFinder;
+import uk.ac.tsl.etherington.genomehelper.fasta.FastaSubstrings;
+import uk.ac.tsl.etherington.genomehelper.fasta.FastaTranslator;
+import uk.ac.tsl.etherington.genomehelper.fasta.RandomFasta;
+import uk.ac.tsl.etherington.genomehelper.fastq.FastqCompression;
+import uk.ac.tsl.etherington.genomehelper.fastq.FastqInterlacer;
+import uk.ac.tsl.etherington.genomehelper.fastq.FastqJoiner;
+import uk.ac.tsl.etherington.genomehelper.fastq.FastqMotifFinder;
+import uk.ac.tsl.etherington.genomehelper.fastq.FastqParser;
+import uk.ac.tsl.etherington.genomehelper.fastq.FastqQC;
+import uk.ac.tsl.etherington.genomehelper.bam.MappedSamRecords;
+import uk.ac.tsl.etherington.genomehelper.gff.GFFFeatureStats;
 
 /**
  *
  * @author ethering
  */
-public class Piculus
+public class GenomeHelper
 {
 
     /**
@@ -234,7 +234,7 @@ public class Piculus
                 }
                 else
                 {
-                    System.err.println("Wrong number of paramters try Picard.jar -h for help");
+                    System.err.println("Wrong number of paramters try GenomeHelper.jar FastaGetSingleFromMultiFasta -h for help");
                 }
             }
         }

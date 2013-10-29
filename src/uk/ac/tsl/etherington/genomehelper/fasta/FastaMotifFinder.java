@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package uk.ac.tsl.etherington.piculus.fasta;
+package uk.ac.tsl.etherington.genomehelper.fasta;
 
 import java.io.BufferedWriter;
 import java.io.File;

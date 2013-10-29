@@ -1,4 +1,4 @@
-package uk.ac.tsl.etherington.piculus.fastq;
+package uk.ac.tsl.etherington.genomehelper.fastq;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;

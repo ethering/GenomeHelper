@@ -1,7 +1,7 @@
 #GenomeHelper - A command Line program and Java API of helper tools for genomics
 
 
-###The following programs are available. Use -h for help with each program:
+###The following programs are available.  Use <program_name> -h for help with each program:
 
 Fasta-related programs:  
 Usage: FastaMotifFinder fastaFile searchMotif motifCountsFile proteinCountsFile minCount  
@@ -49,5 +49,4 @@ Usage: GFFGetMeanFeatureLength gffFile featureName
 Usage: GFFCreateNonCodingGenome gffFile refSeq nonCodingGeneom  
 Usage: GFFCreateCodingGenome gffFile featureName refSeq codingGeneom  
 Usage: GFFGetMeanIntronLength gffFile featureName refSeq  
-Usage: GFFGetMeanTargetIntronLength gffFile featureName targets  
-Usage: GFFCalculateCodingRegion gffFile refSeq attribute
+Usage: GFFGetMeanTargetIntronLength gffFile featureName targets

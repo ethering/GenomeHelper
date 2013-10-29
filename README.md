@@ -1,6 +1,6 @@
 #GenomeHelper - A command Line program and Java API of helper tools for genomics
 
-###Use java -jar GeneomeHelper.jar <program-name> -h for help with each program:
+###Use java -jar GeneomeHelper.jar `program-name` -h for help with each program:
 ###The following programs are available. 
 
 Fasta-related programs:  

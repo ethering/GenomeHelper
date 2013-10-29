@@ -39,7 +39,7 @@ public class GenomeHelper
     {
         if (args.length == 0 || args[0].equalsIgnoreCase("-help") || args[0].equalsIgnoreCase("-h"))
         {
-            System.out.println("The following programs are available. Use <program_name> -h for help with each program:\n");
+            System.out.println("Welcome to GenomeFinder\nThe following programs are available. Use <program_name> -h for help with each program:\n");
             System.out.println("\nFasta-related programs:");
             System.out.println("Usage: FastaMotifFinder fastaFile searchMotif motifCountsFile proteinCountsFile minCount");
             System.out.println("Usage: FastaGetLongestSubstring  <path to files>  outfile.");

@@ -3,7 +3,7 @@
 ###Use `java -jar GenomeHelper.jar <program-name> -h` for help with each program:
 ###The following programs are available. 
 
-Fasta-related programs:  
+####Fasta-related programs:  
 Usage: FastaMotifFinder fastaFile searchMotif motifCountsFile proteinCountsFile minCount  
 Usage: FastaGetLongestSubstring outfile.  
 Usage: FastaGetGenomeLength infile  
@@ -13,7 +13,7 @@ Usage: FastaGetSingleFromMultiFasta infileoutfile seqId subsequence_start (optio
 Usage: FastaSelectRandomSequences fastaIn numberOfRandomSeqs randomSeqsoutfile
 
 
-Fastq-related programs:  
+####Fastq-related programs:  
 Usage: FastqCompress fastqIn fastqOut.gz  
 Usage: FastqInterlace leftReads rightReads interlacedFastqFile singlesFile  
 Usage: FastqDeinterlace interlacedFastqFile leftReads rightReads leftSinglesFile rightSinglesFile  
@@ -27,7 +27,7 @@ Usage: FastqGetSingleEndSequencesFromFile listFile fastqFileIn fastqFileOut
 Usage: FastqToFasta fastqIn fastaOut  
 Usage: FastqTranslate fastqIn fastaOut includeOriginalDNASequence ('true' or 'false')
 
-Quality-control programs:  
+####Quality-control programs:  
 Usage: QCPairedReads fastqInLeft fastqInRight fastqLeftOut fastqrRightOut readLength format('sanger' or 'illumina') writeBadReads ('true' or 'false')  
 Usage: QCSingleEndReads fastqIn fastqOut readLength format('sanger' or 'illumina') writeBadReads ('true' or 'false')  
 Usage: QCInterlacedReads fastqIn fastqOut readLength format('sanger' or 'illumina') writeBadReads ('true' or 'false')  
@@ -37,7 +37,7 @@ Usage: QCVerifyReads fastqIn
 Usage: QCVerifyPairedEndReads fastqLeft fastqRight  
 
 
-SAM/BAM-related programs:  
+####SAM/BAM-related programs:  
 Usage: BAMGetMappedPairedReads bamfile fastqInLeft fastqInRight fastqOutLeft fastqOutRight  
 Usage: BAMGetUnmappedPairedReads bamfile fastqInLeft fastqInRight fastqOutLeft fastqOutRight  
 Usage: BAMGetBothUnmappedPairedReads bamFile fastqInLeft fastqInRight fastqOutLeft fastqOutRight  
@@ -45,7 +45,7 @@ Usage: BAMGetBothMappedPairedRead bamFile fastqInLeft fastqInRight fastqOutLeft 
 Usage: BAMGetSingleUnmappedPairedReads bamFile fastqInLeft fastqInRight fastqOutLeft fastqOutRight  
 Usage: BAMGetSingleMappedPairedReads bamFile fastqInLeft fastqInRight fastqOutLeft fastqOutRight  
 
-GFF-related programs:  
+####GFF-related programs:  
 Usage: GFFGetMeanFeatureLengthWithSplicing gffFile featureName refSeq  
 Usage: GFFGetMeanFeatureLength gffFile featureName  
 Usage: GFFCreateNonCodingGenome gffFile refSeq nonCodingGeneom  

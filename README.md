@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #GenomeHelper - A command Line program and Java API of helper tools for genomics
 
 ###Use `java -jar GenomeHelper.jar <program-name> -h` for help with each program:
@@ -53,3 +54,7 @@ Usage: GFFCreateCodingGenome gffFile featureName refSeq codingGeneom
 Usage: GFFGetMeanIntronLength gffFile featureName refSeq  
 Usage: GFFGetMeanTargetIntronLength gffFile featureName targets  
 Usage: GFFCalculateCodingRegion gffFile refSeq attribute
+=======
+genomehelper
+============
+>>>>>>> d997d03e3d9ed6649862df0d51083851a59f0eda

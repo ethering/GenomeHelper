@@ -15,8 +15,6 @@ import java.util.NoSuchElementException;
 import org.biojava.bio.BioException;
 import org.biojava.bio.seq.DNATools;
 import org.biojava.bio.seq.Sequence;
-import org.biojava.bio.symbol.Alphabet;
-import org.biojava.bio.symbol.AlphabetManager;
 import org.biojava.bio.symbol.Symbol;
 import org.biojava3.core.sequence.DNASequence;
 import org.biojava3.core.sequence.io.FastaReaderHelper;

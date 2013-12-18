@@ -83,8 +83,8 @@ public class GenomeHelper
             System.out.println("\nGFF-related programs:");
             System.out.println("Usage: GFFGetMeanFeatureLengthWithSplicing gffFile featureName refSeq");
             System.out.println("Usage: GFFGetMeanFeatureLength gffFile featureName");
-            System.out.println("Usage: GFFCreateNonCodingGenome gffFile refSeq nonCodingGeneom");
-            System.out.println("Usage: GFFCreateCodingGenome gffFile featureName refSeq codingGeneom");
+            System.out.println("Usage: GFFCreateNonCodingGenome gffFile refSeq nonCodingGenome");
+            System.out.println("Usage: GFFCreateCodingGenome gffFile featureName refSeq codingGenome");
             System.out.println("Usage: GFFGetMeanIntronLength gffFile featureName refSeq ");
             System.out.println("Usage: GFFGetMeanTargetIntronLength gffFile featureName targets");
             System.out.println("Usage: GFFCalculateCodingRegion gffFile refSeq attribute");

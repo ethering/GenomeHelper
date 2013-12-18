@@ -82,10 +82,10 @@ public class FastqParser
      * Extract paired-end fastq sequences from a list of sequence names
      *
      * @param list a HashSet of read names
-     * @param fastqFileInLeft all left-handed reads
-     * @param fastqFileInRight all right-handed reads
-     * @param fastqFileOutLeft the left-handed reads in the list
-     * @param fastqFileOutRight the right-handed reads in the list
+     * @param fastqLeft all left-handed reads
+     * @param fastqRight all right-handed reads
+     * @param fastqLeftOut the left-handed reads in the list
+     * @param fastqRightOut the right-handed reads in the list
      * @throws FileNotFoundException
      * @throws IOException
      */

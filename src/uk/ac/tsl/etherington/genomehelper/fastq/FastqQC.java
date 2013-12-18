@@ -339,7 +339,7 @@ public class FastqQC
      *
      * @param fastqFileIn the fastq file
      * @param readsOut the good reads
-     * @param readLength the expected length of a single read
+     * @param singleEndReadLength the expected length of a single read
      * @param format the fastq format (can only be 'illumina' or 'sanger')
      * @param writeBadSeqs whether to write the bad reads to a file (bad reads
      * file name will start with 'bad_')

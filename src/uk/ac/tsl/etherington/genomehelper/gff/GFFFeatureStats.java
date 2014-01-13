@@ -26,6 +26,7 @@ import org.biojava3.genome.parsers.gff.FeatureList;
 import org.biojava3.genome.parsers.gff.GFF3Reader;
 import org.biojava3.genome.parsers.gff.Location;
 import uk.ac.tsl.etherington.genomehelper.fasta.FastaFeatures;
+import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 
 /*
  *Contains a range of methods that calculate a number of genome statistics for a requested feature type (the 3rd column in a gff file)
@@ -186,14 +187,22 @@ public class GFFFeatureStats
             //System.out.println();
         }
         int codingSpace = 0;
+        double[] featArray = new double[feats.size()];
+        int i = 0;
         for (Integer featInt : feats)
         {
             codingSpace += featInt;
+            featArray[i] = featInt.doubleValue();
+            i++;
         }
+
 
         System.out.println("Feature calculated: " + featureName);
         double meanLength = codingSpace / feats.size();
         System.out.println("Mean feature length = " + meanLength);
+        StandardDeviation sd = new StandardDeviation();
+        double stdev = sd.evaluate(featArray, meanLength);
+        System.out.println("Stddev = " + stdev);
         double codingProportion = codingSpace / genomeLength;
         double genomeMb = genomeLength / 1048576;
         System.out.println("Genome size = " + genomeLength + "(" + genomeMb + "MB)");
@@ -308,14 +317,22 @@ public class GFFFeatureStats
             //System.out.println();
         }
         int codingSpace = 0;
+        double[] featArray = new double[feats.size()];
+        int i = 0;
         for (Integer featInt : feats)
         {
             codingSpace += featInt;
+            featArray[i] = featInt.doubleValue();
+            i++;
         }
+
 
         System.out.println("Feature calculated: " + featureName);
         double meanLength = codingSpace / feats.size();
         System.out.println("Mean feature length = " + meanLength);
+        StandardDeviation sd = new StandardDeviation();
+        double stdev = sd.evaluate(featArray, meanLength);
+        System.out.println("Stddev = " + stdev);
         double codingProportion = codingSpace / genomeLength;
         double genomeMb = genomeLength / 1048576;
         System.out.println("Genome size = " + genomeLength + "(" + genomeMb + "MB)");
@@ -340,6 +357,8 @@ public class GFFFeatureStats
         Iterator it = featTypes.iterator();
         double combinedFeatureLength = 0;
         double numberOfFeatures = 0;
+        int i = 0;
+        double[] featArray = new double[featTypes.size()];
         while (it.hasNext())
         {
             FeatureI fi = (FeatureI) it.next();
@@ -347,13 +366,19 @@ public class GFFFeatureStats
             int start = loc.bioStart();
             int end = loc.bioEnd();
             int featureLength = end - start;
-            System.out.println("Start = "+start+" End = "+end+" Length = "+featureLength);
+            featArray[i] = featureLength;
+            System.out.println("Start = " + start + " End = " + end + " Length = " + featureLength);
             combinedFeatureLength += featureLength;
             numberOfFeatures++;
+            i++;
+
         }
         double meanLength = combinedFeatureLength / numberOfFeatures;
+        StandardDeviation sd = new StandardDeviation();
+        double stdev = sd.evaluate(featArray, meanLength);
         System.out.println("Feature calculated: " + featureName);
         System.out.println("Mean feature length = " + meanLength);
+        System.out.println("Stddev = " + stdev);
         return meanLength;
     }
 
@@ -381,8 +406,6 @@ public class GFFFeatureStats
         //the length of the sequence (so as to include the very last bit of intergenic sequence
         for (Map.Entry<String, ArrayList<Integer>> entry : blocks.entrySet())
         {
-            boolean exonStartsAtOne = false;
-            boolean exonEndsAtGenomeLength = false;
             String chr = entry.getKey();
             System.out.println("Chr " + chr);
             ArrayList<Integer> al = entry.getValue();
@@ -391,7 +414,7 @@ public class GFFFeatureStats
             System.out.println("first pos = " + firstPosition);
             int lastPosition = al.get(al.size() - 1);
             System.out.println("last pos = " + lastPosition);
-            
+
             //check to see if the current contig is included in the seqLengths list (it should be!)
 
             if (seqLengths.containsKey(chr))
@@ -410,7 +433,7 @@ public class GFFFeatureStats
                 {
                     al.remove(0);
                 }
-                               
+
             }
         }
 
@@ -440,7 +463,7 @@ public class GFFFeatureStats
                 {
                     int endBlock = (Integer) alit.next();
                     //System.out.println("end block = "+endBlock);
-                    System.out.println("Contig = " + contig + " Start = " + (startBlock +1) + " End = " + (endBlock-1));
+                    System.out.println("Contig = " + contig + " Start = " + (startBlock + 1) + " End = " + (endBlock - 1));
                     //the block start/end coords are both part of the coding sequence,
                     //so to get the intergenic region +1 to the start and -1 to the end
                     //Also, check for consecutive exons (where one exon starts straight after the other)
@@ -556,6 +579,8 @@ public class GFFFeatureStats
         double nGenes = blocks.size();
         double combinedIntronLength = 0;
         double nIntrons = 0;
+        double[] featArray = new double[blocks.size()];
+        int i = 0;
         if (blocks.isEmpty())
         {
             System.out.println("No features found with attribute " + attribute);
@@ -583,6 +608,8 @@ public class GFFFeatureStats
                     //the block start/end coords are both part of the exon sequence,
                     //so to get the intron length calculate end - start -1
                     int blockLength = endBlock - startBlock - 1;
+                    featArray[i] = (double) blockLength;
+                    i++;
                     //System.out.println("\t" + blockLength);
                     combinedIntronLength += blockLength;
                     nIntrons++;
@@ -597,6 +624,9 @@ public class GFFFeatureStats
         System.out.println("nGenes = " + nGenes);
         System.out.println("nIntrons = " + nIntrons);
         System.out.println("Mean intron length = " + meanLength);
+        StandardDeviation sd = new StandardDeviation();
+        double stdev = sd.evaluate(featArray, meanLength);
+        System.out.println("Stddev = " + stdev);
         System.out.println("Proportion of genome intronic = " + proportionIntron);
         System.out.println("Mean No. introns per gene = " + meanIntronGene);
         return meanLength;
@@ -631,8 +661,8 @@ public class GFFFeatureStats
             return 0;
         }
         double combinedIntronLength = 0;
-
-
+        double[] featArray = new double[blocks.size()];
+        int i = 0;
         double nIntrons = 0;
         for (Map.Entry<String, ArrayList<Integer>> entry : blocks.entrySet())
         {
@@ -654,8 +684,8 @@ public class GFFFeatureStats
                     //the block start/end coords are both part of the exon sequence,
                     //so to get the intron length calculate end - start -1
                     int blockLength = endBlock - startBlock - 1;
-                    //System.out.print("seq = " + entry.getKey() + " start= " + startBlock + " end = " + endBlock);
-                    //System.out.println("\t" + blockLength);
+                    featArray[i] = (double) blockLength;
+                    i++;
                     combinedIntronLength += blockLength;
                     nIntrons++;
                 }
@@ -671,6 +701,9 @@ public class GFFFeatureStats
 
         System.out.println("Mean No. introns per gene = " + meanIntronGene);
         System.out.println("Mean intron length = " + meanLength);
+        StandardDeviation sd = new StandardDeviation();
+        double stdev = sd.evaluate(featArray, meanLength);
+        System.out.println("Stddev = " + stdev);
         return meanLength;
     }
 
@@ -967,6 +1000,4 @@ public class GFFFeatureStats
         }
         return blocks;
     }
-
-    
 }

@@ -83,11 +83,14 @@ public class GenomeHelper
             System.out.println("\nGFF-related programs:");
             System.out.println("Usage: GFFGetMeanFeatureLengthWithSplicing gffFile featureName refSeq");
             System.out.println("Usage: GFFGetMeanFeatureLength gffFile featureName");
+            System.out.println("Usage: GFFGetMeanFeatureLengthOfGeneIDs gffFile featureName fileOfIds");
             System.out.println("Usage: GFFCreateNonCodingGenome gffFile refSeq nonCodingGenome");
             System.out.println("Usage: GFFCreateCodingGenome gffFile featureName refSeq codingGenome");
             System.out.println("Usage: GFFGetMeanIntronLength gffFile featureName refSeq ");
             System.out.println("Usage: GFFGetMeanTargetIntronLength gffFile featureName targets");
             System.out.println("Usage: GFFCalculateCodingRegion gffFile refSeq attribute");
+            System.out.println("Usage: GFFGetStats gffFile refSeq attribute");
+
         }
         else if (args[0].equalsIgnoreCase("FastaMotifFinder"))
         {
@@ -835,13 +838,13 @@ public class GenomeHelper
                 System.out.println("Calculates the mean intron length within a genome of a subset of target genes");
                 System.out.println("gffFile - the gff or gtf file in which the features are stored");
                 System.out.println("attribute - the name of the attribute that will make the genes unique (e.g. 'name', 'gene_id', etc))");
-                System.out.println("targets - a file of gene names (one per line) for which the mean intron length will be calculated");
+                System.out.println("refSeq - the reference sequence for the gff file");
             }
             else
             {
                 String gffFile = args[1];
                 String attribute = args[2];
-                File refSeq = new File(args[2]);
+                File refSeq = new File(args[3]);
 
                 GFFFeatureStats gffs = new GFFFeatureStats();
                 FeatureList fl = gffs.getFeatureList(gffFile);
@@ -961,6 +964,34 @@ public class GenomeHelper
                 gffs.getMeanFeatureLength(fl, featureName);
             }
         }
+        else if (args[0].equalsIgnoreCase("GFFGetMeanFeatureLengthOfGeneIDs"))
+        {
+            if (args[1].equalsIgnoreCase("-h"))
+            {
+                System.out.println("Usage: GFFGetMeanFeatureLengthOfGeneIDs gffFile refSeq geneIds featureName attribute");
+                System.out.println("Calculates the mean length of any feature (third column) in a gff file.");
+                System.out.println("gffFile - the gff or gtf file in which the features are stored");
+                System.out.println("refSeq - the reference sequence for the gff file");
+                System.out.println("geneIds - a file of gene IDs, one per line. Must matuch up with the value given in the attribute parameter."
+                        + " E.g. gene_id=geneX, 'gene_id' would be the attribute and 'geneX' would be the name of a gene in the geneIds file");
+                System.out.println("featureName - the feature to be analysed (e.g. mRNA, exon, CDS, etc.)");
+                System.out.println("attribute - the name of the attribute that will identify the genes in the geneIds file (e.g. 'name', 'gene_id', 'ID', etc.))");
+            }
+            else
+            {
+                String gffFile = args[1];
+                File refSeq = new File(args[2]);
+                File geneIds = new File(args[3]);
+                String featureName = args[4];
+                String attribute = args[5];
+
+                GFFFeatureStats gffs = new GFFFeatureStats();
+                FeatureList fl = gffs.getFeatureList(gffFile);
+                HashMap<String, int[]> genomeMap = new HashMap<>(FastaFeatures.getSequenceAsIntArray(refSeq));
+                double result = gffs.getMeanFeatureLength(fl, genomeMap, featureName, geneIds, attribute);
+
+            }
+        }
         else if (args[0].equalsIgnoreCase("GFFGetMeanFeatureLengthWithSplicing"))
         {
             if (args[1].equalsIgnoreCase("-h"))
@@ -983,9 +1014,29 @@ public class GenomeHelper
                 gffs.getMeanFeatureLength(fl, genomeMap, featureName);
             }
         }
+        else if (args[0].equalsIgnoreCase("GFFGetStats"))
+        {
+            if (args[1].equalsIgnoreCase("-h"))
+            {
+                System.out.println("Usage: GFFGetStats gffFile refSeq featureName");
+                System.out.println("Calculates the mean length of any CDS, exons and introns in a gff file.");
+                System.out.println("gffFile - the gff or gtf file in which the features are stored");
+                System.out.println("refSeq - the reference sequence for the gff file");
+                System.out.println("attribute - the name of the attribute that will make the genes unique (e.g. 'name', 'gene_id', etc))");
+            }
+            else
+            {
+                String gffFile = args[1];
+                File refSeq = new File(args[2]);
+                String attribute = args[3];
+
+                GFFFeatureStats gffs = new GFFFeatureStats();
+                gffs.getStats(gffFile, refSeq, attribute);
+            }
+        }
         else
         {
-            System.err.println("Unknow program, use FastaUtils.jar -h for help");
+            System.err.println("Unknow program, use GenomeHelper.jar -h for help");
             System.exit(0);
         }
     }

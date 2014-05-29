@@ -44,7 +44,7 @@ public class FastaSubstringsTest
     }
 
     /**
-     * Test of seqFromCommandLine method, of class FastaSubstrings.
+     * Test of getSequence method, of class FastaSubstrings.
      */
     @Test
     public void testSeqFromCommandLine_3args() throws Exception
@@ -54,7 +54,7 @@ public class FastaSubstringsTest
         File outfile = new File("test/test_data_out/piculus_test_left.fasta");
         FastaSubstrings instance = new FastaSubstrings();
         //get the required sequence
-        instance.seqFromCommandLine(fastaIn, outfile, seqid);
+        instance.getSequence(fastaIn, outfile, seqid);
         LinkedHashMap<String, DNASequence> seqs = FastaReaderHelper.readFastaDNASequence(outfile);
         for (Map.Entry<String, DNASequence> entry : seqs.entrySet())
         {
@@ -68,7 +68,7 @@ public class FastaSubstringsTest
     }
 
     /**
-     * Test of seqFromCommandLine method, of class FastaSubstrings.
+     * Test of getSequence method, of class FastaSubstrings.
      */
     @Test
     public void testSeqFromCommandLine_5args() throws Exception
@@ -79,7 +79,7 @@ public class FastaSubstringsTest
         int start = 2;
         int end = 79;
         FastaSubstrings instance = new FastaSubstrings();
-        instance.seqFromCommandLine(fastaIn, outfile, seqid, start, end);
+        instance.getSubSequence(fastaIn, outfile, seqid, start, end);
         LinkedHashMap<String, DNASequence> seqs = FastaReaderHelper.readFastaDNASequence(outfile);
         for (Map.Entry<String, DNASequence> entry : seqs.entrySet())
         {

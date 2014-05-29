@@ -4,11 +4,9 @@
  */
 package uk.ac.tsl.etherington.genomehelper.fasta;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -19,17 +17,11 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import org.biojava.bio.symbol.Alphabet;
-import org.biojava.bio.symbol.AlphabetManager;
 
 import org.biojava3.core.sequence.DNASequence;
 import org.biojava3.core.sequence.io.FastaReaderHelper;
-import org.biojavax.SimpleNamespace;
-import org.biojavax.bio.seq.RichSequence;
-import org.biojavax.bio.seq.RichSequenceIterator;
 import org.jtr.transliterate.CharacterParseException;
 
 /**
@@ -49,7 +41,7 @@ public class FastaSubstrings
      * @throws FileNotFoundException
      * @throws Exception
      */
-    public void seqFromCommandLine(File fastaIn, File outfile, String seqid) throws FileNotFoundException, Exception
+    public void getSequence(File fastaIn, File outfile, String seqid) throws FileNotFoundException, Exception
     {
         boolean seqFound = false;
         Writer out = new BufferedWriter(new FileWriter(outfile));
@@ -88,7 +80,7 @@ public class FastaSubstrings
      * @throws FileNotFoundException
      * @throws Exception
      */
-    public void seqFromCommandLine(File fastaIn, File outfile, String seqid, int start, int end) throws FileNotFoundException, Exception
+    public void getSubSequence(File fastaIn, File outfile, String seqid, int start, int end) throws FileNotFoundException, Exception
     {
         boolean seqFound = false;
         int subseqLength = end - start + 1;

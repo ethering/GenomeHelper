@@ -63,7 +63,9 @@ public class FastaFeatures
         LinkedHashMap<String, DNASequence> genome = new LinkedHashMap<>();
         for (Map.Entry<String, DNASequence> entry : tempgenome.entrySet())
         {
+            //get the sequence name
             String seqName = entry.getKey();
+            //split the name on whitespace to get the sequence ID
             String newSeqName = seqName.split(" ")[0];
             DNASequence dna = entry.getValue();
             genome.put(newSeqName, dna);

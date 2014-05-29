@@ -227,13 +227,13 @@ public class GenomeHelper
                 FastaSubstrings ff = new FastaSubstrings();
                 if (args.length == 4)
                 {
-                    ff.seqFromCommandLine(multiFastaFile, outfile, seqid);
+                    ff.getSequence(multiFastaFile, outfile, seqid);
                 }
                 else if (args.length == 6)
                 {
                     start = Integer.parseInt(args[4]);
                     end = Integer.parseInt(args[5]);
-                    ff.seqFromCommandLine(multiFastaFile, outfile, seqid, start, end);
+                    ff.getSubSequence(multiFastaFile, outfile, seqid, start, end);
                 }
                 else
                 {

@@ -39,7 +39,7 @@ public class FastaFeatures
     {
 
         HashMap<String, Integer> seqLengths = new HashMap<>();
-        LinkedHashMap<String, DNASequence> seqs = FastaReaderHelper.readFastaDNASequence(refSeq);
+        LinkedHashMap<String, DNASequence> seqs = FastaReaderHelper.readFastaDNASequence(refSeq, true);
         
         for (Map.Entry<String, DNASequence> entry : seqs.entrySet())
         {

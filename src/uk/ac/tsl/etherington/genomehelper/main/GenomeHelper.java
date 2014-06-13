@@ -149,7 +149,7 @@ public class GenomeHelper
             {
                 File fastaFile = new File(args[1]);
                 double genomeLength = FastaFeatures.getGenomeSize(fastaFile);
-                System.out.println("Geneome length = " + genomeLength);
+                System.out.printf("Geneome length =  %.0f\n", genomeLength);
             }
         }
         else if (args[0].equalsIgnoreCase("FastaTranslate"))

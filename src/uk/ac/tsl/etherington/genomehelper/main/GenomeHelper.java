@@ -23,6 +23,7 @@ import uk.ac.tsl.etherington.genomehelper.fastq.FastqMotifFinder;
 import uk.ac.tsl.etherington.genomehelper.fastq.FastqParser;
 import uk.ac.tsl.etherington.genomehelper.fastq.FastqQC;
 import uk.ac.tsl.etherington.genomehelper.bam.MappedSamRecords;
+import uk.ac.tsl.etherington.genomehelper.fasta.FastaParser;
 import uk.ac.tsl.etherington.genomehelper.gff.GFFFeatureStats;
 
 /**
@@ -48,6 +49,7 @@ public class GenomeHelper
             System.out.println("Usage: FastaGetGCContent  fastafile");
             System.out.println("Usage: FastaGetSingleFromMultiFasta  infileoutfile  seqId subsequence_start (optional) subsequence_end (optional)");
             System.out.println("Usage: FastaSelectRandomSequences fastaIn numberOfRandomSeqs randomSeqsoutfile");
+            System.out.println("Usage: FastaToFastq fastaIn fastqOut");
 
             System.out.println("\nFastq-related programs:");
             System.out.println("Usage: FastqCompress fastqIn fastqOut.gz");
@@ -152,6 +154,27 @@ public class GenomeHelper
                 System.out.printf("Geneome length =  %.0f\n", genomeLength);
             }
         }
+        
+        else if (args[0].equalsIgnoreCase("fastaToFastq"))
+        {
+            if (args[1].equalsIgnoreCase("-h"))
+            {
+                System.out.println("Usage: FastaToFastq fastaIn fastqOut");
+                System.out.println("Changes fasta to fastq files. All quality scores will be '#");
+                System.out.println("fastqIn - fasta file to parse");
+                System.out.println("fastqOut - the fastq output file");
+            }
+            else
+            {
+                File fastaFile = new File(args[1]);
+                File fastqFile = new File(args[2]);
+                FastaParser fp = new FastaParser();
+                fp.fastaToFastq(fastaFile, fastqFile);
+            }
+        }
+        
+        
+        
         else if (args[0].equalsIgnoreCase("FastaTranslate"))
         {
             if (args[1].equalsIgnoreCase("-h"))

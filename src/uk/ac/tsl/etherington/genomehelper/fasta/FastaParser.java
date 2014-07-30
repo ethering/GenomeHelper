@@ -47,10 +47,10 @@ public class FastaParser
         while (iterator.hasNext())
         {
             RichSequence rec = iterator.nextRichSequence();
-            
-            String fastqSeq = rec.getName();
+            String fastqSeq = "@";
+            String name = rec.getName();
             String dna = rec.seqString();
-            fastqSeq = fastqSeq.concat(newLine + dna + newLine + "+" + newLine);
+            fastqSeq = fastqSeq.concat(name + newLine + dna + newLine + "+" + newLine);
             int len = rec.length();
             char[] chars = new char[len];
             Arrays.fill(chars, '#');

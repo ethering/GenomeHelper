@@ -517,7 +517,7 @@ public class GenomeHelper
         {
             if (args[1].equalsIgnoreCase("-h"))
             {
-                System.out.println("Usage: FastqSplit fastqIn");
+                System.out.println("Usage: FastqCountNucleotides fastqIn");
                 System.out.println("Counts the number of reads and combined read lengths for a given fastq file");
                 System.out.println("fastqIn - the fastq file to count");
             }

@@ -64,6 +64,7 @@ public class GenomeHelper
             System.out.println("Usage: FastqGetSingleEndSequencesFromFile listFile fastqFileIn fastqFileOut");
             System.out.println("Usage: FastqToFasta fastqIn fastaOut ");
             System.out.println("Usage: FastqTranslate fastqIn fastaOut includeOriginalDNASequence ('true' or 'false')");
+            System.out.println("Usage: FastqCountNucleotides fastqIn");
 
             System.out.println("\nQuality-control programs:");
             System.out.println("Usage: QCPairedReads fastqInLeft fastqInRight fastqLeftOut fastqrRightOut readLength format('sanger' or 'illumina') writeBadReads ('true' or 'false')");
@@ -511,6 +512,23 @@ public class GenomeHelper
                 fj.split(joinedFastqFile, leftReads, rightReads);
             }
         }
+        
+        else if (args[0].equalsIgnoreCase("FastqCountNucleotides"))
+        {
+            if (args[1].equalsIgnoreCase("-h"))
+            {
+                System.out.println("Usage: FastqSplit fastqIn");
+                System.out.println("Counts the number of reads and combined read lengths for a given fastq file");
+                System.out.println("fastqIn - the fastq file to count");
+            }
+            else
+            {
+                File fastqIn = new File(args[1]);
+                FastqQC fq = new FastqQC();
+                fq.getNucleotideCount(fastqIn);
+            }
+        }
+        
         else if (args[0].equalsIgnoreCase("QCVerifyPairedEndReads"))
         {
             if (args[1].equalsIgnoreCase("-h"))
@@ -700,7 +718,7 @@ public class GenomeHelper
                 String format = args[6];
                 if (args.length == 8)
                 {
-                    writeBadReads = Boolean.parseBoolean(args[7]);
+                    writeBadReads = Boolean.parseBoolean(args[7].toLowerCase());
                 }
 
 

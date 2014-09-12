@@ -71,7 +71,7 @@ public class FastqQC
             return false;
         }
     }
-
+    
     /**
      * Creates a FastqWriter for bad reads that fail Quality Control
      *
@@ -425,6 +425,30 @@ public class FastqQC
         FastqQualityFormat qual = detector.generateBestGuess(QualityEncodingDetector.FileContext.FASTQ);
         System.out.println("Qualaty encoding: " + qual.toString());
         return qual;
+    }
+    
+    
+    public void getNucleotideCount(File fastq)
+    {
+        FastqReader fq = new FastqReader(fastq);
+        double reads = 0;
+        double nucleotides = 0;
+        TreeMap<Integer, Integer> lengthDists = new TreeMap<>();
+
+        //create an interator for each file
+        Iterator it = fq.iterator();
+
+        while (it.hasNext())
+        {
+            //get the corresponding reads
+            FastqRecord seqRecord = (FastqRecord) it.next();
+            reads++;
+            //get the length of them
+            int seqLength = seqRecord.getReadString().length();
+            nucleotides+=seqLength;
+        }
+        System.out.println("No. of reads: "+reads);
+        System.out.println("Nucleotide count: "+nucleotides);
     }
 
     /**

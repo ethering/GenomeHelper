@@ -84,7 +84,7 @@ public class ContigPosition
 
     /**
      * Validates that the strand char is '+' or '-'
-     *
+     *@param strand the strand character to validate
      * @return returns true if the strand is '+' or '-'. Otherwise returns false
      */
     public final boolean validateNewStrand(char strand)

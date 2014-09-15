@@ -32,8 +32,8 @@ public class FastaFeatures
      * 
      * @param refSeq a multi-fasta file of DNA sequences
      * @return a HashMap of sequence names as keys with their sequence-lengths as values
-     * @throws FileNotFoundException
-     * @throws BioException 
+     * @throws FileNotFoundException exception
+     * @throws BioException exception
      */
     public static HashMap getSequenceLengths(File refSeq) throws FileNotFoundException, BioException, Exception
     {
@@ -54,7 +54,7 @@ public class FastaFeatures
      * Parses a multi-fasta file into a LinkedHashMap of sequence names and DNASequences
      * @param refSeq a multi-fasta file of DNA sequences
      * @return a LinkedHashMap of Accession numbers as keys with their DNA sequences as values. All sequence names will have any non-accession information stripped
-     * (e.g. ">gi|2033910|gb|AA381581.1|AA381581 EST94688 Activated T-cells I Homo sapiens" would become ">gi|2033910|gb|AA381581.1|AA381581")
+     * (e.g. "gi|2033910|gb|AA381581.1|AA381581 EST94688 Activated T-cells I Homo sapiens" would become "gi|2033910|gb|AA381581.1|AA381581")
      * @throws Exception 
      */
     public static LinkedHashMap<String, DNASequence> getParsedDNASequences(File refSeq) throws Exception

@@ -5,6 +5,8 @@
 package uk.ac.tsl.etherington.genomehelper.fastq;
 
 import java.io.File;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
@@ -427,28 +429,32 @@ public class FastqQC
         return qual;
     }
     
-    
-    public void getNucleotideCount(File fastq)
+    /**
+     * Counts the number of reads and their cumulative nucleotide content. 
+     * Useful for when a fastq file has varying read lengths, e.g. after trimming. 
+     * Prints the number of reads and their cumulative nucleotide content.
+     * 
+     * @param fastq the fastq-formatted sequence file to analyse
+     * @return nucleotides the combined number of nucleotides in a fastq file
+     */
+    public double getNucleotideCount(File fastq)
     {
         FastqReader fq = new FastqReader(fastq);
         double reads = 0;
         double nucleotides = 0;
-        TreeMap<Integer, Integer> lengthDists = new TreeMap<>();
 
-        //create an interator for each file
-        Iterator it = fq.iterator();
-
-        while (it.hasNext())
-        {
-            //get the corresponding reads
-            FastqRecord seqRecord = (FastqRecord) it.next();
+        for (FastqRecord seqRecord : fq) {
             reads++;
-            //get the length of them
             int seqLength = seqRecord.getReadString().length();
             nucleotides+=seqLength;
         }
-        System.out.println("No. of reads: "+reads);
-        System.out.println("Nucleotide count: "+nucleotides);
+        NumberFormat formatter = new DecimalFormat("###.#####");  
+
+        String readsString = formatter.format(reads);
+        String ntString = formatter.format(nucleotides);
+        System.out.println("No. of reads: "+readsString);
+        System.out.println("Nucleotide count: "+ntString);
+        return nucleotides;
     }
 
     /**
@@ -572,12 +578,12 @@ public class FastqQC
         System.out.println("Counted " + itCounter + " reads which were all in order");
     }
 
-    public static void main(String[] args)
-    {
-        FastqRecord newseq = new FastqRecord("@HWI-EAS396_0001:5:1:10468:1298#0/1", "CTTTTAGCAAGATATCTTATCCATTCCATCTTCGATCCACACAATTGAATCATGTAATTCTCCAATGTAACGCAAT",
-                "+HWI-EAS396_0001:5:1:10468:1298#0/1", "ddc_cfcccfa[ddab\\_a`cfffdffS_ffc^fYddcWe]`]X^bcbadcffccW^ae[ffffffcdffdfaWcc");
-        FastqQC instance = new FastqQC();
-        instance.guessFormat(newseq);
-
-    }
+//    public static void main(String[] args)
+//    {
+//        FastqRecord newseq = new FastqRecord("@HWI-EAS396_0001:5:1:10468:1298#0/1", "CTTTTAGCAAGATATCTTATCCATTCCATCTTCGATCCACACAATTGAATCATGTAATTCTCCAATGTAACGCAAT",
+//                "+HWI-EAS396_0001:5:1:10468:1298#0/1", "ddc_cfcccfa[ddab\\_a`cfffdffS_ffc^fYddcWe]`]X^bcbadcffccW^ae[ffffffcdffdfaWcc");
+//        FastqQC instance = new FastqQC();
+//        instance.guessFormat(newseq);
+//
+//    }
 }

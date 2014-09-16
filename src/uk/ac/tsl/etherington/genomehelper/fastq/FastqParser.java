@@ -9,6 +9,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.HashSet;
+import java.util.Iterator;
 import net.sf.picard.fastq.FastqReader;
 import net.sf.picard.fastq.FastqRecord;
 import net.sf.picard.fastq.FastqWriter;
@@ -26,8 +27,7 @@ import org.biojava3.data.sequence.FastaSequence;
  *
  * @author ethering
  */
-public class FastqParser
-{
+public class FastqParser {
 
     /**
      * prints the sequence id's from a fastq file
@@ -43,40 +43,34 @@ public class FastqParser
      * @throws FileNotFoundException
      * @throws IOException
      */
-    public HashSet readNamesToHashSet(File readNames) throws FileNotFoundException, IOException
-    {
+    public HashSet readNamesToHashSet(File readNames) throws FileNotFoundException, IOException {
         HashSet reads = new HashSet();
         BufferedReader reader = new BufferedReader(new FileReader(readNames));
         String motif;
-        while ((motif = reader.readLine()) != null)
-        {
+        while ((motif = reader.readLine()) != null) {
             reads.add(motif);
         }
         return reads;
     }
-    
-       /**
-     * 
+
+    /**
+     *
      * @param fastqReader
      * @param out
-     * @param mappedReads 
+     * @param mappedReads
      */
-    public static void writeRecords(FastqReader fastqReader, FastqWriter out, HashSet<String> mappedReads)
-    {
-        while (fastqReader.hasNext())
-        {
+    public static void writeRecords(FastqReader fastqReader, FastqWriter out, HashSet<String> mappedReads) {
+        while (fastqReader.hasNext()) {
             FastqRecord record = fastqReader.next();
             String readName = record.getReadHeader();
             int hashIndex = readName.indexOf(" ");
             readName = readName.substring(0, hashIndex);
-            if (mappedReads.contains(readName))
-            {
+            if (mappedReads.contains(readName)) {
                 out.write(record);
             }
         }
         out.close();
     }
-
 
     /**
      * Extract paired-end fastq sequences from a list of sequence names
@@ -90,27 +84,23 @@ public class FastqParser
      * @throws IOException
      */
     public void getPairedFastqSeqsFromHashSet(HashSet list, File fastqLeft, File fastqRight,
-            File fastqLeftOut, File fastqRightOut) throws FileNotFoundException, IOException
-    {
+            File fastqLeftOut, File fastqRightOut) throws FileNotFoundException, IOException {
         final FastqReader readerLeft = new FastqReader(fastqLeft);
         final FastqReader readerRight = new FastqReader(fastqRight);
-
 
         FastqWriterFactory writer = new FastqWriterFactory();
         FastqWriter outLeft = writer.newWriter(fastqLeftOut);
         FastqWriter outRight = writer.newWriter(fastqRightOut);
         int recordsfound = 0;
 
-        while (readerLeft.hasNext())
-        {
+        while (readerLeft.hasNext()) {
             FastqRecord recordLeft = readerLeft.next();
             FastqRecord recordRight = readerRight.next();
             String leftRead = recordLeft.getReadHeader();
 
             int hashIndex = leftRead.indexOf(" ");
             leftRead = leftRead.substring(0, hashIndex);
-            if (list.contains(leftRead))
-            {
+            if (list.contains(leftRead)) {
                 recordsfound++;
                 outLeft.write(recordLeft);
                 outRight.write(recordRight);
@@ -129,31 +119,25 @@ public class FastqParser
      * @param fastqFileOut the fastq file of found read names
      *
      */
-    public void getOneSideFastqSeqsFromList(File listFile, File fastqFileIn, File fastqFileOut) throws FileNotFoundException, IOException
-    {
+    public void getOneSideFastqSeqsFromList(File listFile, File fastqFileIn, File fastqFileOut) throws FileNotFoundException, IOException {
         HashSet<String> list = new HashSet<>();
         BufferedReader input = new BufferedReader(new FileReader(listFile));
 
         String line = null;
         //System.out.println("List:");
-        while ((line = input.readLine()) != null)
-        {
+        while ((line = input.readLine()) != null) {
             String[] array = line.split(" ");
             //if there's a space in the seq id then it will contain the 'handedness' of the read, e.g. 1:N:0:
-            if (array.length > 1)
-            {
+            if (array.length > 1) {
                 //split it up and get the sequence id
                 int hashIndex = line.indexOf(" ");
                 line = line.substring(0, hashIndex);
-                if (line.startsWith("@"))
-                {
+                if (line.startsWith("@")) {
                     //get rid of the @ sign
                     line = line.substring(1, line.length());
                 }
                 list.add(line);
-            }
-            else
-            {
+            } else {
                 list.add(line);
             }
 
@@ -166,16 +150,14 @@ public class FastqParser
 
         int recordsfound = 0;
         //System.out.println("Reads:");
-        while (reader.hasNext())
-        {
+        while (reader.hasNext()) {
             FastqRecord record = reader.next();
 
             String readName = record.getReadHeader();
             int hashIndex = readName.indexOf(" ");
             readName = readName.substring(0, hashIndex);
             //System.out.println(readName);
-            if (list.contains(readName))
-            {
+            if (list.contains(readName)) {
                 recordsfound++;
                 out.write(record);
             }
@@ -191,12 +173,10 @@ public class FastqParser
      * @param fastaOut the fasta output file
      * @throws IOException
      */
-    public void fastqToFastaFile(File fastqIn, File fastaOut) throws IOException
-    {
+    public void fastqToFastaFile(File fastqIn, File fastaOut) throws IOException {
         final FastqReader reader = new FastqReader(fastqIn);
         Writer out = new BufferedWriter(new FileWriter(fastaOut));
-        while (reader.hasNext())
-        {
+        while (reader.hasNext()) {
             FastqRecord record = reader.next();
             out.write(fastqToFastaSeq(record).toString());
         }
@@ -211,8 +191,7 @@ public class FastqParser
      * @return a FastaSequence object
      * @throws IOException
      */
-    public FastaSequence fastqToFastaSeq(FastqRecord record) throws IOException
-    {
+    public FastaSequence fastqToFastaSeq(FastqRecord record) throws IOException {
         String readName = record.getReadHeader();
         String seq = record.getReadString();
         FastaSequence fasta = new FastaSequence(readName, seq);
@@ -229,25 +208,21 @@ public class FastqParser
      * in the outfile
      * @throws IOException
      */
-    public void fastqToFastaSixFrameTranslation(File fastqIn, File fastaOut, boolean includeDNASeq) throws IOException
-    {
+    public void fastqToFastaSixFrameTranslation(File fastqIn, File fastaOut, boolean includeDNASeq) throws IOException {
         DNASequence dna;
         RNASequence rna;
         ProteinSequence aa;
         final FastqReader reader = new FastqReader(fastqIn);
         Writer out = new BufferedWriter(new FileWriter(fastaOut));
-        while (reader.hasNext())
-        {
+        while (reader.hasNext()) {
             FastqRecord record = reader.next();
             FastaSequence fasta = fastqToFastaSeq(record);
             dna = new DNASequence(fasta.getSequence());
             Frame[] frames = Frame.getAllFrames();
-            if (includeDNASeq == true)
-            {
+            if (includeDNASeq == true) {
                 out.write(fasta.toString());
             }
-            for (Frame frame : frames)
-            {
+            for (Frame frame : frames) {
                 rna = dna.getRNASequence(frame);
                 aa = rna.getProteinSequence();
                 String aaSeq = (">" + record.getReadHeader() + "_" + (frame.ordinal() + 1) + "\n" + aa.toString() + "\n");
@@ -255,5 +230,28 @@ public class FastqParser
             }
         }
         out.close();
+    }
+
+    
+    /**
+     * Finds kmer or subsequence in fastq file and prints to STDOUT
+     * @param fastqFileIn the fastq file to search
+     * @param kmer the kmer or subsequence to locate
+     */
+    public void findKmerInReads(File fastqFileIn, String kmer) 
+    {
+        FastqReader fq = new FastqReader(fastqFileIn);
+
+        for (FastqRecord seqRecord : fq) 
+        {
+            String readString = seqRecord.getReadString();
+            boolean containsKmer = readString.toLowerCase().contains(kmer);
+            if (containsKmer)
+            {
+                System.out.println(seqRecord.getReadHeader());
+                System.out.println(readString);
+            }
+        }
+
     }
 }

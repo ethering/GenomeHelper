@@ -65,6 +65,7 @@ public class GenomeHelper
             System.out.println("Usage: FastqToFasta fastqIn fastaOut ");
             System.out.println("Usage: FastqTranslate fastqIn fastaOut includeOriginalDNASequence ('true' or 'false')");
             System.out.println("Usage: FastqCountNucleotides fastqIn");
+            System.out.println("Usage: FastqFindKmer fastqIn kmer");
 
             System.out.println("\nQuality-control programs:");
             System.out.println("Usage: QCPairedReads fastqInLeft fastqInRight fastqLeftOut fastqrRightOut readLength format('sanger' or 'illumina') writeBadReads ('true' or 'false')");
@@ -512,7 +513,26 @@ public class GenomeHelper
                 fj.split(joinedFastqFile, leftReads, rightReads);
             }
         }
+        else if (args[0].equalsIgnoreCase("FastqFindKmer"))
+        {
+            if (args[1].equalsIgnoreCase("-h"))
+            {
+                System.out.println("Usage: FastqFindKmer fastqIn kmer");
+                System.out.println("Finds reads with a given kmer or sub-sequence");
+                System.out.println("fastqin - the reads to search");
+                System.out.println("kmer - the kmer or subsequence to search for");
+                System.out.println("Prints read names and sequence to STDOUT");
+            }
+            else
+            {
+                File fastqin = new File(args[1]);
+                String kmer = args[2];
+                FastqParser fp = new FastqParser();
+                fp.findKmerInReads(fastqin, kmer);
+            }
+        }
         
+                
         else if (args[0].equalsIgnoreCase("FastqCountNucleotides"))
         {
             if (args[1].equalsIgnoreCase("-h"))

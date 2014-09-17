@@ -68,7 +68,6 @@ public class GenomeHelper
             System.out.println("Usage: FastqTranslate fastqIn fastaOut includeOriginalDNASequence ('true' or 'false')");
             System.out.println("Usage: FastqCountNucleotides fastqIn");
             System.out.println("Usage: FastqFindKmer fastqIn kmer");
-            System.out.println("Usage: FastqRemoveKmerReads fastqInLeft fastqInRight fastqLeftOut fastqrRightOut kmerFile");
 
             System.out.println("\nQuality-control programs:");
             System.out.println("Usage: QCPairedReads fastqInLeft fastqInRight fastqLeftOut fastqrRightOut readLength format('sanger' or 'illumina') writeBadReads ('true' or 'false')");
@@ -78,6 +77,10 @@ public class GenomeHelper
             System.out.println("Usage: QCJoinedReads fastqIn fastqLeftOut fastqrRightOut readLength format('sanger' or 'illumina') writeBadReads ('true' or 'false')");
             System.out.println("Usage: QCVerifyReads fastqIn");
             System.out.println("Usage: QCVerifyPairedEndReads fastqLeft fastqRight");
+            System.out.println("Usage: QCRemoveKmerPairedReads fastqInLeft fastqInRight fastqLeftOut fastqrRightOut kmerFile");
+            System.out.println("Usage: QCRemoveKmerSingleReads fastqIn fastqOut kmerFile");
+
+            
 
             System.out.println("\nSAM/BAM-related programs:");
             System.out.println("Usage: BAMGetMappedPairedReads bamfile fastqInLeft fastqInRight fastqOutLeft fastqOutRight");
@@ -681,11 +684,11 @@ public class GenomeHelper
                 FastqQC check = new FastqQC();
                 check.qcPairedReads(fastqInLeft, fastqInRight, fastqOutLeft, fastqOutRight, readLength, format, writeBadReads);
             }
-        } else if (args[0].equalsIgnoreCase("FastqRemoveKmerReads"))
+        } else if (args[0].equalsIgnoreCase("QCRemoveKmerPairedReads"))
         {
             if (args[1].equalsIgnoreCase("-h"))
             {
-                System.out.println("Usage: FastqRemoveKmerReads fastqInLeft fastqInRight fastqOutLeft fastqOutRight kmerFile");
+                System.out.println("Usage: QCRemoveKmerPairedReads fastqInLeft fastqInRight fastqOutLeft fastqOutRight kmerFile");
                 System.out.println("Removes pairs of reads where any number of provided kmers is found in either read");
                 System.out.println("fastqInLeft - the left-handed reads to filter");
                 System.out.println("fastqInRight - the right-handed reads to filter");
@@ -709,9 +712,37 @@ public class GenomeHelper
                     kmers.add(line);
                 }
                 br.close();
-                check.removeReadsWithKmers(fastqInLeft, fastqInRight, fastqOutLeft, fastqOutRight, kmers);
+                check.removePairdReadsWithKmers(fastqInLeft, fastqInRight, fastqOutLeft, fastqOutRight, kmers);
             }
-        } else if (args[0].equalsIgnoreCase("BAMGetBothMappedPairedRead"))
+        } 
+        else if (args[0].equalsIgnoreCase("QCRemoveKmerSingleReads"))
+        {
+            if (args[1].equalsIgnoreCase("-h"))
+            {
+                System.out.println("Usage: QCRemoveKmerSingleReads fastqIn  fastqOut  kmerFile");
+                System.out.println("Removes single reads where any number of provided kmers is found in either read");
+                System.out.println("fastqIn - the  reads to filter");
+                System.out.println("fastqOut - the filtered  reads");
+                System.out.println("kmerFile - a file containg the kmers to filter. One kmer per line");
+
+            } else
+            {
+                File fastqIn = new File(args[1]);
+                File fastqOUt = new File(args[2]);
+                File kmerFile = new File(args[3]);
+                ArrayList<String> kmers = new ArrayList<>();
+                FastqQC check = new FastqQC();
+                BufferedReader br = new BufferedReader(new FileReader(kmerFile));
+                String line;
+                while ((line = br.readLine()) != null)
+                {
+                    kmers.add(line);
+                }
+                br.close();
+                check.removeSingleReadsWithKmers(fastqIn,fastqOUt, kmers);
+            }
+        }
+        else if (args[0].equalsIgnoreCase("BAMGetBothMappedPairedRead"))
         {
             if (args[1].equalsIgnoreCase("-h"))
             {

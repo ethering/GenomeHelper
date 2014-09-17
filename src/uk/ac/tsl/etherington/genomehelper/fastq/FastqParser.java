@@ -245,7 +245,7 @@ public class FastqParser {
         for (FastqRecord seqRecord : fq) 
         {
             String readString = seqRecord.getReadString();
-            boolean containsKmer = readString.toLowerCase().contains(kmer);
+            boolean containsKmer = readString.toLowerCase().contains(kmer.toLowerCase());
             if (containsKmer)
             {
                 System.out.println(seqRecord.getReadHeader());

@@ -241,7 +241,7 @@ public class FastqParser {
     public void findKmerInReads(File fastqFileIn, String kmer) 
     {
         FastqReader fq = new FastqReader(fastqFileIn);
-
+        int found = 0;
         for (FastqRecord seqRecord : fq) 
         {
             String readString = seqRecord.getReadString();
@@ -250,8 +250,9 @@ public class FastqParser {
             {
                 System.out.println(seqRecord.getReadHeader());
                 System.out.println(readString);
+                found++;
             }
         }
-
+        System.out.println("Found "+ found + " occurances");
     }
 }

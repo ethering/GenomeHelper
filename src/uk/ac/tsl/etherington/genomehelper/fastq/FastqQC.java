@@ -617,8 +617,8 @@ public class FastqQC
 
             for (String kmer : kmers)
             {
-                leftGood = leftSeq.toLowerCase().contains(kmer.toLowerCase());
-                rightGood = rightSeq.toLowerCase().contains(kmer.toLowerCase());
+                leftGood = !leftSeq.toLowerCase().contains(kmer.toLowerCase());
+                rightGood = !rightSeq.toLowerCase().contains(kmer.toLowerCase());
             }
 
             if (leftGood && rightGood)
@@ -657,7 +657,7 @@ public class FastqQC
             boolean leftGood = true;
             for (String kmer : kmers)
             {
-                leftGood = leftSeq.toLowerCase().contains(kmer.toLowerCase());
+                leftGood = !leftSeq.toLowerCase().contains(kmer.toLowerCase());
             }
 
             if (leftGood)

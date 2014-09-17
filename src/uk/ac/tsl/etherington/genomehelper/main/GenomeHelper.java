@@ -4,15 +4,19 @@
  */
 package uk.ac.tsl.etherington.genomehelper.main;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import org.biojava3.genome.parsers.gff.FeatureList;
 import org.jtr.transliterate.CharacterParseException;
+import uk.ac.tsl.etherington.genomehelper.bam.MappedSamRecords;
 import uk.ac.tsl.etherington.genomehelper.fasta.FastaFeatures;
 import uk.ac.tsl.etherington.genomehelper.fasta.FastaMotifFinder;
+import uk.ac.tsl.etherington.genomehelper.fasta.FastaParser;
 import uk.ac.tsl.etherington.genomehelper.fasta.FastaSubstrings;
 import uk.ac.tsl.etherington.genomehelper.fasta.FastaTranslator;
 import uk.ac.tsl.etherington.genomehelper.fasta.RandomFasta;
@@ -22,8 +26,6 @@ import uk.ac.tsl.etherington.genomehelper.fastq.FastqJoiner;
 import uk.ac.tsl.etherington.genomehelper.fastq.FastqMotifFinder;
 import uk.ac.tsl.etherington.genomehelper.fastq.FastqParser;
 import uk.ac.tsl.etherington.genomehelper.fastq.FastqQC;
-import uk.ac.tsl.etherington.genomehelper.bam.MappedSamRecords;
-import uk.ac.tsl.etherington.genomehelper.fasta.FastaParser;
 import uk.ac.tsl.etherington.genomehelper.gff.GFFFeatureStats;
 
 /**
@@ -66,6 +68,7 @@ public class GenomeHelper
             System.out.println("Usage: FastqTranslate fastqIn fastaOut includeOriginalDNASequence ('true' or 'false')");
             System.out.println("Usage: FastqCountNucleotides fastqIn");
             System.out.println("Usage: FastqFindKmer fastqIn kmer");
+            System.out.println("Usage: FastqRemoveKmerReads fastqInLeft fastqInRight fastqLeftOut fastqrRightOut kmerFile");
 
             System.out.println("\nQuality-control programs:");
             System.out.println("Usage: QCPairedReads fastqInLeft fastqInRight fastqLeftOut fastqrRightOut readLength format('sanger' or 'illumina') writeBadReads ('true' or 'false')");
@@ -95,8 +98,7 @@ public class GenomeHelper
             System.out.println("Usage: GFFCalculateCodingRegion gffFile refSeq attribute");
             System.out.println("Usage: GFFGetStats gffFile refSeq attribute");
 
-        }
-        else if (args[0].equalsIgnoreCase("FastaMotifFinder"))
+        } else if (args[0].equalsIgnoreCase("FastaMotifFinder"))
         {
             if (args[1].equalsIgnoreCase("-h"))
             {
@@ -107,8 +109,7 @@ public class GenomeHelper
                 System.out.println("motifCounts - a tab-delimited file of the occurrence of each pattern");
                 System.out.println("proteinCounts - a tab-delimited file of the occurrence of each pattern when translated into ammino acids");
                 System.out.println("minCount - the minimum number of times a motif must be found to be included in the results\n");
-            }
-            else
+            } else
             {
                 File fastaFile = new File(args[1]);
                 String searchMotif = args[2];
@@ -118,8 +119,7 @@ public class GenomeHelper
                 FastaMotifFinder fmf = new FastaMotifFinder();
                 fmf.findMatches(fastaFile, searchMotif, motifCounts, aaMotifCounts, minCount);
             }
-        }
-        else if (args[0].equalsIgnoreCase("FastaGetLongestSubstring"))
+        } else if (args[0].equalsIgnoreCase("FastaGetLongestSubstring"))
         {
             if (args[1].equalsIgnoreCase("-h"))
             {
@@ -127,8 +127,7 @@ public class GenomeHelper
                 System.out.println("Takes a list of fasta files (more than one) and finds the longest subsequences that are common to all files.");
                 System.out.println("<fasta_files> - two or more (multi)-fasta files.");
                 System.out.println("outfile - the last file path provided. Will contain the longest subsequences in the fasta files common to all input files.");
-            }
-            else
+            } else
             {
                 ArrayList<String> al = new ArrayList<>();
                 for (int i = 1; i < args.length - 1; i++)
@@ -140,24 +139,20 @@ public class GenomeHelper
                 FastaSubstrings fs = new FastaSubstrings();
                 fs.findLongestCommonSequences(al, outfile);
             }
-        }
-        else if (args[0].equalsIgnoreCase("FastaGetGenomeLength"))
+        } else if (args[0].equalsIgnoreCase("FastaGetGenomeLength"))
         {
             if (args[1].equalsIgnoreCase("-h"))
             {
                 System.out.println("Usage: FastaGetGenomeLength fastaFile");
                 System.out.println("Calculates the combined length, in nucleotides, of a file of fasta sequences");
                 System.out.println("fastaFile - fasta file to calculated the length");
-            }
-            else
+            } else
             {
                 File fastaFile = new File(args[1]);
                 double genomeLength = FastaFeatures.getGenomeSize(fastaFile);
                 System.out.printf("Geneome length =  %.0f\n", genomeLength);
             }
-        }
-        
-        else if (args[0].equalsIgnoreCase("fastaToFastq"))
+        } else if (args[0].equalsIgnoreCase("fastaToFastq"))
         {
             if (args[1].equalsIgnoreCase("-h"))
             {
@@ -165,19 +160,14 @@ public class GenomeHelper
                 System.out.println("Changes fasta to fastq files. All quality scores will be '#");
                 System.out.println("fastqIn - fasta file to parse");
                 System.out.println("fastqOut - the fastq output file");
-            }
-            else
+            } else
             {
                 File fastaFile = new File(args[1]);
                 File fastqFile = new File(args[2]);
                 FastaParser fp = new FastaParser();
                 fp.fastaToFastq(fastaFile, fastqFile);
             }
-        }
-        
-        
-        
-        else if (args[0].equalsIgnoreCase("FastaTranslate"))
+        } else if (args[0].equalsIgnoreCase("FastaTranslate"))
         {
             if (args[1].equalsIgnoreCase("-h"))
             {
@@ -185,31 +175,27 @@ public class GenomeHelper
                 System.out.println("Provides a six-frame translation of a fasta file");
                 System.out.println("infile - the fasta file to translate");
                 System.out.println("outfile - a fasta file containing six traslated protein sequences (1 for each reading frame) for every DNA sequence in the infile.");
-            }
-            else
+            } else
             {
                 File infile = new File(args[1]);
                 File outfile = new File(args[2]);
                 FastaTranslator ft = new FastaTranslator();
                 ft.translateMultiFasta(infile, outfile);
             }
-        }
-        else if (args[0].equalsIgnoreCase("FastaGetGCContent"))
+        } else if (args[0].equalsIgnoreCase("FastaGetGCContent"))
         {
             if (args[1].equalsIgnoreCase("-h"))
             {
                 System.out.println("Usage: FastaGetGCContent fastaFile ");
                 System.out.println("Calculates the GC content of a fasta file");
                 System.out.println("fastaFile - the fasta file from which GC content will be calculated");
-            }
-            else
+            } else
             {
                 File fastaFile = new File(args[1]);
                 FastaFeatures ff = new FastaFeatures();
                 ff.getGCContent(fastaFile);
             }
-        }
-        else if (args[0].equalsIgnoreCase("FastaSelectRandomSequences"))
+        } else if (args[0].equalsIgnoreCase("FastaSelectRandomSequences"))
         {
             if (args[1].equalsIgnoreCase("-h"))
             {
@@ -218,8 +204,7 @@ public class GenomeHelper
                 System.out.println("infile - the multi-asta file from which to select random sequences");
                 System.out.println("noRandSeqs - the number of random sequences to select");
                 System.out.println("outfile - the file containing the random sequences");
-            }
-            else
+            } else
             {
                 File infile = new File(args[1]);
                 int noRandSeqs = Integer.parseInt(args[2]);
@@ -227,8 +212,7 @@ public class GenomeHelper
                 RandomFasta rf = new RandomFasta();
                 rf.selectRandomSequences(infile, noRandSeqs, outfile);
             }
-        }
-        else if (args[0].equalsIgnoreCase("FastaGetSingleFromMultiFasta"))
+        } else if (args[0].equalsIgnoreCase("FastaGetSingleFromMultiFasta"))
         {
             if (args[1].equalsIgnoreCase("-h"))
             {
@@ -241,8 +225,7 @@ public class GenomeHelper
                 System.out.println("seqid - the accession number of sequence id of the fasta sequence to extract");
                 System.out.println("(optional) start - the 1-based start co-ordinate for a sub-sequence");
                 System.out.println("(optional) end - the 1-based end co-ordinate for a sub-sequence");
-            }
-            else
+            } else
             {
                 File multiFastaFile = new File(args[1]);
                 File outfile = new File(args[2]);
@@ -253,20 +236,17 @@ public class GenomeHelper
                 if (args.length == 4)
                 {
                     ff.getSequence(multiFastaFile, outfile, seqid);
-                }
-                else if (args.length == 6)
+                } else if (args.length == 6)
                 {
                     start = Integer.parseInt(args[4]);
                     end = Integer.parseInt(args[5]);
                     ff.getSubSequence(multiFastaFile, outfile, seqid, start, end);
-                }
-                else
+                } else
                 {
                     System.err.println("Wrong number of paramters try GenomeHelper.jar FastaGetSingleFromMultiFasta -h for help");
                 }
             }
-        }
-        else if (args[0].equalsIgnoreCase("FastqTranslate"))
+        } else if (args[0].equalsIgnoreCase("FastqTranslate"))
         {
             if (args[1].equalsIgnoreCase("-h"))
             {
@@ -275,8 +255,7 @@ public class GenomeHelper
                 System.out.println("infile - the fasta file to translate");
                 System.out.println("outfile - a fasta file containing six traslated protein sequences (1 for each reading frame) for every DNA sequence in the infile.");
                 System.out.println("includeDNA (optional) - a boolean ('true' or 'false' (default)). If set to 'true' the original DNA sequence will be included in outfile. If set to 'false' (default) no DNA sequence will be included.");
-            }
-            else
+            } else
             {
                 boolean includeDNA = false;
                 File in = new File(args[1]);
@@ -289,8 +268,7 @@ public class GenomeHelper
                 FastqParser fp = new FastqParser();
                 fp.fastqToFastaSixFrameTranslation(in, out, includeDNA);
             }
-        }
-        else if (args[0].equalsIgnoreCase("FastqMotifFinder"))
+        } else if (args[0].equalsIgnoreCase("FastqMotifFinder"))
         {
             if (args[1].equalsIgnoreCase("-h"))
             {
@@ -301,8 +279,7 @@ public class GenomeHelper
                 System.out.println("motifCounts - a tab-delimited file of the occurrence of each pattern");
                 System.out.println("proteinCounts - a tab-delimited file of the occurrence of each pattern when translated into ammino acids");
                 System.out.println("minCount - the minimum number of times a motif must be found to be included in the results\n");
-            }
-            else
+            } else
             {
                 File fastqFile = new File(args[1]);
                 String searchMotif = args[2];
@@ -312,8 +289,7 @@ public class GenomeHelper
                 FastqMotifFinder fmf = new FastqMotifFinder();
                 fmf.findMatches(fastqFile, searchMotif, motifCounts, aaMotifCounts, minCount);
             }
-        }
-        else if (args[0].equalsIgnoreCase("FastqToFasta"))
+        } else if (args[0].equalsIgnoreCase("FastqToFasta"))
         {
             if (args[1].equalsIgnoreCase("-h"))
             {
@@ -321,16 +297,14 @@ public class GenomeHelper
                 System.out.println("Transforms a fastq dataset into a fasta-formatted dataset");
                 System.out.println("fastq - the fastq which to transform into fasta");
                 System.out.println("fasta - the resulting fasta file");
-            }
-            else
+            } else
             {
                 File fastq = new File(args[1]);
                 File fasta = new File(args[2]);
                 FastqParser fp = new FastqParser();
                 fp.fastqToFastaFile(fastq, fasta);
             }
-        }
-        else if (args[0].equalsIgnoreCase("FastqGetSingleEndSequencesFromFile"))
+        } else if (args[0].equalsIgnoreCase("FastqGetSingleEndSequencesFromFile"))
         {
             if (args[1].equalsIgnoreCase("-h"))
             {
@@ -339,8 +313,7 @@ public class GenomeHelper
                 System.out.println("readNames - a file containing a list of sequence names to extract from a single-end dataset (each sequence name on a seperate line)");
                 System.out.println("in - the reads from which to extract the subsetted sequences");
                 System.out.println("out - the subsetted reads");
-            }
-            else
+            } else
             {
                 File listFile = new File(args[1]);
                 File in = new File(args[2]);
@@ -348,8 +321,7 @@ public class GenomeHelper
                 FastqParser fp = new FastqParser();
                 fp.getOneSideFastqSeqsFromList(listFile, in, out);
             }
-        }
-        else if (args[0].equalsIgnoreCase("FastqGetPairedEndSequencesFromFile"))
+        } else if (args[0].equalsIgnoreCase("FastqGetPairedEndSequencesFromFile"))
         {
             if (args[1].equalsIgnoreCase("-h"))
             {
@@ -360,8 +332,7 @@ public class GenomeHelper
                 System.out.println("rightIn - the right-handed reads from which to extract the subseted sequences");
                 System.out.println("leftOut - the sub-setted left-handed reads");
                 System.out.println("rightOut - the sub-setted right-handed reads");
-            }
-            else
+            } else
             {
                 File listFile = new File(args[1]);
                 File leftIn = new File(args[2]);
@@ -372,8 +343,7 @@ public class GenomeHelper
                 HashSet readNames = fp.readNamesToHashSet(listFile);
                 fp.getPairedFastqSeqsFromHashSet(readNames, leftIn, rightIn, leftOut, rightOut);
             }
-        }
-        else if (args[0].equalsIgnoreCase("FastqGetPairedEndSequencesWithMotifMatch"))
+        } else if (args[0].equalsIgnoreCase("FastqGetPairedEndSequencesWithMotifMatch"))
         {
             if (args[1].equalsIgnoreCase("-h"))
             {
@@ -382,8 +352,7 @@ public class GenomeHelper
                 System.out.println("fastqIn - an interlaced file of paired-end reads");
                 System.out.println("searchPattern - the sequenced motif to search for");
                 System.out.println("matchingFastq - the paired-end fastq files in which at least one of the pair contains the searchPattern");
-            }
-            else
+            } else
             {
                 File fastqIn = new File(args[1]);
                 String searchPattern = args[2];
@@ -391,8 +360,7 @@ public class GenomeHelper
                 FastqMotifFinder fmf = new FastqMotifFinder();
                 fmf.getPEFastqReadsFromMotif(fastqIn, searchPattern, matchingFastq);
             }
-        }
-        else if (args[0].equalsIgnoreCase("FastqCompress"))
+        } else if (args[0].equalsIgnoreCase("FastqCompress"))
         {
             if (args[1].equalsIgnoreCase("-h"))
             {
@@ -400,16 +368,14 @@ public class GenomeHelper
                 System.out.println("Compresses an input fastq file");
                 System.out.println("fastq - the fastq file to compress");
                 System.out.println("compFastqOut - the compressed fastq file");
-            }
-            else
+            } else
             {
                 File fastq = new File(args[1]);
                 File compFastqOut = new File(args[2]);
                 FastqCompression comp = new FastqCompression();
                 comp.compressFastq(fastq, compFastqOut);
             }
-        }
-        else if (args[0].equalsIgnoreCase("FastqInterlace"))
+        } else if (args[0].equalsIgnoreCase("FastqInterlace"))
         {
             if (args[1].equalsIgnoreCase("-h"))
             {
@@ -420,8 +386,7 @@ public class GenomeHelper
                 System.out.println("rightReads - the right-handed pair of a paired-end fastq file");
                 System.out.println("interlacedFastqFile - the output interlaced pairs (in fastq format)");
                 System.out.println("singlesFile - singleton fastq files without a pair");
-            }
-            else
+            } else
             {
                 File leftReads = new File(args[1]);
                 File rightReads = new File(args[2]);
@@ -430,8 +395,7 @@ public class GenomeHelper
                 FastqInterlacer ft = new FastqInterlacer();
                 ft.interlace(leftReads, rightReads, interlacedFastqFile, singlesFile);
             }
-        }
-        else if (args[0].equalsIgnoreCase("FastqInterlaceKnownPairs"))
+        } else if (args[0].equalsIgnoreCase("FastqInterlaceKnownPairs"))
         {
             if (args[1].equalsIgnoreCase("-h"))
             {
@@ -440,8 +404,7 @@ public class GenomeHelper
                 System.out.println("leftReads - the left-handed pair of a paired-end fastq file");
                 System.out.println("rightReads - the right-handed pair of a paired-end fastq file");
                 System.out.println("interlacedFastqFile - the output interlaced fastq file");
-            }
-            else
+            } else
             {
                 File leftReads = new File(args[1]);
                 File rightReads = new File(args[2]);
@@ -449,8 +412,7 @@ public class GenomeHelper
                 FastqInterlacer ft = new FastqInterlacer();
                 ft.interlaceKnownPairs(leftReads, rightReads, interlacedFastqFile);
             }
-        }
-        else if (args[0].equalsIgnoreCase("FastqDeinterlace"))
+        } else if (args[0].equalsIgnoreCase("FastqDeinterlace"))
         {
             if (args[1].equalsIgnoreCase("-h"))
             {
@@ -461,8 +423,7 @@ public class GenomeHelper
                 System.out.println("rightReads - the right-handed pair of a paired-end fastq file");
                 System.out.println("fastqJoinedFile - the output joined pairs (in fastq format)");
                 System.out.println("fastqSinglesFile - singleton fastq files without a pair");
-            }
-            else
+            } else
             {
                 File interlacedFastqFile = new File(args[1]);
                 File leftReads = new File(args[2]);
@@ -473,8 +434,7 @@ public class GenomeHelper
                 FastqInterlacer ft = new FastqInterlacer();
                 ft.deinterlace(interlacedFastqFile, leftReads, rightReads, leftSinglesFile, rightSinglesFile);
             }
-        }
-        else if (args[0].equalsIgnoreCase("FastqJoin"))
+        } else if (args[0].equalsIgnoreCase("FastqJoin"))
         {
             if (args[1].equalsIgnoreCase("-h"))
             {
@@ -484,8 +444,7 @@ public class GenomeHelper
                 System.out.println("rightReads - the right-handed pair of a paired-end fastq file");
                 System.out.println("fastqJoinedFile - the output joined pairs (in fastq format)");
                 System.out.println("fastqSinglesFile - singleton fastq files without a pair");
-            }
-            else
+            } else
             {
                 File leftReads = new File(args[1]);
                 File rightReads = new File(args[2]);
@@ -494,8 +453,7 @@ public class GenomeHelper
                 FastqJoiner fj = new FastqJoiner();
                 fj.join(leftReads, rightReads, fastqJoinedFile, fastqSinglesFile);
             }
-        }
-        else if (args[0].equalsIgnoreCase("FastqSplit"))
+        } else if (args[0].equalsIgnoreCase("FastqSplit"))
         {
             if (args[1].equalsIgnoreCase("-h"))
             {
@@ -503,8 +461,7 @@ public class GenomeHelper
                 System.out.println("Splits a single fastq file which contains paired-end reads where each read pair is joined");
                 System.out.println("leftReads - the split left-handed reads");
                 System.out.println("rightReads - the split right-handed reads");
-            }
-            else
+            } else
             {
                 File joinedFastqFile = new File(args[1]);
                 File leftReads = new File(args[2]);
@@ -512,8 +469,7 @@ public class GenomeHelper
                 FastqJoiner fj = new FastqJoiner();
                 fj.split(joinedFastqFile, leftReads, rightReads);
             }
-        }
-        else if (args[0].equalsIgnoreCase("FastqFindKmer"))
+        } else if (args[0].equalsIgnoreCase("FastqFindKmer"))
         {
             if (args[1].equalsIgnoreCase("-h"))
             {
@@ -522,34 +478,27 @@ public class GenomeHelper
                 System.out.println("fastqin - the reads to search");
                 System.out.println("kmer - the kmer or subsequence to search for");
                 System.out.println("Prints read names and sequence to STDOUT");
-            }
-            else
+            } else
             {
                 File fastqin = new File(args[1]);
                 String kmer = args[2];
                 FastqParser fp = new FastqParser();
                 fp.findKmerInReads(fastqin, kmer);
             }
-        }
-        
-                
-        else if (args[0].equalsIgnoreCase("FastqCountNucleotides"))
+        } else if (args[0].equalsIgnoreCase("FastqCountNucleotides"))
         {
             if (args[1].equalsIgnoreCase("-h"))
             {
                 System.out.println("Usage: FastqCountNucleotides fastqIn");
                 System.out.println("Counts the number of reads and combined read lengths for a given fastq file");
                 System.out.println("fastqIn - the fastq file to count");
-            }
-            else
+            } else
             {
                 File fastqIn = new File(args[1]);
                 FastqQC fq = new FastqQC();
                 fq.getNucleotideCount(fastqIn);
             }
-        }
-        
-        else if (args[0].equalsIgnoreCase("QCVerifyPairedEndReads"))
+        } else if (args[0].equalsIgnoreCase("QCVerifyPairedEndReads"))
         {
             if (args[1].equalsIgnoreCase("-h"))
             {
@@ -557,32 +506,28 @@ public class GenomeHelper
                 System.out.println("Verifies that two files of left/right paired-end reads are in order and contain no fastq format errors .");
                 System.out.println("fastqInLeft - the left-handed reads to verify");
                 System.out.println("fastqInRight - the right-handed reads to verify");
-            }
-            else
+            } else
             {
                 File fastqInLeft = new File(args[1]);
                 File fastqInRight = new File(args[2]);
                 FastqQC check = new FastqQC();
                 check.veryfiyPairedReads(fastqInLeft, fastqInRight);
             }
-        }
-        else if (args[0].equalsIgnoreCase("QCVerifyReads"))
+        } else if (args[0].equalsIgnoreCase("QCVerifyReads"))
         {
             if (args[1].equalsIgnoreCase("-h"))
             {
                 System.out.println("Usage: QCVerifyReads fastqIn ");
                 System.out.println("Checks a fastq file to verify that all the reads can be parsed into a FastqRecord. Errors should be thrown if any of the reads are not formatted correctly.");
                 System.out.println("fastqIn - the fastq file to verify");
-            }
-            else
+            } else
             {
                 File fastqIn = new File(args[1]);
 
                 FastqQC check = new FastqQC();
                 check.veryfiyReads(fastqIn);
             }
-        }
-        else if (args[0].equalsIgnoreCase("QCJoinedReads"))
+        } else if (args[0].equalsIgnoreCase("QCJoinedReads"))
         {
             if (args[1].equalsIgnoreCase("-h"))
             {
@@ -597,8 +542,7 @@ public class GenomeHelper
                         + " They will automatically be reformated into sanger-quality scores.");
                 System.out.println("writeBadReads (optional) - a boolean ('true' or 'false' (default)). If set to 'true' the paired-reads failing QC"
                         + " will be written to a 'bad reads' file (bad reads file name will start with 'bad_'");
-            }
-            else
+            } else
             {
                 File fastqIn = new File(args[1]);
                 File fastqOutLeft = new File(args[2]);
@@ -611,8 +555,7 @@ public class GenomeHelper
                 FastqQC check = new FastqQC();
                 check.qcJoinedReads(fastqIn, fastqOutLeft, fastqOutRight, readLength, format, writeBadReads);
             }
-        }
-        else if (args[0].equalsIgnoreCase("QCInterlacedReadsToPairs"))
+        } else if (args[0].equalsIgnoreCase("QCInterlacedReadsToPairs"))
         {
             if (args[1].equalsIgnoreCase("-h"))
             {
@@ -627,8 +570,7 @@ public class GenomeHelper
                         + " They will automatically be reformated into sanger-quality scores.");
                 System.out.println("writeBadReads (optional) - a boolean ('true' or 'false' (default)). If set to 'true' the paired-reads failing QC"
                         + " will be written to a 'bad reads' file (bad reads file name will start with 'bad_'");
-            }
-            else
+            } else
             {
                 boolean writeBadReads = false;
                 File fastqIn = new File(args[1]);
@@ -644,8 +586,7 @@ public class GenomeHelper
                 FastqQC check = new FastqQC();
                 check.qcInterlacedReadsToPairs(fastqIn, fastqLeftOut, fastRightOut, readLength, format, writeBadReads);
             }
-        }
-        else if (args[0].equalsIgnoreCase("QCInterlacedReads"))
+        } else if (args[0].equalsIgnoreCase("QCInterlacedReads"))
         {
             if (args[1].equalsIgnoreCase("-h"))
             {
@@ -660,8 +601,7 @@ public class GenomeHelper
                         + " They will automatically be reformated into sanger-quality scores.");
                 System.out.println("writeBadReads (optional) - a boolean ('true' or 'false' (default)). If set to 'true' the paired-reads failing QC"
                         + " will be written to a 'bad reads' file (bad reads file name will start with 'bad_'");
-            }
-            else
+            } else
             {
                 boolean writeBadReads = false;
                 File fastqIn = new File(args[1]);
@@ -676,8 +616,7 @@ public class GenomeHelper
                 FastqQC check = new FastqQC();
                 check.qcInterlacedReads(fastqIn, fastqOut, readLength, format, writeBadReads);
             }
-        }
-        else if (args[0].equalsIgnoreCase("QCSingleEndReads"))
+        } else if (args[0].equalsIgnoreCase("QCSingleEndReads"))
         {
             if (args[1].equalsIgnoreCase("-h"))
             {
@@ -692,8 +631,7 @@ public class GenomeHelper
                         + " They will automatically be reformated into sanger-quality scores.");
                 System.out.println("writeBadReads (optional) - a boolean ('true' or 'false' (default)). If set to 'true' the paired-reads failing QC"
                         + " will be written to a 'bad reads' file (bad reads file name will start with 'bad_'");
-            }
-            else
+            } else
             {
                 boolean writeBadReads = false;
                 File fastqIn = new File(args[1]);
@@ -708,8 +646,7 @@ public class GenomeHelper
                 FastqQC check = new FastqQC();
                 check.qcSingleEndReads(fastqIn, fastqOut, readLength, format, writeBadReads);
             }
-        }
-        else if (args[0].equalsIgnoreCase("QCPairedReads"))
+        } else if (args[0].equalsIgnoreCase("QCPairedReads"))
         {
             if (args[1].equalsIgnoreCase("-h"))
             {
@@ -726,8 +663,7 @@ public class GenomeHelper
                         + " They will automatically be reformated into sanger-quality scores.");
                 System.out.println("writeBadReads (optional) - a boolean ('true' or 'false' (default)). If set to 'true' the paired-reads failing QC"
                         + " will be written to a 'bad reads' file (bad reads file name will start with 'bad_'");
-            }
-            else
+            } else
             {
                 boolean writeBadReads = false;
                 File fastqInLeft = new File(args[1]);
@@ -741,13 +677,41 @@ public class GenomeHelper
                     writeBadReads = Boolean.parseBoolean(args[7].toLowerCase());
                 }
 
-
                 System.out.println("write bad reads = " + writeBadReads);
                 FastqQC check = new FastqQC();
                 check.qcPairedReads(fastqInLeft, fastqInRight, fastqOutLeft, fastqOutRight, readLength, format, writeBadReads);
             }
-        }
-        else if (args[0].equalsIgnoreCase("BAMGetBothMappedPairedRead"))
+        } else if (args[0].equalsIgnoreCase("FastqRemoveKmerReads"))
+        {
+            if (args[1].equalsIgnoreCase("-h"))
+            {
+                System.out.println("Usage: FastqRemoveKmerReads fastqInLeft fastqInRight fastqOutLeft fastqOutRight kmerFile");
+                System.out.println("Removes pairs of reads where any number of provided kmers is found in either read");
+                System.out.println("fastqInLeft - the left-handed reads to filter");
+                System.out.println("fastqInRight - the right-handed reads to filter");
+                System.out.println("fastqOutLeft - the filtered left-handed reads");
+                System.out.println("fastqOutRight - the filtered right-handed reads");
+                System.out.println("kmerFile - a file containg the kmers to filter. One kmer per line");
+
+            } else
+            {
+                File fastqInLeft = new File(args[1]);
+                File fastqInRight = new File(args[2]);
+                File fastqOutLeft = new File(args[3]);
+                File fastqOutRight = new File(args[4]);
+                File kmerFile = new File(args[5]);
+                ArrayList<String> kmers = new ArrayList<>();
+                FastqQC check = new FastqQC();
+                BufferedReader br = new BufferedReader(new FileReader(kmerFile));
+                String line;
+                while ((line = br.readLine()) != null)
+                {
+                    kmers.add(line);
+                }
+                br.close();
+                check.removeReadsWithKmers(fastqInLeft, fastqInRight, fastqOutLeft, fastqOutRight, kmers);
+            }
+        } else if (args[0].equalsIgnoreCase("BAMGetBothMappedPairedRead"))
         {
             if (args[1].equalsIgnoreCase("-h"))
             {
@@ -758,8 +722,7 @@ public class GenomeHelper
                 System.out.println("fastqInRight - the right-handed reads that were used in the mapping");
                 System.out.println("fastqOutLeft - The mapped left-handed paired reads");
                 System.out.println("fastqOutRight - The mapped right-handed paired reads");
-            }
-            else
+            } else
             {
                 File bamfile = new File(args[1]);
                 File fastqInLeft = new File(args[2]);
@@ -770,8 +733,7 @@ public class GenomeHelper
                 MappedSamRecords msr = new MappedSamRecords();
                 msr.getOnePairedMappedSamRecords(bamfile, fastqInLeft, fastqInRight, fastqOutLeft, fastqOutRight);
             }
-        }
-        else if (args[0].equalsIgnoreCase("BAMGetBothUnmappedPairedReads"))
+        } else if (args[0].equalsIgnoreCase("BAMGetBothUnmappedPairedReads"))
         {
             if (args[1].equalsIgnoreCase("-h"))
             {
@@ -782,8 +744,7 @@ public class GenomeHelper
                 System.out.println("fastqInRight - the right-handed reads that were used in the mapping");
                 System.out.println("fastqOutLeft - The unmapped left-handed paired reads");
                 System.out.println("fastqOutRight - The unmapped right-handed paired reads");
-            }
-            else
+            } else
             {
                 File bamfile = new File(args[1]);
                 File fastqInLeft = new File(args[2]);
@@ -794,8 +755,7 @@ public class GenomeHelper
                 MappedSamRecords msr = new MappedSamRecords();
                 msr.getOnePairedUnmappedSamRecords(bamfile, fastqInLeft, fastqInRight, fastqOutLeft, fastqOutRight);
             }
-        }
-        else if (args[0].equalsIgnoreCase("BAMGetMappedPairedReads"))
+        } else if (args[0].equalsIgnoreCase("BAMGetMappedPairedReads"))
         {
             if (args[1].equalsIgnoreCase("-h"))
             {
@@ -806,8 +766,7 @@ public class GenomeHelper
                 System.out.println("fastqInRight - the right-handed reads that were used in the mapping");
                 System.out.println("fastqOutLeft - The mapped left-handed paired reads");
                 System.out.println("fastqOutRight - The mapped right-handed paired reads");
-            }
-            else
+            } else
             {
                 File bamfile = new File(args[1]);
                 File fastqInLeft = new File(args[2]);
@@ -818,8 +777,7 @@ public class GenomeHelper
                 MappedSamRecords msr = new MappedSamRecords();
                 msr.getOnePairedMappedSamRecords(bamfile, fastqInLeft, fastqInRight, fastqOutLeft, fastqOutRight);
             }
-        }
-        else if (args[0].equalsIgnoreCase("BAMGetUnmappedPairedReads"))
+        } else if (args[0].equalsIgnoreCase("BAMGetUnmappedPairedReads"))
         {
             if (args[1].equalsIgnoreCase("-h"))
             {
@@ -830,8 +788,7 @@ public class GenomeHelper
                 System.out.println("fastqInRight - the right-handed reads that were used in the mapping");
                 System.out.println("fastqOutLeft - The unmapped left-handed paired reads");
                 System.out.println("fastqOutRight - The unmapped right-handed paired reads");
-            }
-            else
+            } else
             {
                 File bamfile = new File(args[1]);
                 File fastqInLeft = new File(args[2]);
@@ -842,8 +799,7 @@ public class GenomeHelper
                 MappedSamRecords msr = new MappedSamRecords();
                 msr.getOnePairedUnmappedSamRecords(bamfile, fastqInLeft, fastqInRight, fastqOutLeft, fastqOutRight);
             }
-        }
-        else if (args[0].equalsIgnoreCase("BAMGetSingleUnmappedPairedReads"))
+        } else if (args[0].equalsIgnoreCase("BAMGetSingleUnmappedPairedReads"))
         {
             if (args[1].equalsIgnoreCase("-h"))
             {
@@ -855,8 +811,7 @@ public class GenomeHelper
                 System.out.println("fastqOut - The mapped reads");
                 System.out.println("isRightHandedReads - a boolean ('true' or 'false'). If the the reads are left-handed reads, "
                         + "set to 'true'. If they are right-handed, set to 'false'");
-            }
-            else
+            } else
             {
                 File bamfile = new File(args[1]);
                 File fastqIn = new File(args[2]);
@@ -866,8 +821,7 @@ public class GenomeHelper
                 MappedSamRecords msr = new MappedSamRecords();
                 msr.getSingleMappedSamRecords(bamfile, fastqIn, fastqOut, isRightHandedReads);
             }
-        }
-        else if (args[0].equalsIgnoreCase("BAMGetSingleMappedPairedReads"))
+        } else if (args[0].equalsIgnoreCase("BAMGetSingleMappedPairedReads"))
         {
             if (args[1].equalsIgnoreCase("-h"))
             {
@@ -879,8 +833,7 @@ public class GenomeHelper
                 System.out.println("fastqOut - The unmapped reads");
                 System.out.println("isRightHandedReads - a boolean ('true' or 'false'). If the the reads are left-handed reads, "
                         + "set to 'true'. If they are right-handed, set to 'false'");
-            }
-            else
+            } else
             {
                 File bamfile = new File(args[1]);
                 File fastqIn = new File(args[2]);
@@ -890,8 +843,7 @@ public class GenomeHelper
                 MappedSamRecords msr = new MappedSamRecords();
                 msr.getSingleUnmappedSamRecords(bamfile, fastqIn, fastqOut, isRightHandedReads);
             }
-        }
-        else if (args[0].equalsIgnoreCase("GFFGetMeanIntronLength"))
+        } else if (args[0].equalsIgnoreCase("GFFGetMeanIntronLength"))
         {
             if (args[1].equalsIgnoreCase("-h"))
             {
@@ -900,8 +852,7 @@ public class GenomeHelper
                 System.out.println("gffFile - the gff or gtf file in which the features are stored");
                 System.out.println("attribute - the name of the attribute that will make the genes unique (e.g. 'name', 'gene_id', etc))");
                 System.out.println("refSeq - the reference sequence for the gff file");
-            }
-            else
+            } else
             {
                 String gffFile = args[1];
                 String attribute = args[2];
@@ -913,8 +864,7 @@ public class GenomeHelper
                 gffs.getMeanIntronLength(fl, attribute, genomeSize);
             }
 
-        }
-        else if (args[0].equalsIgnoreCase("GFFCalculateCodingRegion"))
+        } else if (args[0].equalsIgnoreCase("GFFCalculateCodingRegion"))
         {
             if (args[1].equalsIgnoreCase("-h"))
             {
@@ -923,8 +873,7 @@ public class GenomeHelper
                 System.out.println("gffFile - the gff or gtf file in which the features are stored");
                 System.out.println("refSeq - the reference sequence for the gff file");
                 System.out.println("attribute - the name of the attribute that will make the genes unique (e.g. 'name', 'gene_id', etc))");
-            }
-            else
+            } else
             {
                 String gffFile = args[1];
                 File refSeq = new File(args[2]);
@@ -937,8 +886,7 @@ public class GenomeHelper
                 gffs.calculateCodingRegion(fl, genomeMap, attribute, genomeSize);
             }
 
-        }
-        else if (args[0].equalsIgnoreCase("GFFGetMeanTargetIntronLength"))
+        } else if (args[0].equalsIgnoreCase("GFFGetMeanTargetIntronLength"))
         {
             if (args[1].equalsIgnoreCase("-h"))
             {
@@ -947,8 +895,7 @@ public class GenomeHelper
                 System.out.println("gffFile - the gff or gtf file in which the features are stored");
                 System.out.println("attribute - the name of the attribute that will make the genes unique (e.g. 'name', 'gene_id', etc))");
                 System.out.println("targets - a file of gene names (one per line) for which the mean intron length will be calculated");
-            }
-            else
+            } else
             {
                 String gffFile = args[1];
                 String attribute = args[2];
@@ -960,8 +907,7 @@ public class GenomeHelper
                 gffs.getMeanSecretedIntronLength(fl, attribute, targets);
             }
 
-        }
-        else if (args[0].equalsIgnoreCase("GFFCreateCodingGenome"))
+        } else if (args[0].equalsIgnoreCase("GFFCreateCodingGenome"))
         {
             if (args[1].equalsIgnoreCase("-h"))
             {
@@ -971,8 +917,7 @@ public class GenomeHelper
                 System.out.println("refSeq - the reference sequence for the gff file");
                 System.out.println("featureName - the gff feature from which to calculate the coding part of the genome (e.g. exon, cds, mRNA)");
                 System.out.println("cgenome - the coding genome in fasta format");
-            }
-            else
+            } else
             {
                 String gffFile = args[1];
                 File refSeq = new File(args[2]);
@@ -984,8 +929,7 @@ public class GenomeHelper
                 gffs.createCodingGenome(fl, feature, refSeq, cgenome);
             }
 
-        }
-        else if (args[0].equalsIgnoreCase("GFFCreateNonCodingGenome"))
+        } else if (args[0].equalsIgnoreCase("GFFCreateNonCodingGenome"))
         {
             if (args[1].equalsIgnoreCase("-h"))
             {
@@ -994,8 +938,7 @@ public class GenomeHelper
                 System.out.println("gffFile - the gff or gtf file in which the features are stored");
                 System.out.println("refSeq - the reference sequence for the gff file");
                 System.out.println("ncgenome - the non-coding genome in fasta format");
-            }
-            else
+            } else
             {
                 String gffFile = args[1];
                 File refSeq = new File(args[2]);
@@ -1005,8 +948,7 @@ public class GenomeHelper
 
                 gffs.createNonCodingGenome(fl, refSeq, ncgenome);
             }
-        }
-        else if (args[0].equalsIgnoreCase("GFFGetMeanFeatureLength"))
+        } else if (args[0].equalsIgnoreCase("GFFGetMeanFeatureLength"))
         {
             if (args[1].equalsIgnoreCase("-h"))
             {
@@ -1014,8 +956,7 @@ public class GenomeHelper
                 System.out.println("Calculates the mean length of any feature (third column) in a gff file.");
                 System.out.println("gffFile - the gff or gtf file in which the features are stored");
                 System.out.println("featureName - the feature to be analysed (e.g. mRNA, exon, CDS, etc.)");
-            }
-            else
+            } else
             {
                 String gffFile = args[1];
                 String featureName = args[2];
@@ -1024,8 +965,7 @@ public class GenomeHelper
                 FeatureList fl = gffs.getFeatureList(gffFile);
                 gffs.getMeanFeatureLength(fl, featureName);
             }
-        }
-        else if (args[0].equalsIgnoreCase("GFFGetMeanFeatureLengthOfGeneIDs"))
+        } else if (args[0].equalsIgnoreCase("GFFGetMeanFeatureLengthOfGeneIDs"))
         {
             if (args[1].equalsIgnoreCase("-h"))
             {
@@ -1037,8 +977,7 @@ public class GenomeHelper
                         + " E.g. gene_id=geneX, 'gene_id' would be the attribute and 'geneX' would be the name of a gene in the geneIds file");
                 System.out.println("featureName - the feature to be analysed (e.g. mRNA, exon, CDS, etc.)");
                 System.out.println("attribute - the name of the attribute that will identify the genes in the geneIds file (e.g. 'name', 'gene_id', 'ID', etc.))");
-            }
-            else
+            } else
             {
                 String gffFile = args[1];
                 File refSeq = new File(args[2]);
@@ -1052,8 +991,7 @@ public class GenomeHelper
                 double result = gffs.getMeanFeatureLength(fl, genomeMap, featureName, geneIds, attribute);
 
             }
-        }
-        else if (args[0].equalsIgnoreCase("GFFGetMeanFeatureLengthWithSplicing"))
+        } else if (args[0].equalsIgnoreCase("GFFGetMeanFeatureLengthWithSplicing"))
         {
             if (args[1].equalsIgnoreCase("-h"))
             {
@@ -1062,8 +1000,7 @@ public class GenomeHelper
                 System.out.println("gffFile - the gff or gtf file in which the features are stored");
                 System.out.println("refSeq - the reference sequence for the gff file");
                 System.out.println("featureName - the feature to be analysed (e.g. mRNA, exon, CDS, etc.)");
-            }
-            else
+            } else
             {
                 String gffFile = args[1];
                 String featureName = args[2];
@@ -1074,8 +1011,7 @@ public class GenomeHelper
                 HashMap<String, int[]> genomeMap = new HashMap<>(FastaFeatures.getSequenceAsIntArray(refSeq));
                 gffs.getMeanFeatureLength(fl, genomeMap, featureName);
             }
-        }
-        else if (args[0].equalsIgnoreCase("GFFGetStats"))
+        } else if (args[0].equalsIgnoreCase("GFFGetStats"))
         {
             if (args[1].equalsIgnoreCase("-h"))
             {
@@ -1084,8 +1020,7 @@ public class GenomeHelper
                 System.out.println("gffFile - the gff or gtf file in which the features are stored");
                 System.out.println("refSeq - the reference sequence for the gff file");
                 System.out.println("attribute - the name of the attribute that will make the genes unique (e.g. 'name', 'gene_id', etc))");
-            }
-            else
+            } else
             {
                 String gffFile = args[1];
                 File refSeq = new File(args[2]);
@@ -1094,8 +1029,7 @@ public class GenomeHelper
                 GFFFeatureStats gffs = new GFFFeatureStats();
                 gffs.getStats(gffFile, refSeq, attribute);
             }
-        }
-        else
+        } else
         {
             System.err.println("Unknow program, use GenomeHelper.jar -h for help");
             System.exit(0);

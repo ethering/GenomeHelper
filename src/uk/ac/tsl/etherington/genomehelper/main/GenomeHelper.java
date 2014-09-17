@@ -712,7 +712,7 @@ public class GenomeHelper
                     kmers.add(line);
                 }
                 br.close();
-                check.removePairdReadsWithKmers(fastqInLeft, fastqInRight, fastqOutLeft, fastqOutRight, kmers);
+                check.removePairedReadsWithKmers(fastqInLeft, fastqInRight, fastqOutLeft, fastqOutRight, kmers);
             }
         } 
         else if (args[0].equalsIgnoreCase("QCRemoveKmerSingleReads"))

@@ -584,7 +584,7 @@ public class FastqQC
      * @param rightReadsOut the QCd right-handed reads
      * @param kmers - an ArrayList of kmers to search for
      */
-    public void removePairdReadsWithKmers(File leftFastqFileIn, File rightFastqFileIn, File leftReadsOut, File rightReadsOut, ArrayList<String> kmers)
+    public void removePairedReadsWithKmers(File leftFastqFileIn, File rightFastqFileIn, File leftReadsOut, File rightReadsOut, ArrayList<String> kmers)
     {
         FastqReader fql = new FastqReader(leftFastqFileIn);
         FastqReader fqr = new FastqReader(rightFastqFileIn);
@@ -599,15 +599,18 @@ public class FastqQC
         //create an interator for each file
         Iterator itl = fql.iterator();
         Iterator itr = fqr.iterator();
-
+        FastqRecord leftSeqRecord = null;
+        FastqRecord rightSeqRecord = null;
+        String leftSeq = "";
+        String rightSeq = "";
         while (itl.hasNext())
         {
             reads++;
             //get the corresponding reads
-            FastqRecord leftSeqRecord = (FastqRecord) itl.next();
-            FastqRecord rightSeqRecord = (FastqRecord) itr.next();
-            String leftSeq = leftSeqRecord.getReadString();
-            String rightSeq = rightSeqRecord.getReadString();
+            leftSeqRecord = (FastqRecord) itl.next();
+            rightSeqRecord = (FastqRecord) itr.next();
+            leftSeq = leftSeqRecord.getReadString();
+            rightSeq = rightSeqRecord.getReadString();
 
             boolean leftGood = true;
             boolean rightGood = true;
@@ -640,7 +643,8 @@ public class FastqQC
 
         int reads = 0;
         int goodReads = 0;
-
+        FastqRecord leftSeqRecord = null;
+        String leftSeq = "";
         //create an interator for each file
         Iterator itl = fql.iterator();
 
@@ -648,8 +652,8 @@ public class FastqQC
         {
             reads++;
             //get the corresponding reads
-            FastqRecord leftSeqRecord = (FastqRecord) itl.next();
-            String leftSeq = leftSeqRecord.getReadString();
+            leftSeqRecord = (FastqRecord) itl.next();
+            leftSeq = leftSeqRecord.getReadString();
             boolean leftGood = true;
             for (String kmer : kmers)
             {

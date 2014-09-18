@@ -617,8 +617,16 @@ public class FastqQC
 
             for (String kmer : kmers)
             {
-                leftGood = !leftSeq.toLowerCase().contains(kmer.toLowerCase());
-                rightGood = !rightSeq.toLowerCase().contains(kmer.toLowerCase());
+                if (leftSeq.toLowerCase().contains(kmer.toLowerCase()))
+                {
+                    leftGood = false;
+                    break;
+                }
+                if (rightSeq.toLowerCase().contains(kmer.toLowerCase()))
+                {
+                    rightGood = false;
+                    break;
+                }
             }
 
             if (leftGood && rightGood)
@@ -632,7 +640,9 @@ public class FastqQC
 
         goodLeftSeqs.close();
         goodRightSeqs.close();
+        int removedReads = reads - goodReads;
         System.out.println("Wrote " + goodReads + " good reads from " + reads);
+        System.out.println("Removed " + removedReads + " reads");
     }
 
     public void removeSingleReadsWithKmers(File fastqFileIn, File readsOut, ArrayList<String> kmers)
@@ -647,7 +657,7 @@ public class FastqQC
         String leftSeq = "";
         //create an interator for each file
         Iterator itl = fql.iterator();
-
+        System.out.println(kmers);
         while (itl.hasNext())
         {
             reads++;
@@ -657,7 +667,11 @@ public class FastqQC
             boolean leftGood = true;
             for (String kmer : kmers)
             {
-                leftGood = !leftSeq.toLowerCase().contains(kmer.toLowerCase());
+                if (leftSeq.toLowerCase().contains(kmer.toLowerCase()))
+                {
+                    leftGood = false;
+                    break;
+                }
             }
 
             if (leftGood)
@@ -668,7 +682,9 @@ public class FastqQC
         }
 
         goodLeftSeqs.close();
+        int removedReads = reads - goodReads;
         System.out.println("Wrote " + goodReads + " good reads from " + reads);
+        System.out.println("Removed " + removedReads + " reads");
     }
 
 //    public static void main(String[] args)

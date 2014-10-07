@@ -58,7 +58,7 @@ public class FastqQC
      * @return true if the read is the correct length and contains no 'N's,
      * false otherwise
      */
-    public boolean qcFastq(FastqRecord seqRecord, int singleEndReadLength)
+    public boolean checkLengthAndContent(FastqRecord seqRecord, int singleEndReadLength)
     {
         //get the length of them
         int seqLength = seqRecord.getReadString().length();
@@ -103,12 +103,13 @@ public class FastqQC
      * @param rightFastqFileIn the right-handed reads
      * @param leftReadsOut the QCd left-handed reads
      * @param rightReadsOut the QCd right-handed reads
+     * @param singles the QC'd reads where the opposite pair has failed QC
      * @param singleEndReadLength the expected length of a single read
      * @param format the fastq format (can only be 'illumina' or 'sanger')
      * @param writeBadSeqs whether to write the bad reads to a file (bad reads
      * file name will start with 'bad_')
      */
-    public void qcPairedReads(File leftFastqFileIn, File rightFastqFileIn, File leftReadsOut, File rightReadsOut, int singleEndReadLength, String format, boolean writeBadSeqs)
+    public void qcPairedReads(File leftFastqFileIn, File rightFastqFileIn, File leftReadsOut, File rightReadsOut, File singles, int singleEndReadLength, String format, boolean writeBadSeqs)
     {
         FastqReader fql = new FastqReader(leftFastqFileIn);
         FastqReader fqr = new FastqReader(rightFastqFileIn);
@@ -116,13 +117,19 @@ public class FastqQC
         FastqWriterFactory writer = new FastqWriterFactory();
         FastqWriter goodLeftSeqs = writer.newWriter(leftReadsOut);
         FastqWriter goodRightSeqs = writer.newWriter(rightReadsOut);
+        FastqWriter singleSeqs = writer.newWriter(singles);
 
-        FastqWriter badLeftSeqs = getBadSeqFastqWriter(leftReadsOut, writer);
-        FastqWriter badRightSeqs = getBadSeqFastqWriter(rightReadsOut, writer);
+        FastqWriter badLeftSeqs = null;
+        FastqWriter badRightSeqs = null;
+        if (writeBadSeqs)
+        {
+            badLeftSeqs = getBadSeqFastqWriter(leftReadsOut, writer);
+            badRightSeqs = getBadSeqFastqWriter(rightReadsOut, writer);
+        }
+
         int itCounter = 0;
         if (checkFormat(format) == true)
         {
-
             //create an interator for each file
             Iterator itl = fql.iterator();
             Iterator itr = fqr.iterator();
@@ -132,8 +139,8 @@ public class FastqQC
                 //get the corresponding reads
                 FastqRecord leftSeqRecord = (FastqRecord) itl.next();
                 FastqRecord rightSeqRecord = (FastqRecord) itr.next();
-                boolean leftGood = qcFastq(leftSeqRecord, singleEndReadLength);
-                boolean rightGood = qcFastq(rightSeqRecord, singleEndReadLength);
+                boolean leftGood = checkLengthAndContent(leftSeqRecord, singleEndReadLength);
+                boolean rightGood = checkLengthAndContent(rightSeqRecord, singleEndReadLength);
 
                 if (leftGood && rightGood)
                 {
@@ -142,17 +149,40 @@ public class FastqQC
                     goodLeftSeqs.write(newLeftSeq);
                     goodRightSeqs.write(newRightSeq);
                     itCounter++;
-                } else if (writeBadSeqs == true)
+                } else if (leftGood && rightGood == false)
                 {
-                    badLeftSeqs.write(leftSeqRecord);
-                    badRightSeqs.write(rightSeqRecord);
+                    FastqRecord seq = groomRead(leftSeqRecord, format);
+                    singleSeqs.write(seq);
+                } else if (leftGood == false && rightGood)
+                {
+                    FastqRecord seq = groomRead(rightSeqRecord, format);
+                    singleSeqs.write(seq);
+                } else if (writeBadSeqs)
+                {
+                    if (leftGood == false && rightGood == false)
+                    {
+                        badLeftSeqs.write(leftSeqRecord);
+                        badRightSeqs.write(rightSeqRecord);
+                    } else if (leftGood && rightGood == false)
+                    {
+                        badRightSeqs.write(rightSeqRecord);
+                    } else if (leftGood == false && rightGood)
+                    {
+                        badLeftSeqs.write(leftSeqRecord);
+                    }
+
                 }
             }
         }
         goodLeftSeqs.close();
         goodRightSeqs.close();
-        badLeftSeqs.close();
-        badRightSeqs.close();
+        singleSeqs.close();
+        if (writeBadSeqs)
+        {
+            badLeftSeqs.close();
+            badRightSeqs.close();
+        }
+
         System.out.println("Completed writing " + itCounter + " good reads");
     }
 
@@ -162,18 +192,24 @@ public class FastqQC
      *
      * @param fastqFileIn an interlaced fastq file
      * @param fastqFileOut the good left-handed reads
+     * @param singles the QC'd reads where the opposite pair has failed QC
      * @param singleEndReadLength the expected length of a single read
      * @param format the fastq format (can only be 'illumina' or 'sanger')
      * @param writeBadSeqs whether to write the bad reads to a file (bad reads
      * file name will start with 'bad_')
      */
-    public void qcInterlacedReads(File fastqFileIn, File fastqFileOut, int singleEndReadLength, String format, boolean writeBadSeqs)
+    public void qcInterlacedReads(File fastqFileIn, File fastqFileOut, File singles, int singleEndReadLength, String format, boolean writeBadSeqs)
     {
         FastqReader fq = new FastqReader(fastqFileIn);
 
         FastqWriterFactory writer = new FastqWriterFactory();
         FastqWriter goodSeqs = writer.newWriter(fastqFileOut);
-        FastqWriter badSeqs = getBadSeqFastqWriter(fastqFileOut, writer);
+        FastqWriter singleSeqs = writer.newWriter(singles);
+        FastqWriter badSeqs = null;
+        if (writeBadSeqs)
+        {
+            badSeqs = getBadSeqFastqWriter(fastqFileOut, writer);
+        }
         int itCounter = 0;
 
         if (checkFormat(format) == true)
@@ -186,8 +222,8 @@ public class FastqQC
                 FastqRecord leftSeqRecord = (FastqRecord) it.next();
                 FastqRecord rightSeqRecord = (FastqRecord) it.next();
 
-                boolean leftGood = qcFastq(leftSeqRecord, singleEndReadLength);
-                boolean rightGood = qcFastq(rightSeqRecord, singleEndReadLength);
+                boolean leftGood = checkLengthAndContent(leftSeqRecord, singleEndReadLength);
+                boolean rightGood = checkLengthAndContent(rightSeqRecord, singleEndReadLength);
 
                 if (leftGood && rightGood)
                 {
@@ -196,21 +232,47 @@ public class FastqQC
                     goodSeqs.write(newLeftSeq);
                     goodSeqs.write(newRightSeq);
                     itCounter++;
-                } else if (writeBadSeqs == true)
+                } else if (leftGood && rightGood == false)
                 {
-                    badSeqs.write(leftSeqRecord);
-                    badSeqs.write(rightSeqRecord);
+                    FastqRecord seq = groomRead(leftSeqRecord, format);
+                    singleSeqs.write(seq);
+                } else if (leftGood == false && rightGood)
+                {
+                    FastqRecord seq = groomRead(rightSeqRecord, format);
+                    singleSeqs.write(seq);
+                } 
+                
+                else if (writeBadSeqs)
+                {
+                    if (leftGood == false && rightGood == false)
+                    {
+                        badSeqs.write(leftSeqRecord);
+                        badSeqs.write(rightSeqRecord);
+                    } else if (leftGood && rightGood == false)
+                    {
+                        badSeqs.write(rightSeqRecord);
+                    } else if (leftGood == false && rightGood)
+                    {
+                        badSeqs.write(leftSeqRecord);
+                    }
+
                 }
             }
         }
         goodSeqs.close();
-        badSeqs.close();
+        singleSeqs.close();
+        if (writeBadSeqs)
+        {
+            badSeqs.close();
+        }
+        
         System.out.println("Completed writing " + itCounter + " good reads");
     }
 
     /**
      * Removes pairs of reads where at least one of the pair contains short/long
-     * reads or a read that contain an 'N', from an interlaced fastq file
+     * reads or a read that contain an 'N', from an interlaced fastq file and writes
+     * the resulting good reads to two separate paired-end files
      *
      * @param fastqFileIn an interlaced fastq file
      * @param leftReadsOut the good left-handed reads
@@ -220,14 +282,14 @@ public class FastqQC
      * @param writeBadSeqs whether to write the bad reads to a file (bad reads
      * file name will start with 'bad_')
      */
-    public void qcInterlacedReadsToPairs(File fastqFileIn, File leftReadsOut, File rightReadsOut, int singleEndReadLength, String format, boolean writeBadSeqs)
+    public void qcInterlacedReadsToPairs(File fastqFileIn, File leftReadsOut, File rightReadsOut, File singles, int singleEndReadLength, String format, boolean writeBadSeqs)
     {
         FastqReader fq = new FastqReader(fastqFileIn);
 
         FastqWriterFactory writer = new FastqWriterFactory();
         FastqWriter goodLeftSeqs = writer.newWriter(leftReadsOut);
         FastqWriter goodRightSeqs = writer.newWriter(rightReadsOut);
-
+        FastqWriter singleSeqs = writer.newWriter(singles);
         FastqWriter badLeftSeqs = getBadSeqFastqWriter(leftReadsOut, writer);
         FastqWriter badRightSeqs = getBadSeqFastqWriter(rightReadsOut, writer);
         int itCounter = 0;
@@ -242,8 +304,8 @@ public class FastqQC
                 FastqRecord leftSeqRecord = (FastqRecord) it.next();
                 FastqRecord rightSeqRecord = (FastqRecord) it.next();
 
-                boolean leftGood = qcFastq(leftSeqRecord, singleEndReadLength);
-                boolean rightGood = qcFastq(rightSeqRecord, singleEndReadLength);
+                boolean leftGood = checkLengthAndContent(leftSeqRecord, singleEndReadLength);
+                boolean rightGood = checkLengthAndContent(rightSeqRecord, singleEndReadLength);
 
                 if (leftGood && rightGood)
                 {
@@ -252,17 +314,39 @@ public class FastqQC
                     goodLeftSeqs.write(newLeftSeq);
                     goodRightSeqs.write(newRightSeq);
                     itCounter++;
-                } else if (writeBadSeqs == true)
+                } else if (leftGood && rightGood == false)
                 {
-                    badLeftSeqs.write(leftSeqRecord);
-                    badRightSeqs.write(rightSeqRecord);
+                    FastqRecord seq = groomRead(leftSeqRecord, format);
+                    singleSeqs.write(seq);
+                } else if (leftGood == false && rightGood)
+                {
+                    FastqRecord seq = groomRead(rightSeqRecord, format);
+                    singleSeqs.write(seq);
+                } else if (writeBadSeqs)
+                {
+                    if (leftGood == false && rightGood == false)
+                    {
+                        badLeftSeqs.write(leftSeqRecord);
+                        badRightSeqs.write(rightSeqRecord);
+                    } else if (leftGood && rightGood == false)
+                    {
+                        badRightSeqs.write(rightSeqRecord);
+                    } else if (leftGood == false && rightGood)
+                    {
+                        badLeftSeqs.write(leftSeqRecord);
+                    }
+
                 }
             }
         }
         goodLeftSeqs.close();
         goodRightSeqs.close();
-        badLeftSeqs.close();
-        badRightSeqs.close();
+        singleSeqs.close();
+        if (writeBadSeqs)
+        {
+            badLeftSeqs.close();
+            badRightSeqs.close();
+        }
         System.out.println("Completed writing " + itCounter + " good reads");
     }
 
@@ -295,11 +379,8 @@ public class FastqQC
         if (checkFormat(format) == true)
         {
             //create an interator for each file
-            Iterator it = fq.iterator();
-            while (it.hasNext())
-            {
-                //get the corresponding reads
-                FastqRecord seqRecord = (FastqRecord) it.next();
+            
+            for (FastqRecord seqRecord : fq) {
                 int seqLength = seqRecord.getReadString().length();
                 String readString = seqRecord.getReadString();
                 boolean containsN = readString.toLowerCase().contains("n");
@@ -356,13 +437,9 @@ public class FastqQC
         if (checkFormat(format) == true)
         {
             //create an interator for the interlaced file
-            Iterator it = fq.iterator();
-
-            while (it.hasNext())
-            {
-                //get the corresponding reads
-                FastqRecord seqRecord = (FastqRecord) it.next();
-                boolean goodRead = qcFastq(seqRecord, singleEndReadLength);
+            
+            for (FastqRecord seqRecord : fq) {
+                boolean goodRead = checkLengthAndContent(seqRecord, singleEndReadLength);
 
                 if (goodRead)
                 {
@@ -592,7 +669,7 @@ public class FastqQC
         FastqWriterFactory writer = new FastqWriterFactory();
         FastqWriter goodLeftSeqs = writer.newWriter(leftReadsOut);
         FastqWriter goodRightSeqs = writer.newWriter(rightReadsOut);
-
+        System.out.println("kmers: " + kmers.toString());
         int reads = 0;
         int goodReads = 0;
 
@@ -601,37 +678,15 @@ public class FastqQC
         Iterator itr = fqr.iterator();
         FastqRecord leftSeqRecord = null;
         FastqRecord rightSeqRecord = null;
-        String leftSeq = "";
-        String rightSeq = "";
+
         while (itl.hasNext())
         {
             reads++;
-            //get the corresponding reads
-            leftSeqRecord = (FastqRecord) itl.next();
-            rightSeqRecord = (FastqRecord) itr.next();
-            leftSeq = leftSeqRecord.getReadString();
-            rightSeq = rightSeqRecord.getReadString();
-
-            boolean leftGood = true;
-            boolean rightGood = true;
-
-            for (String kmer : kmers)
-            {
-                if (leftSeq.toLowerCase().contains(kmer.toLowerCase()))
-                {
-                    leftGood = false;
-                    break;
-                }
-                if (rightSeq.toLowerCase().contains(kmer.toLowerCase()))
-                {
-                    rightGood = false;
-                    break;
-                }
-            }
+            boolean leftGood = findKmers(kmers, (FastqRecord) itl.next());
+            boolean rightGood = findKmers(kmers, (FastqRecord) itr.next());
 
             if (leftGood && rightGood)
             {
-
                 goodLeftSeqs.write(leftSeqRecord);
                 goodRightSeqs.write(rightSeqRecord);
                 goodReads++;
@@ -649,42 +704,50 @@ public class FastqQC
     {
         FastqReader fql = new FastqReader(fastqFileIn);
         FastqWriterFactory writer = new FastqWriterFactory();
-        FastqWriter goodLeftSeqs = writer.newWriter(readsOut);
+        FastqWriter goodSeqs = writer.newWriter(readsOut);
 
         int reads = 0;
         int goodReads = 0;
-        FastqRecord leftSeqRecord = null;
-        String leftSeq = "";
+        FastqRecord seqRecord = null;
+        String seq = "";
         //create an interator for each file
         Iterator itl = fql.iterator();
-        System.out.println(kmers);
+        System.out.println("kmers: " + kmers.toString());
         while (itl.hasNext())
         {
             reads++;
             //get the corresponding reads
-            leftSeqRecord = (FastqRecord) itl.next();
-            leftSeq = leftSeqRecord.getReadString();
-            boolean leftGood = true;
-            for (String kmer : kmers)
-            {
-                if (leftSeq.toLowerCase().contains(kmer.toLowerCase()))
-                {
-                    leftGood = false;
-                    break;
-                }
-            }
+            seqRecord = (FastqRecord) itl.next();
+            seq = seqRecord.getReadString();
+            boolean leftGood = findKmers(kmers, seqRecord);
 
             if (leftGood)
             {
-                goodLeftSeqs.write(leftSeqRecord);
+                goodSeqs.write(seqRecord);
                 goodReads++;
             }
         }
 
-        goodLeftSeqs.close();
+        goodSeqs.close();
         int removedReads = reads - goodReads;
         System.out.println("Wrote " + goodReads + " good reads from " + reads);
         System.out.println("Removed " + removedReads + " reads");
+    }
+
+    public boolean findKmers(ArrayList<String> kmers, FastqRecord rec)
+    {
+        boolean goodSeq = true;
+        String seq = rec.getReadString();
+        for (String kmer : kmers)
+        {
+            if (seq.toLowerCase().contains(kmer.toLowerCase()))
+            {
+                goodSeq = false;
+                break;
+
+            }
+        }
+        return goodSeq;
     }
 
 //    public static void main(String[] args)

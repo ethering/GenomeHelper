@@ -70,10 +70,10 @@ public class GenomeHelper
             System.out.println("Usage: FastqFindKmer fastqIn kmer");
 
             System.out.println("\nQuality-control programs:");
-            System.out.println("Usage: QCPairedReads fastqInLeft fastqInRight fastqLeftOut fastqrRightOut readLength format('sanger' or 'illumina') writeBadReads ('true' or 'false')");
+            System.out.println("Usage: QCPairedReads fastqInLeft fastqInRight fastqLeftOut fastqrRightOut singleReads readLength format('sanger' or 'illumina') writeBadReads ('true' or 'false')");
             System.out.println("Usage: QCSingleEndReads fastqIn fastqOut readLength format('sanger' or 'illumina') writeBadReads ('true' or 'false')");
-            System.out.println("Usage: QCInterlacedReads fastqIn fastqOut readLength format('sanger' or 'illumina') writeBadReads ('true' or 'false')");
-            System.out.println("Usage: QCInterlacedReadsToPairs fastqIn fastqLeftOut fastqrRightOut readLength format('sanger' or 'illumina') writeBadReads ('true' or 'false')");
+            System.out.println("Usage: QCInterlacedReads fastqIn fastqOut singleReads readLength format('sanger' or 'illumina') writeBadReads ('true' or 'false')");
+            System.out.println("Usage: QCInterlacedReadsToPairs fastqIn fastqLeftOut fastqrRightOut singleReads readLength format('sanger' or 'illumina') writeBadReads ('true' or 'false')");
             System.out.println("Usage: QCJoinedReads fastqIn fastqLeftOut fastqrRightOut readLength format('sanger' or 'illumina') writeBadReads ('true' or 'false')");
             System.out.println("Usage: QCVerifyReads fastqIn");
             System.out.println("Usage: QCVerifyPairedEndReads fastqLeft fastqRight");
@@ -560,12 +560,13 @@ public class GenomeHelper
         {
             if (args[1].equalsIgnoreCase("-h"))
             {
-                System.out.println("Usage: QCInterlacedReads fastqIn  fastqLeftOut fastqRightOut  readLength format writeBadReads");
+                System.out.println("Usage: QCInterlacedReads fastqIn  fastqLeftOut fastqRightOut singleReads readLength format writeBadReads");
                 System.out.println("Takes an interlaced fastq file and returns two fastq files containing QCd paired-end sequences. Removes reads which contain short/long reads or a read that contain an 'N',"
                         + " from single-end fastq files. Fastq files with a qulaity-score format of 'illumina' (pre-Illumina 1.8)"
                         + " will have their quality score format changed to sanger format. Optionally writes bad reads to a file.");
                 System.out.println("fastqIn - the reads to QC");
                 System.out.println("fastqOut - the QCd reads");
+                System.out.println("singleReads - the QCd reads where the opposite pair failed QC");
                 System.out.println("readLength - the single-end read length for the input files");
                 System.out.println("format - 'illumina' or 'sanger'. 'illumina' should be used for sequences with quality-scores that are pre-Illumina 1.8."
                         + " They will automatically be reformated into sanger-quality scores.");
@@ -577,26 +578,28 @@ public class GenomeHelper
                 File fastqIn = new File(args[1]);
                 File fastqLeftOut = new File(args[2]);
                 File fastRightOut = new File(args[3]);
-                int readLength = Integer.parseInt(args[4]);
-                String format = args[5];
-                if (args.length == 7)
+                File singles = new File(args[4]);
+                int readLength = Integer.parseInt(args[5]);
+                String format = args[6];
+                if (args.length == 8)
                 {
-                    writeBadReads = Boolean.parseBoolean(args[6]);
+                    writeBadReads = Boolean.parseBoolean(args[7]);
                 }
                 System.out.println("write bad reads = " + writeBadReads);
                 FastqQC check = new FastqQC();
-                check.qcInterlacedReadsToPairs(fastqIn, fastqLeftOut, fastRightOut, readLength, format, writeBadReads);
+                check.qcInterlacedReadsToPairs(fastqIn, fastqLeftOut, fastRightOut, singles, readLength, format, writeBadReads);
             }
         } else if (args[0].equalsIgnoreCase("QCInterlacedReads"))
         {
             if (args[1].equalsIgnoreCase("-h"))
             {
-                System.out.println("Usage: QCInterlacedReads fastqIn fastqOut readLength format writeBadReads");
+                System.out.println("Usage: QCInterlacedReads fastqIn fastqOut singleReads readLength format writeBadReads");
                 System.out.println("Takes and returns an interlaced fastq file and removes reads which contain short/long reads or a read that contain an 'N',"
                         + " from single-end fastq files. Fastq files with a qulaity-score format of 'illumina' (pre-Illumina 1.8)"
                         + " will have their quality score format changed to sanger format. Optionally writes bad reads to a file.");
                 System.out.println("fastqIn - the reads to QC");
                 System.out.println("fastqOut - the QCd reads");
+                System.out.println("singleReads - the QCd reads where the opposite pair failed QC");
                 System.out.println("readLength - the single-end read length for the input files");
                 System.out.println("format - 'illumina' or 'sanger'. 'illumina' should be used for sequences with quality-scores that are pre-Illumina 1.8."
                         + " They will automatically be reformated into sanger-quality scores.");
@@ -607,15 +610,16 @@ public class GenomeHelper
                 boolean writeBadReads = false;
                 File fastqIn = new File(args[1]);
                 File fastqOut = new File(args[2]);
-                int readLength = Integer.parseInt(args[3]);
-                String format = args[4];
-                if (args.length == 6)
+                File singles = new File(args[3]);
+                int readLength = Integer.parseInt(args[4]);
+                String format = args[5];
+                if (args.length == 7)
                 {
-                    writeBadReads = Boolean.parseBoolean(args[5]);
+                    writeBadReads = Boolean.parseBoolean(args[6]);
                 }
                 System.out.println("write bad reads = " + writeBadReads);
                 FastqQC check = new FastqQC();
-                check.qcInterlacedReads(fastqIn, fastqOut, readLength, format, writeBadReads);
+                check.qcInterlacedReads(fastqIn, fastqOut, singles, readLength, format, writeBadReads);
             }
         } else if (args[0].equalsIgnoreCase("QCSingleEndReads"))
         {
@@ -651,7 +655,7 @@ public class GenomeHelper
         {
             if (args[1].equalsIgnoreCase("-h"))
             {
-                System.out.println("Usage: QCPairedReads fastqInLeft fastqInRight fastqOutLeft fastqOutRight readLength format writeBadReads");
+                System.out.println("Usage: QCPairedReads fastqInLeft fastqInRight fastqOutLeft fastqOutRight singleReads readLength format writeBadReads");
                 System.out.println("Removes pairs of reads where at least one of the pair contains short/long reads or a read that contain an 'N',"
                         + " from paired-end fastq files. Fastq files with a qulaity-score format of 'illumina' (pre-Illumina 1.8)"
                         + " will have their quality score format changed to sanger format. Optionally writes bad reads to a file.");
@@ -659,6 +663,7 @@ public class GenomeHelper
                 System.out.println("fastqInRight - the right-handed reads to QC");
                 System.out.println("fastqOutLeft - the QCd left-handed reads");
                 System.out.println("fastqOutRight - the QCd right-handed reads");
+                System.out.println("singleReads - the QCd reads where the opposite pair failed QC");
                 System.out.println("readLength - the single-end read length for the input files");
                 System.out.println("format - 'illumina' or 'sanger'. 'illumina' should be used for sequences with quality-scores that are pre-Illumina 1.8."
                         + " They will automatically be reformated into sanger-quality scores.");
@@ -671,16 +676,17 @@ public class GenomeHelper
                 File fastqInRight = new File(args[2]);
                 File fastqOutLeft = new File(args[3]);
                 File fastqOutRight = new File(args[4]);
-                int readLength = Integer.parseInt(args[5]);
-                String format = args[6];
-                if (args.length == 8)
+                File singles = new File(args[5]);
+                int readLength = Integer.parseInt(args[6]);
+                String format = args[7];
+                if (args.length == 9)
                 {
-                    writeBadReads = Boolean.parseBoolean(args[7].toLowerCase());
+                    writeBadReads = Boolean.parseBoolean(args[8].toLowerCase());
                 }
 
                 System.out.println("write bad reads = " + writeBadReads);
                 FastqQC check = new FastqQC();
-                check.qcPairedReads(fastqInLeft, fastqInRight, fastqOutLeft, fastqOutRight, readLength, format, writeBadReads);
+                check.qcPairedReads(fastqInLeft, fastqInRight, fastqOutLeft, fastqOutRight, singles, readLength, format, writeBadReads);
             }
         } else if (args[0].equalsIgnoreCase("QCRemoveKmerPairedReads"))
         {

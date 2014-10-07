@@ -98,10 +98,10 @@ public class FastqQCTest
     }
 
     /**
-     * Test of qcFastq method, of class FastqQC.
+     * Test of checkLengthAndContent method, of class FastqQC.
      */
     @Test
-    public void testQcFastq()
+    public void testCheckLengthAndContent()
     {
         System.out.println("qcFastq");
         //a good fastq sequence
@@ -116,14 +116,14 @@ public class FastqQCTest
         int singleEndReadLength = 4;
         FastqQC instance = new FastqQC();
         boolean expResult = true;
-        boolean result = instance.qcFastq(fq1, singleEndReadLength);
+        boolean result = instance.checkLengthAndContent(fq1, singleEndReadLength);
         assertEquals(expResult, result);
         expResult = false;
-        result = instance.qcFastq(fq2, singleEndReadLength);
+        result = instance.checkLengthAndContent(fq2, singleEndReadLength);
         assertEquals(expResult, result);
-        result = instance.qcFastq(fq3, singleEndReadLength);
+        result = instance.checkLengthAndContent(fq3, singleEndReadLength);
         assertEquals(expResult, result);
-        result = instance.qcFastq(fq4, singleEndReadLength);
+        result = instance.checkLengthAndContent(fq4, singleEndReadLength);
         assertEquals(expResult, result);
     }
 

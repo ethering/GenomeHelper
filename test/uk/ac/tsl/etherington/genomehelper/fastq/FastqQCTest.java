@@ -138,11 +138,12 @@ public class FastqQCTest
         File rightFastqFileIn = new File("test/test_data_in/piculus_test_right.fastq");
         File leftReadsOut = new File("test/test_data_out/piculus_test_left_QC.fastq");
         File rightReadsOut = new File("test/test_data_out/piculus_test_right_QC.fastq");
+        File singles = new File("test/test_data_out/piculus_test_singles_QC.fastq");
         int singleEndReadLength = 80;
         String format = "sanger";
         boolean writeBadSeqs = true;
         FastqQC instance = new FastqQC();
-        instance.qcPairedReads(leftFastqFileIn, rightFastqFileIn, leftReadsOut, rightReadsOut, singleEndReadLength, format, writeBadSeqs);
+        instance.qcPairedReads(leftFastqFileIn, rightFastqFileIn, leftReadsOut, rightReadsOut, singles, singleEndReadLength, format, writeBadSeqs);
         //there are 11 bad reads in the file, so we should have 1989 good reads, or 7956 lines
         long lineCount = countLines(leftReadsOut);
         assertEquals(lineCount, 7956);
@@ -157,11 +158,12 @@ public class FastqQCTest
         System.out.println("qcInterlacedReads");
         File fastqFileIn = new File("test/test_data_in/piculus_test_interlaced.fastq");
         File fastqFileOut = new File("test/test_data_out/piculus_test_interlaced_QC.fastq");
+        File singles = new File("test/test_data_out/piculus_test_singles_QC.fastq");
         int singleEndReadLength = 80;
         String format = "sanger";
         boolean writeBadSeqs = true;
         FastqQC instance = new FastqQC();
-        instance.qcInterlacedReads(fastqFileIn, fastqFileOut, singleEndReadLength, format, writeBadSeqs);
+        instance.qcInterlacedReads(fastqFileIn, fastqFileOut, singles, singleEndReadLength, format, writeBadSeqs);
         //there are 22 bad reads in the interlaced file, so we should have 3978 good reads, or 15912 lines
         long lineCount = countLines(fastqFileOut);
         assertEquals(lineCount, 15912);
@@ -177,11 +179,12 @@ public class FastqQCTest
         File fastqFileIn = new File("test/test_data_in/piculus_test_interlaced.fastq");
         File leftReadsOut = new File("test/test_data_out/piculus_test_left_QC.fastq");
         File rightReadsOut = new File("test/test_data_out/piculus_test_right_QC.fastq");
+        File singles = new File("test/test_data_out/piculus_test_singles_QC.fastq");
         int singleEndReadLength = 80;
         String format = "sanger";
         boolean writeBadSeqs = true;
         FastqQC instance = new FastqQC();
-        instance.qcInterlacedReadsToPairs(fastqFileIn, leftReadsOut, rightReadsOut, singleEndReadLength, format, writeBadSeqs);
+        instance.qcInterlacedReadsToPairs(fastqFileIn, leftReadsOut, rightReadsOut, singles, singleEndReadLength, format, writeBadSeqs);
         //there are 11 bad reads in the file, so we should have 1989 good reads, or 7956 lines
         long leftLineCount = countLines(leftReadsOut);
         assertEquals(leftLineCount, 7956);

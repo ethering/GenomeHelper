@@ -682,8 +682,10 @@ public class FastqQC
         while (itl.hasNext())
         {
             reads++;
-            boolean leftGood = findKmers(kmers, (FastqRecord) itl.next());
-            boolean rightGood = findKmers(kmers, (FastqRecord) itr.next());
+            leftSeqRecord = (FastqRecord) itl.next();
+            rightSeqRecord = (FastqRecord) itr.next();
+            boolean leftGood = findKmers(kmers, leftSeqRecord);
+            boolean rightGood = findKmers(kmers, rightSeqRecord);
 
             if (leftGood && rightGood)
             {

@@ -709,19 +709,19 @@ public class GenomeHelper
                 File kmerFile = new File(args[5]);
                 ArrayList<String> kmers = new ArrayList<>();
                 FastqQC check = new FastqQC();
-                BufferedReader br = new BufferedReader(new FileReader(kmerFile));
-                String line;
-                while ((line = br.readLine()) != null)
+                try (BufferedReader br = new BufferedReader(new FileReader(kmerFile)))
                 {
-                    line = line.trim(); // remove leading and trailing whitespace
-                    
-                    if (!line.equals("")) // don't write out blank lines
+                    String line;
+                    while ((line = br.readLine()) != null)
                     {
-                        kmers.add(line);
+                        line = line.trim(); // remove leading and trailing whitespace
+                        
+                        if (!line.equals("")) // don't write out blank lines
+                        {
+                            kmers.add(line);
+                        }
                     }
                 }
-                
-                br.close();
                 check.removePairedReadsWithKmers(fastqInLeft, fastqInRight, fastqOutLeft, fastqOutRight, kmers);
             }
         } else if (args[0].equalsIgnoreCase("QCRemoveKmerSingleReads"))

@@ -525,8 +525,8 @@ public class FastqQC
 
         String readsString = formatter.format(reads);
         String ntString = formatter.format(nucleotides);
-        System.out.println("No. of reads: " + readsString);
-        System.out.println("Nucleotide count: " + ntString);
+        System.out.println("No. of reads\tNucleotide count");
+        System.out.println(readsString +"\t" + ntString);
         return nucleotides;
     }
 

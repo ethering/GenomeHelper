@@ -37,6 +37,9 @@ public class GenomeHelper
 
     /**
      * @param args the command line arguments
+     * @throws java.io.IOException
+     * @throws org.jtr.transliterate.CharacterParseException
+     * 
      */
     public static void main(String[] args) throws IOException, CharacterParseException, Exception
     {

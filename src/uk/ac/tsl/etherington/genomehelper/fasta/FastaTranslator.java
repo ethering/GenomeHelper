@@ -10,7 +10,6 @@ import java.io.FileWriter;
 import java.io.Writer;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
-import org.biojava3.core.sequence.AccessionID;
 import org.biojava3.core.sequence.DNASequence;
 import org.biojava3.core.sequence.ProteinSequence;
 import org.biojava3.core.sequence.RNASequence;

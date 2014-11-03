@@ -5,8 +5,11 @@ package uk.ac.tsl.etherington.genomehelper.bam;
  * read or its mate (or both) are mapped
  */
 import java.io.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import net.sf.picard.fastq.FastqReader;
 import net.sf.picard.fastq.FastqRecord;
 import net.sf.picard.fastq.FastqWriter;
@@ -23,7 +26,6 @@ import uk.ac.tsl.etherington.genomehelper.fastq.FastqParser;
 public class MappedSamRecords
 {
 
- 
     /**
      * Returns the fastq sequences that have been mapped to a genome. All fastq
      * reads must either be left-handed or right-handed
@@ -60,8 +62,7 @@ public class MappedSamRecords
                 if (isRightHandedReads && isFirstOfPair == false)
                 {
                     mappedReads.add(currentRead);
-                }
-                else if (isRightHandedReads == false && isFirstOfPair)
+                } else if (isRightHandedReads == false && isFirstOfPair)
                 {
                     mappedReads.add(currentRead);
                 }
@@ -110,8 +111,7 @@ public class MappedSamRecords
                 if (isRightHandedReads && isFirstOfPair == false)
                 {
                     unMappedReads.add(currentRead);
-                }
-                else if (isRightHandedReads == false && isFirstOfPair)
+                } else if (isRightHandedReads == false && isFirstOfPair)
                 {
                     unMappedReads.add(currentRead);
                 }
@@ -141,7 +141,7 @@ public class MappedSamRecords
      */
     public void getOnePairedMappedSamRecords(File bamFile, File fastqInLeft, File fastqInRight, File fastqOutLeft, File fastqOutRight)
     {
-        
+
         final SAMFileReader samReader = new SAMFileReader(bamFile);
         samReader.setValidationStringency(SAMFileReader.ValidationStringency.SILENT);
 
@@ -152,7 +152,7 @@ public class MappedSamRecords
         // Open an iterator for the particular sequence
         SAMRecordIterator iterator = samReader.iterator();
         HashSet<String> mappedReads = getReads(samReader, iterator, true);
-        
+
         System.out.println("Found " + mappedReads.size() + " mapped reads");
         samReader.close();
 
@@ -188,8 +188,7 @@ public class MappedSamRecords
                 //get the read name
                 String currentRead = samRecord.getReadName();
                 reads.add(currentRead);
-            }
-            else if (unMapped && getMapped == false)
+            } else if (unMapped && getMapped == false)
             {
                 String currentRead = samRecord.getReadName();
                 reads.add(currentRead);
@@ -214,7 +213,7 @@ public class MappedSamRecords
      */
     public void getOnePairedUnmappedSamRecords(File bamFile, File fastqInLeft, File fastqInRight, File fastqOutLeft, File fastqOutRight)
     {
-        
+
         final SAMFileReader samReader = new SAMFileReader(bamFile);
         samReader.setValidationStringency(SAMFileReader.ValidationStringency.SILENT);
 
@@ -225,7 +224,7 @@ public class MappedSamRecords
         // Open an iterator for the particular sequence
         SAMRecordIterator iterator = samReader.iterator();
         HashSet<String> unMappedReads = getReads(samReader, iterator, false);
-        
+
         System.out.println("Found " + unMappedReads.size() + " unmapped reads");
         samReader.close();
 
@@ -291,21 +290,18 @@ public class MappedSamRecords
                     if (isLeftRead)
                     {
                         pmr.setLeftMapped(true);
-                    }
-                    else
+                    } else
                     {
                         pmr.setRightMapped(true);
                     }
                     mappedReads.put(currentRead, pmr);
-                }
-                else
+                } else
                 {
                     PairedMappedRead pmr = new PairedMappedRead(false, false);
                     if (isLeftRead)
                     {
                         pmr.setLeftMapped(true);
-                    }
-                    else
+                    } else
                     {
                         pmr.setRightMapped(true);
                     }
@@ -383,22 +379,19 @@ public class MappedSamRecords
                     if (isLeftRead)
                     {
                         pmr.setLeftMapped(false);
-                    }
-                    else
+                    } else
                     {
                         pmr.setRightMapped(false);
                     }
                     mappedReads.put(currentRead, pmr);
-                }
-                else
+                } else
                 {
                     //we'll be looking for false in both later, so set to true
                     PairedMappedRead pmr = new PairedMappedRead(true, true);
                     if (isLeftRead)
                     {
                         pmr.setLeftMapped(false);
-                    }
-                    else
+                    } else
                     {
                         pmr.setRightMapped(false);
                     }
@@ -430,6 +423,99 @@ public class MappedSamRecords
             }
         }
     }
+
+    /**
+     * Returns the pairs of sequences where at both of the pair has been mapped
+     * to a genome.
+     *
+     * @param bamFile a sam/bam file
+     * @param fastqInLeft the left-hand fastq dataset that was mapped to the
+     * sam/bam file
+     * @param fastqInRight the righ-hand fastq dataset that was mapped to the
+     * sam/bam file
+     * @param fastqOutLeft the left-hand fastq reads where both of the pairs
+     * were unmapped
+     * @param fastqOutRight the right-hand fastq reads where both of the pairs
+     * were unmapped
+     * @param singles - single unmapped reads where the mate was mapped
+     */
+    public void getUnmappedSamRecords(File bamFile, File fastqInLeft, File fastqInRight, File fastqOutLeft, File fastqOutRight, File singles)
+    {
+        Set<String> unmappedPairs = new HashSet<>();
+        Map<String, Boolean> unmappedSingles = new HashMap<>();
+        final SAMFileReader samReader = new SAMFileReader(bamFile);
+        samReader.setValidationStringency(SAMFileReader.ValidationStringency.SILENT);
+        // Open an iterator for the particular sequence
+        SAMRecordIterator iterator = samReader.iterator();
+        while (iterator.hasNext())
+        {
+            SAMRecord samRecord = iterator.next();
+            //is the read unmapped?
+            boolean unmapped = samRecord.getReadUnmappedFlag();
+            //if it is...
+            if (unmapped)
+            {
+                //is its mate also unmapped
+                boolean mateUnmapped = samRecord.getMateUnmappedFlag();
+
+                //if so, add it to the unmappedPairs HashSet
+                if (mateUnmapped)
+                {
+                    unmappedPairs.add(samRecord.getReadName());
+                } //if it's not find out if it's a left or right read
+                else
+                {
+                    boolean isLeftRead = samRecord.getFirstOfPairFlag();
+                    if (isLeftRead)
+                    {
+                        //set it to true if it's a leftRead, false if it's not
+                        unmappedSingles.put(samRecord.getReadName(), isLeftRead);
+                    }
+                }
+            }
+            System.out.println("Found " + unmappedPairs.size() + " mapped reads");
+            System.out.println("Found " + unmappedSingles.size() + " mapped reads");
+            samReader.close();
+
+            FastqWriterFactory writer = new FastqWriterFactory();
+            FastqWriter outLeft = writer.newWriter(fastqOutLeft);
+            FastqWriter outRight = writer.newWriter(fastqOutRight);
+            FastqWriter outSingles = writer.newWriter(singles);
+
+            final FastqReader fastqReaderLeft = new FastqReader(fastqInLeft);
+            final FastqReader fastqReaderRight = new FastqReader(fastqInRight);
+            while (fastqReaderLeft.hasNext())
+            {
+                FastqRecord leftRecord = fastqReaderLeft.next();
+                FastqRecord rightRecord = fastqReaderRight.next();
+                String readName = leftRecord.getReadHeader();
+                int hashIndex = readName.indexOf(" ");
+                readName = readName.substring(0, hashIndex);
+                if (unmappedPairs.contains(readName))
+                {
+                    outLeft.write(leftRecord);
+                    outRight.write(rightRecord);
+                }
+                else if (unmappedSingles.containsKey(readName))
+                {
+                    boolean isLeftRead = unmappedSingles.get(readName);
+                    if (isLeftRead)
+                    {
+                        outSingles.write(leftRecord);
+                    }
+                    else
+                    {
+                        outSingles.write(rightRecord);
+                    }
+                }
+            }
+            outLeft.close();
+            outRight.close();
+            outSingles.close();
+        }
+    }
+
+    
 
     private class PairedMappedRead
     {

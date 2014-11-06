@@ -792,9 +792,11 @@ public class GenomeHelper
             } else
             {
                 File bamfile = new File(args[1]);
+                File fastqInLeft = new File(args[2]);
+                File fastqInRight = new File(args[3]);
 
                 MappedSamRecords msr = new MappedSamRecords();
-                msr.getUnmappedSamRecords(bamfile);
+                msr.getUnmappedSamRecords(bamfile, fastqInLeft, fastqInRight);
             }
         }
         

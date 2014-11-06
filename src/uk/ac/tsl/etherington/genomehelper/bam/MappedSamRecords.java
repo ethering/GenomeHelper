@@ -64,6 +64,9 @@ public class MappedSamRecords
             while (iterator.hasNext())
             {
                 SAMRecord samRecord = iterator.next();
+                String readHeader = samRecord.getReadName();
+                String leftHeader = readHeader.concat(" 1:N:0:");
+                String rightHeader = readHeader.concat(" 2:N:0:");
                 String scaffold = samRecord.getReferenceName();
                 if (!mappingStats.containsKey(scaffold))
                 {
@@ -87,7 +90,7 @@ public class MappedSamRecords
                         //if so, add it to the unmappedPairs HashSet
                         if (mateUnmapped && isLeftRead)
                         {
-                            fq = new FastqRecord(samRecord.getReadName().concat("/1")  , samRecord.getReadString(), "", samRecord.getBaseQualityString());
+                            fq = new FastqRecord(leftHeader, samRecord.getReadString(), "", samRecord.getBaseQualityString());
                             outLeft.write(fq);
                             unmappedPairs.add(samRecord.getReadName());
                             int unmappedPairsCount = mappingStats.get(scaffold).getUnmappedPairs();
@@ -96,12 +99,12 @@ public class MappedSamRecords
                             System.out.println(samRecord.getReadName() + " is unmapped pair");
                         } else if (mateUnmapped && isLeftRead == false)
                         {
-                            fq = new FastqRecord(samRecord.getReadName().concat("/2"), samRecord.getReadString(), "", samRecord.getBaseQualityString());
+                            fq = new FastqRecord(rightHeader, samRecord.getReadString(), "", samRecord.getBaseQualityString());
                             outRight.write(fq);
                         } //if the mate is mapped
                         else if (mateUnmapped == false)
                         {
-                           
+
                             int unmappedSinglesCount = mappingStats.get(scaffold).getUnmappedSingles();
                             unmappedSinglesCount++;
                             mappingStats.get(scaffold).setUnmappedSingles(unmappedSinglesCount);
@@ -111,11 +114,11 @@ public class MappedSamRecords
                             if (isLeft)
                             {
                                 System.out.println(" left-hand read");
-                                fq = new FastqRecord(samRecord.getReadName().concat("/1")  , samRecord.getReadString(), "", samRecord.getBaseQualityString());
+                                fq = new FastqRecord(leftHeader, samRecord.getReadString(), "", samRecord.getBaseQualityString());
                                 outSingles.write(fq);
                             } else
                             {
-                                fq = new FastqRecord(samRecord.getReadName().concat("/2"), samRecord.getReadString(), "", samRecord.getBaseQualityString());
+                                fq = new FastqRecord(rightHeader, samRecord.getReadString(), "", samRecord.getBaseQualityString());
                                 outSingles.write(fq);
                                 System.out.println(" right-hand read");
                             }

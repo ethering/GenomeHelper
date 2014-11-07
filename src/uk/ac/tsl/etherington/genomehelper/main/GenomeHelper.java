@@ -779,7 +779,7 @@ public class GenomeHelper
                 File fastqOutSingles = new File(args[6]);
 
                 MappedSamRecords msr = new MappedSamRecords();
-                msr.getUnmappedReadsFromPairedReads(bamfile, fastqInLeft, fastqInRight, fastqOutLeft, fastqOutRight, fastqOutSingles);
+                msr.getAllPairedUnmappedReadsFromPairedReads(bamfile, fastqInLeft, fastqInRight, fastqOutLeft, fastqOutRight, fastqOutSingles);
             }
         }
         else if (args[0].equalsIgnoreCase("BAMGetMappedReads"))

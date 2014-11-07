@@ -86,7 +86,8 @@ public class GenomeHelper
             System.out.println("\nSAM/BAM-related programs:");
             System.out.println("Usage: BAMGetUnmappedReads bamfile fastqInLeft fastqInRight fastqOutLeft fastqOutRight fastqOutSingles");
             System.out.println("Usage: BAMGetMmappedReads bamfile fastqInLeft fastqInRight fastqOutLeft fastqOutRight fastqOutSingles");
-
+            System.out.println("Usage: BAMPrintReads bamfile fastqInLeft fastqInRight");
+            
             System.out.println("\nGFF-related programs:");
             System.out.println("Usage: GFFGetMeanFeatureLengthWithSplicing gffFile featureName refSeq");
             System.out.println("Usage: GFFGetMeanFeatureLength gffFile featureName");
@@ -804,6 +805,27 @@ public class GenomeHelper
 
                 MappedSamRecords msr = new MappedSamRecords();
                 msr.getMappedReadsFromPairedReads(bamfile, fastqInLeft, fastqInRight, fastqOutLeft, fastqOutRight, fastqOutSingles);
+            }
+        }
+        else if (args[0].equalsIgnoreCase("BAMPrintReads"))
+        {
+            if (args[1].equalsIgnoreCase("-h"))
+            {
+                System.out.println("Usage: BAMGetBothMappedPairedRead bamfile fastqInLeft fastqInRight fastqOutLeft fastqOutRight");
+                System.out.println("Returns the pairs of sequences where both of the pairs have mapped to a genome.");
+                System.out.println("bamfile - the sam or bam file to examin");
+                System.out.println("fastqInLeft - the left-handed reads that were used in the mapping");
+                System.out.println("fastqInRight - the right-handed reads that were used in the mapping");
+
+            } else
+            {
+                File bamfile = new File(args[1]);
+                File fastqInLeft = new File(args[2]);
+                File fastqInRight = new File(args[3]);
+
+
+                MappedSamRecords msr = new MappedSamRecords();
+                msr.printReadsFromBamAndFastq(bamfile, fastqInLeft, fastqInRight);
             }
         }
         

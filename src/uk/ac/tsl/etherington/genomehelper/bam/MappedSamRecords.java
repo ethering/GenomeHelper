@@ -304,7 +304,6 @@ public class MappedSamRecords
 
             }
 
-
             final FastqReader fastqReaderLeft = new FastqReader(fastqInLeft);
             final FastqReader fastqReaderRight = new FastqReader(fastqInRight);
             while (fastqReaderLeft.hasNext())
@@ -341,8 +340,8 @@ public class MappedSamRecords
             outSingles.close();
         }
     }
-    
-     /**
+
+    /**
      * Returns three files, the two paired-end sequence files where both pairs
      * are unmapped and single unmapped reads where only one of a pair are
      * unmapped
@@ -377,7 +376,7 @@ public class MappedSamRecords
                 String readHeader = samRecord.getReadName();
                 String leftHeader = readHeader.concat(" 1:N:0:");
                 String rightHeader = readHeader.concat(" 2:N:0:");
-                
+
                 //is the read unmapped?
                 boolean unmapped = samRecord.getReadUnmappedFlag();
                 //if it is...
@@ -388,7 +387,7 @@ public class MappedSamRecords
                     //if it is paired
                     if (isPaired)
                     {
-                       
+
                         //is it a left-hand read (we want to count pairs, so just count the left-hand reads)
                         boolean isLeftRead = samRecord.getFirstOfPairFlag();
                         //if so, add it to the unmappedPairs HashSet
@@ -396,26 +395,72 @@ public class MappedSamRecords
                         {
                             fq = new FastqRecord(leftHeader, samRecord.getReadString(), "", samRecord.getBaseQualityString());
                             outLeft.write(fq);
-                           
+
                         } else if (isLeftRead == false)
                         {
                             fq = new FastqRecord(rightHeader, samRecord.getReadString(), "", samRecord.getBaseQualityString());
                             outRight.write(fq);
                         } //if the mate is mapped
-                        
+
                     } else//if it's not paired
                     {
                         fq = new FastqRecord(samRecord.getReadName(), samRecord.getReadString(), "", samRecord.getBaseQualityString());
                         outSingles.write(fq);
                     }
 
-                } 
+                }
             }
 
             outLeft.close();
             outRight.close();
             outSingles.close();
         }
+    }
+
+    /**
+     * Returns three files, the two paired-end sequence files where both pairs
+     * are unmapped and single unmapped reads where only one of a pair are
+     * unmapped
+     *
+     * @param bamFile a sam/bam file
+     * @param fastqInLeft the left-hand fastq dataset that was mapped to the
+     * sam/bam file
+     * @param fastqInRight the righ-hand fastq dataset that was mapped to the
+     * sam/bam file
+     * @param fastqOutLeft the left-hand fastq reads where both of the pairs
+     * were unmapped
+     * @param fastqOutRight the right-hand fastq reads where both of the pairs
+     * were unmapped
+     * @param singles - single unmapped reads where the mate was mapped
+     */
+    public void printReadsFromBamAndFastq(File bamFile, File fastqInLeft, File fastqInRight)
+    {
+        try (SAMFileReader samReader = new SAMFileReader(bamFile))
+        {
+            samReader.setValidationStringency(SAMFileReader.ValidationStringency.SILENT);
+            // Open an iterator for the particular sequence
+            SAMRecordIterator iterator = samReader.iterator();
+            System.out.println("Read Headers");
+            while (iterator.hasNext())
+            {
+                SAMRecord samRecord = iterator.next();
+                String readHeader = samRecord.getReadName();
+                System.out.println(readHeader);
+            }
+        }
+        System.out.println("\t\t");
+        final FastqReader fastqReaderLeft = new FastqReader(fastqInLeft);
+        final FastqReader fastqReaderRight = new FastqReader(fastqInRight);
+        while (fastqReaderLeft.hasNext())
+        {
+            FastqRecord leftRecord = fastqReaderLeft.next();
+            FastqRecord rightRecord = fastqReaderRight.next();
+            String leftRead = leftRecord.getReadHeader();
+            System.out.println("Left read " + leftRead);
+            String rightRead = rightRecord.getReadHeader();
+            System.out.println("Fullreadname " + rightRead);
+        }
+
     }
 
     private class ScaffoldMappingStats

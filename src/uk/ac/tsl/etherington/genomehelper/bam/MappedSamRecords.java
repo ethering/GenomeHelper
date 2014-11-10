@@ -50,6 +50,7 @@ public class MappedSamRecords
                 }
             }
         }
+        System.out.println("Found "+unmappedReads.size()+ " unmapped reads");
         return unmappedReads;
     }
 
@@ -199,9 +200,11 @@ public class MappedSamRecords
 
         final FastqReader fastqReaderLeft = new FastqReader(fastqInLeft);
         final FastqReader fastqReaderRight = new FastqReader(fastqInRight);
-
+        
+        int noFound = 0;
         while (fastqReaderLeft.hasNext())
         {
+            
             FastqRecord leftRecord = fastqReaderLeft.next();
             FastqRecord rightRecord = fastqReaderRight.next();
             String fullReadName = leftRecord.getReadHeader();
@@ -210,12 +213,14 @@ public class MappedSamRecords
 
             if (list.contains(readName))
             {
+                noFound++;
                 outLeft.write(leftRecord);
                 outRight.write(rightRecord);
             }
         }
         outLeft.close();
         outRight.close();
+        System.out.println("Found "+noFound + " from "+list.size());
     }
     
         /**

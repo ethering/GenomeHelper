@@ -84,8 +84,9 @@ public class GenomeHelper
             System.out.println("Usage: QCRemoveKmerSingleReads fastqIn fastqOut kmerFile");
 
             System.out.println("\nSAM/BAM-related programs:");
-            System.out.println("Usage: BAMGetPairedUnmappedReads bamfile fastqInLeft fastqInRight fastqOutLeft fastqOutRight fastqOutSingles");
-            System.out.println("Usage: BAMGetPairedMappedReads bamfile fastqInLeft fastqInRight fastqOutLeft fastqOutRight fastqOutSingles");
+            System.out.println("Usage: BAMGetPairedUnmappedReads bamfile fastqInLeft fastqInRight fastqOutLeft fastqOutRight");
+            System.out.println("Usage: BAMGetPairedMappedReads bamfile fastqInLeft fastqInRight fastqOutLeft fastqOutRight");
+            System.out.println("Usage: BAMGetBothPairedUnmappedReads bamfile fastqInLeft fastqInRight fastqOutLeft fastqOutRight");
             System.out.println("Usage: BAMGetSingleUnmappedReads bamfile, fastqInLeft, fastqInRight, fastqSingles");
             System.out.println("Usage: BAMGetSingleMappedReads bamfile, fastqInLeft, fastqInRight, fastqSingles");
 
@@ -803,7 +804,34 @@ public class GenomeHelper
                 HashSet hs = msr.listPairedMappedReadsFromBam(bamfile);
                 msr.writePairedReadsFromHashSet(hs, fastqInLeft, fastqInRight, fastqOutLeft, fastqOutRight);
             }
-        } else if (args[0].equalsIgnoreCase("BAMGetSingleUnmappedReads"))
+        } 
+        
+        else if (args[0].equalsIgnoreCase("BAMGetBothPairedUnmappedReads"))
+        {
+            if (args[1].equalsIgnoreCase("-h"))
+            {
+                System.out.println("Usage: BAMGetBothPairedUnmappedReads bamfile fastqInLeft fastqInRight fastqOutLeft fastqOutRight");
+                System.out.println("Returns the pairs of sequences where both of the pairs are unmapped.");
+                System.out.println("bamfile - the sam or bam file to examin");
+                System.out.println("fastqInLeft - the left-handed reads that were used in the mapping");
+                System.out.println("fastqInRight - the right-handed reads that were used in the mapping");
+                System.out.println("fastqOutLeft - The unmapped left-handed paired reads");
+                System.out.println("fastqOutRight - The unmapped right-handed paired reads");
+            } else
+            {
+                File bamfile = new File(args[1]);
+                File fastqInLeft = new File(args[2]);
+                File fastqInRight = new File(args[3]);
+                File fastqOutLeft = new File(args[4]);
+                File fastqOutRight = new File(args[5]);
+
+                MappedSamRecords msr = new MappedSamRecords();
+                HashSet hs = msr.listPairedMappedReadsFromBam(bamfile);
+                msr.writePairedReadsFromHashSet(hs, fastqInLeft, fastqInRight, fastqOutLeft, fastqOutRight);
+            }
+        }         
+                
+        else if (args[0].equalsIgnoreCase("BAMGetSingleUnmappedReads"))
         {
             if (args[1].equalsIgnoreCase("-h"))
             {

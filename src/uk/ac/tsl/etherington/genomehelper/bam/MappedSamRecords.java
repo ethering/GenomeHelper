@@ -50,7 +50,52 @@ public class MappedSamRecords
                 }
             }
         }
-        System.out.println("Found "+unmappedReads.size()+ " unmapped reads");
+        System.out.println("Found " + unmappedReads.size() + " unmapped reads");
+        return unmappedReads;
+    }
+
+    /**
+     * Returns a HashSet of unmapped reads where either of the paired reads are
+     * unmapped
+     *
+     * @param bamFile a sam/bam file
+     * @return a unique list of unmapped reads
+     */
+    public HashSet listBothPairedUnmappedReadsFromBam(File bamFile)
+    {
+        HashSet<String> unmappedReads = new HashSet<>();
+
+        try (SAMFileReader samReader = new SAMFileReader(bamFile))
+        {
+            samReader.setValidationStringency(SAMFileReader.ValidationStringency.SILENT);
+            // Open an iterator for the particular sequence
+            SAMRecordIterator iterator = samReader.iterator();
+            while (iterator.hasNext())
+            {
+                SAMRecord samRecord = iterator.next();
+                //is the read unmapped?
+                boolean unmapped = samRecord.getReadUnmappedFlag();
+                //if it is...
+                if (unmapped)
+                {
+                    //is it paired
+                    boolean isPaired = samRecord.getReadPairedFlag();
+                    //if it is paired
+                    if (isPaired)
+                    {
+                        //is its mate mapped
+                        boolean mateMapped = samRecord.getMateUnmappedFlag();
+                        //if both it and it's mate are unmapped
+                        if (mateMapped == false)
+                        {
+                            //add it to the list
+                            unmappedReads.add(samRecord.getReadName());
+                        }
+                    }
+                }
+            }
+        }
+        System.out.println("Found " + unmappedReads.size() + " unmapped reads");
         return unmappedReads;
     }
 
@@ -82,7 +127,7 @@ public class MappedSamRecords
                 }
             }
         }
-        System.out.println("Found "+mappedReads.size()+ " mapped reads");
+        System.out.println("Found " + mappedReads.size() + " mapped reads");
         return mappedReads;
     }
 
@@ -131,7 +176,7 @@ public class MappedSamRecords
                 }
             }
         }
-        System.out.println("Found "+unmappedReads.size()+ " mapped reads");
+        System.out.println("Found " + unmappedReads.size() + " mapped reads");
         return unmappedReads;
     }
 
@@ -176,25 +221,24 @@ public class MappedSamRecords
                                 mappedReads.put(samRecord.getReadName(), isLeft);
                             }
                         }
-
                     }
-
                 }
             }
         }
-        System.out.println("Found "+mappedReads.size()+ " mapped reads");
+        System.out.println("Found " + mappedReads.size() + " mapped reads");
         return mappedReads;
     }
 
     /**
-     * 
+     *
      * @param list a HashSet of paired reads
-     * @param fastqInLeft the left-hand fastq reads which contains the reads in list
-     * @param fastqInRight the right-hand fastq reads which contains the reads in list
+     * @param fastqInLeft the left-hand fastq reads which contains the reads in
+     * list
+     * @param fastqInRight the right-hand fastq reads which contains the reads
+     * in list
      * @param fastqOutLeft the output left-hand fastq reads
      * @param fastqOutRight the output right-hand fastq reads
      */
-    
     public void writePairedReadsFromHashSet(HashSet list, File fastqInLeft, File fastqInRight, File fastqOutLeft, File fastqOutRight)
     {
         FastqWriterFactory writer = new FastqWriterFactory();
@@ -203,11 +247,11 @@ public class MappedSamRecords
 
         final FastqReader fastqReaderLeft = new FastqReader(fastqInLeft);
         final FastqReader fastqReaderRight = new FastqReader(fastqInRight);
-        
+
         int noFound = 0;
         while (fastqReaderLeft.hasNext())
         {
-            
+
             FastqRecord leftRecord = fastqReaderLeft.next();
             FastqRecord rightRecord = fastqReaderRight.next();
             String fullReadName = leftRecord.getReadHeader();
@@ -223,17 +267,18 @@ public class MappedSamRecords
         }
         outLeft.close();
         outRight.close();
-        System.out.println("Found "+noFound + " from "+list.size());
+        System.out.println("Found " + noFound + " from " + list.size());
     }
-    
-        /**
-     * 
-     * @param list a HashSet of paired reads
-     * @param fastqInLeft the left-hand fastq reads which contains the reads in list
-     * @param fastqInRight the right-hand fastq reads which contains the reads in list
-     * @param fastqSinglesOut the output  fastq reads
-     */
 
+    /**
+     *
+     * @param list a HashSet of paired reads
+     * @param fastqInLeft the left-hand fastq reads which contains the reads in
+     * list
+     * @param fastqInRight the right-hand fastq reads which contains the reads
+     * in list
+     * @param fastqSinglesOut the output fastq reads
+     */
     public void writeSingleReadsFromHashMap(HashMap<String, Boolean> list, File fastqInLeft, File fastqInRight, File fastqSinglesOut)
     {
         FastqWriterFactory writer = new FastqWriterFactory();
@@ -263,7 +308,7 @@ public class MappedSamRecords
                 noFound++;
             }
         }
-        System.out.println("Found "+noFound + " from "+list.size());
+        System.out.println("Found " + noFound + " from " + list.size());
         out.close();
     }
 

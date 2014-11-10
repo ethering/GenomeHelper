@@ -76,7 +76,7 @@ public class FastaFeatures
     
     /**
      * 
-     * @param refSeq
+     * @param refSeq the reference sequence
      * @return the cumulative length of the provided sequences
      * @throws FileNotFoundException
      * @throws BioException 
@@ -96,7 +96,7 @@ public class FastaFeatures
 
     /**
      * 
-     * @param refSeq
+     * @param refSeq the reference sequence
      * @return a HashMap where the keys are sequence names and the values are int arrays the length of the corresponding sequence, filed with zeros
      * @throws FileNotFoundException
      * @throws BioException 

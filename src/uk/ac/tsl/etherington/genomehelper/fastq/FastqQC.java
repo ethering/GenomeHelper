@@ -277,6 +277,7 @@ public class FastqQC
      * @param fastqFileIn an interlaced fastq file
      * @param leftReadsOut the good left-handed reads
      * @param rightReadsOut the good right-handed reads
+     * @param singles any single reads
      * @param singleEndReadLength the expected length of a single read
      * @param format the fastq format (can only be 'illumina' or 'sanger')
      * @param writeBadSeqs whether to write the bad reads to a file (bad reads
@@ -535,6 +536,7 @@ public class FastqQC
      * and the distribution of read lengths
      *
      * @param fastq the fastq file to analyse
+     * @return the number of reads found with 'N' in the read sequence
      */
     public int countLengthsAndNs(File fastq)
     {

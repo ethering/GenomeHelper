@@ -81,7 +81,7 @@ public class GFFFeatureStats
      * Calculates the length of a genome from collection of int arrays, where
      * each int array is the length of a genome sequence
      *
-     * @param genomeMap
+     * @param genomeMap an integer array of genome sequence lengths
      * @return the size of the genome (in nucleotides)
      */
     public double getGenomeSizeFromIntArrayHashMap(HashMap<String, int[]> genomeMap)

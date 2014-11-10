@@ -24,7 +24,7 @@ public class RandomFasta
      *
      * @param fasta the multi-fasta infile
      * @param numberOfSeqsRequired the number of random sequences required
-     * @param outfile
+     * @param outfile the output sequences
      * @throws Exception
      */
     public void selectRandomSequences(File fasta, int numberOfSeqsRequired, File outfile) throws Exception

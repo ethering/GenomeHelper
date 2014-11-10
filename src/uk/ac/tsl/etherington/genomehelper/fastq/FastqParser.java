@@ -54,9 +54,9 @@ public class FastqParser {
 
     /**
      *
-     * @param fastqReader
-     * @param out
-     * @param mappedReads
+     * @param fastqReader a FastqReader object
+     * @param out - the output fastq reads
+     * @param mappedReads a HashSet of mapped reads
      */
     public static void writeRecords(FastqReader fastqReader, FastqWriter out, HashSet<String> mappedReads) {
         while (fastqReader.hasNext()) {
@@ -116,6 +116,7 @@ public class FastqParser {
      * @param listFile a file of read names, one per line
      * @param fastqFileIn the fastq file to search for the read names
      * @param fastqFileOut the fastq file of found read names
+     * @throws java.io.FileNotFoundException
      *
      */
     public void getOneSideFastqSeqsFromList(File listFile, File fastqFileIn, File fastqFileOut) throws FileNotFoundException, IOException {

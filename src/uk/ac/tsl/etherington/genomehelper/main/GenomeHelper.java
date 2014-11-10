@@ -844,7 +844,7 @@ public class GenomeHelper
                 File fastqSingles = new File(args[4]);
 
                 MappedSamRecords msr = new MappedSamRecords();
-                HashMap hm = msr.listSingleUnmappedReadsFromBam(bamfile);
+                HashMap hm = msr.listSingleMappedReadsFromBam(bamfile);
                 msr.writeSingleReadsFromHashMap(hm, fastqInLeft, fastqInRight, fastqSingles);
             }
         } else if (args[0].equalsIgnoreCase("BAMPrintReads"))

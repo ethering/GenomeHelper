@@ -82,6 +82,7 @@ public class MappedSamRecords
                 }
             }
         }
+        System.out.println("Found "+mappedReads.size()+ " mapped reads");
         return mappedReads;
     }
 
@@ -130,6 +131,7 @@ public class MappedSamRecords
                 }
             }
         }
+        System.out.println("Found "+unmappedReads.size()+ " mapped reads");
         return unmappedReads;
     }
 
@@ -180,6 +182,7 @@ public class MappedSamRecords
                 }
             }
         }
+        System.out.println("Found "+mappedReads.size()+ " mapped reads");
         return mappedReads;
     }
 
@@ -238,7 +241,7 @@ public class MappedSamRecords
 
         final FastqReader fastqReaderLeft = new FastqReader(fastqInLeft);
         final FastqReader fastqReaderRight = new FastqReader(fastqInRight);
-
+        int noFound = 0;
         while (fastqReaderLeft.hasNext())
         {
             FastqRecord leftRecord = fastqReaderLeft.next();
@@ -263,8 +266,10 @@ public class MappedSamRecords
                     FastqRecord newLeftRecord = new FastqRecord(newRightReadName, rightRecord.getReadString(), "", rightRecord.getBaseQualityString());
                     out.write(newLeftRecord);
                 }
+                noFound++;
             }
         }
+        System.out.println("Found "+noFound + " from "+list.size());
         out.close();
     }
 

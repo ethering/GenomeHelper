@@ -259,7 +259,7 @@ public class MappedSamRecords
                 } else
                 {
                     String rightReadName = rightRecord.getReadHeader();
-                    String newRightReadName = rightReadName.concat("1:N:0:");
+                    String newRightReadName = rightReadName.concat("2:N:0:");
                     FastqRecord newLeftRecord = new FastqRecord(newRightReadName, rightRecord.getReadString(), "", rightRecord.getBaseQualityString());
                     out.write(newLeftRecord);
                 }

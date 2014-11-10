@@ -840,8 +840,8 @@ public class GenomeHelper
                 System.out.println("bamfile - the sam or bam file to examin");
                 System.out.println("fastqInLeft - the left-handed reads that were used in the mapping");
                 System.out.println("fastqInRight - the right-handed reads that were used in the mapping");
-                System.out.println("fastqOutLeft - The mapped left-handed paired reads");
-                System.out.println("fastqOutRight - The mapped right-handed paired reads");
+                System.out.println("fastqSingles - The mapped left-handed paired reads");
+
             } else
             {
                 File bamfile = new File(args[1]);

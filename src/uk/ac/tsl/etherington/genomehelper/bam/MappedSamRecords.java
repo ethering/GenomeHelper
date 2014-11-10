@@ -255,16 +255,10 @@ public class MappedSamRecords
                 boolean isLeft = list.get(readName);
                 if (isLeft)
                 {
-                    String leftReadName = leftRecord.getReadHeader();
-                    String newLeftReadName = leftReadName.concat("1:N:0:");
-                    FastqRecord newLeftRecord = new FastqRecord(newLeftReadName, leftRecord.getReadString(), "", leftRecord.getBaseQualityString());
-                    out.write(newLeftRecord);
+                    out.write(leftRecord);
                 } else
                 {
-                    String rightReadName = rightRecord.getReadHeader();
-                    String newRightReadName = rightReadName.concat("2:N:0:");
-                    FastqRecord newLeftRecord = new FastqRecord(newRightReadName, rightRecord.getReadString(), "", rightRecord.getBaseQualityString());
-                    out.write(newLeftRecord);
+                    out.write(rightRecord);
                 }
                 noFound++;
             }

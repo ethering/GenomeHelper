@@ -130,9 +130,8 @@ public class MappedSamRecords
         System.out.println("Found " + mappedReads.size() + " mapped reads");
         return mappedReads;
     }
-    
-    
-/**
+
+    /**
      * Returns a HashSet of mapped reads where both of the paired reads are
      * mapped
      *
@@ -184,7 +183,7 @@ public class MappedSamRecords
      * @param bamFile a sam/bam file
      * @return a unique list of mapped reads
      */
-    public HashMap listSingleUnmappedReadsFromBam(File bamFile)
+    public HashMap listSingleUnmappedPairedReadsFromBam(File bamFile)
     {
         HashMap<String, Boolean> unmappedReads = new HashMap<>();
 
@@ -216,7 +215,51 @@ public class MappedSamRecords
                             {
                                 //add it to the list
                                 unmappedReads.put(samRecord.getReadName(), isLeft);
+                                System.out.println(samRecord.getReadName()+ " " + isLeft);
                             }
+                        }
+                    }
+                }
+            }
+        }
+        System.out.println("Found " + unmappedReads.size() + " mapped reads");
+        return unmappedReads;
+    }
+
+    /**
+     * Returns a HashSet of mapped reads where only one of the paired reads are
+     * mapped
+     *
+     * @param bamFile a sam/bam file
+     * @return a unique list of mapped reads
+     */
+    public HashMap listUnmappedUnpairedReadsFromBam(File bamFile)
+    {
+        HashMap<String, Boolean> unmappedReads = new HashMap<>();
+
+        try (SAMFileReader samReader = new SAMFileReader(bamFile))
+        {
+            samReader.setValidationStringency(SAMFileReader.ValidationStringency.SILENT);
+            // Open an iterator for the particular sequence
+            SAMRecordIterator iterator = samReader.iterator();
+            while (iterator.hasNext())
+            {
+                SAMRecord samRecord = iterator.next();
+                //is the read unmapped?
+                boolean unmapped = samRecord.getReadUnmappedFlag();
+                //if it is...
+                if (unmapped)
+                {
+                    //is it paired
+                    boolean isPaired = samRecord.getReadPairedFlag();
+                    //if it is paired
+                    if (isPaired == false)
+                    {
+                        //is it a left or right read
+                        boolean isLeft = samRecord.getFirstOfPairFlag();
+                        {
+                            //add it to the list
+                            unmappedReads.put(samRecord.getReadName(), isLeft);
                         }
                     }
                 }

@@ -87,7 +87,7 @@ public class GenomeHelper
             System.out.println("Usage: BAMGetPairedUnmappedReads bamfile fastqInLeft fastqInRight fastqOutLeft fastqOutRight");
             System.out.println("Usage: BAMGetPairedMappedReads bamfile fastqInLeft fastqInRight fastqOutLeft fastqOutRight");
             System.out.println("Usage: BAMGetBothPairedUnmappedReads bamfile fastqInLeft fastqInRight fastqOutLeft fastqOutRight");
-            System.out.println("Usage: BAMGetSingleUnmappedReads bamfile, fastqInLeft, fastqInRight, fastqSingles");
+            System.out.println("Usage: BAMGetSingleUnmappedPairedReads bamfile, fastqInLeft, fastqInRight, fastqSingles");
             System.out.println("Usage: BAMGetSingleMappedReads bamfile, fastqInLeft, fastqInRight, fastqSingles");
 
             System.out.println("\nGFF-related programs:");
@@ -831,7 +831,7 @@ public class GenomeHelper
             }
         }         
                 
-        else if (args[0].equalsIgnoreCase("BAMGetSingleUnmappedReads"))
+        else if (args[0].equalsIgnoreCase("BAMGetSingleUnmappedPairedReads"))
         {
             if (args[1].equalsIgnoreCase("-h"))
             {
@@ -850,7 +850,7 @@ public class GenomeHelper
                 File fastqSingles = new File(args[4]);
 
                 MappedSamRecords msr = new MappedSamRecords();
-                HashMap hm = msr.listSingleUnmappedReadsFromBam(bamfile);
+                HashMap hm = msr.listSingleUnmappedPairedReadsFromBam(bamfile);
                 msr.writeSingleReadsFromHashMap(hm, fastqInLeft, fastqInRight, fastqSingles);
             }
         } else if (args[0].equalsIgnoreCase("BAMGetSingleMappedReads"))

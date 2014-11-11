@@ -226,16 +226,16 @@ public class MappedSamRecordsTest
     }
 
     /**
-     * Test of listSingleUnmappedReadsFromBam method, of class MappedSamRecords.
+     * Test of listSingleUnmappedPairedReadsFromBam method, of class MappedSamRecords.
      */
     @Test
-    public void testListSingleUnmappedReadsFromBam()
+    public void testListSingleUnmappedPairedReadsFromBam()
     {
         System.out.println("listSingleUnmappedReadsFromBam");
         File bamFile = null;
         MappedSamRecords instance = new MappedSamRecords();
         HashMap expResult = null;
-        HashMap result = instance.listSingleUnmappedReadsFromBam(bamFile);
+        HashMap result = instance.listSingleUnmappedPairedReadsFromBam(bamFile);
         assertEquals(expResult, result);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");

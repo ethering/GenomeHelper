@@ -7,6 +7,7 @@ package uk.ac.tsl.etherington.genomehelper.bam;
 import java.io.*;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import net.sf.picard.fastq.FastqReader;
 import net.sf.picard.fastq.FastqRecord;
 import net.sf.picard.fastq.FastqWriter;
@@ -29,7 +30,7 @@ public class MappedSamRecords
      * @param bamFile a sam/bam file
      * @return a unique list of unmapped reads
      */
-    public HashSet listPairedUnmappedReadsFromBam(File bamFile)
+    public HashSet listEitherPairedReadUnmappedFromBam(File bamFile)
     {
         HashSet<String> unmappedReads = new HashSet<>();
 
@@ -61,7 +62,7 @@ public class MappedSamRecords
      * @param bamFile a sam/bam file
      * @return a unique list of unmapped reads where both pairs are unmapped
      */
-    public HashSet listBothPairedUnmappedReadsFromBam(File bamFile)
+    public HashSet listBothPairedReadsUnmappedFromBam(File bamFile)
     {
         HashSet<String> unmappedReads = new HashSet<>();
 
@@ -100,16 +101,54 @@ public class MappedSamRecords
     }
 
     /**
-     * Returns a HashSet of unmapped reads where either of the paired reads are
-     * unmapped
+     * Returns a HashSet of reads where both reads are not properly paired
+     *
+     * @param bamFile a sam/bam file
+     * @return a unique list of unmapped reads where both pairs are unmapped
+     */
+    public HashSet listNonProperlyPairedReadsUnmappedFromBam(File bamFile)
+    {
+        HashSet<String> unmappedReads = new HashSet<>();
+
+        try (SAMFileReader samReader = new SAMFileReader(bamFile))
+        {
+            samReader.setValidationStringency(SAMFileReader.ValidationStringency.SILENT);
+            // Open an iterator for the particular sequence
+            SAMRecordIterator iterator = samReader.iterator();
+            while (iterator.hasNext())
+            {
+                SAMRecord samRecord = iterator.next();
+                //is it paired
+                boolean isPaired = samRecord.getReadPairedFlag();
+                //if it is paired
+                if (isPaired)
+                {
+                    //is the read unmapped?
+                    boolean properlyPaired = samRecord.getProperPairFlag();
+                    //if it is...
+                    if (properlyPaired == false)
+                    {
+                        //add it to the list
+                        unmappedReads.add(samRecord.getReadName());
+                    }
+                }
+            }
+        }
+        System.out.println("Found " + unmappedReads.size() + " non-properly paired reads");
+        return unmappedReads;
+    }
+
+    /**
+     * Returns a HashSet of mapped reads where either of the paired reads are
+     * mapped
      *
      * @param bamFile a sam/bam file
      * @return a unique list of mapped reads
      */
-    public HashSet listPairedMappedReadsFromBam(File bamFile)
+    public HashSet listEitherPairedReadMappedFromBam(File bamFile)
     {
         HashSet<String> mappedReads = new HashSet<>();
-
+        int unmappedReads = 0;
         try (SAMFileReader samReader = new SAMFileReader(bamFile))
         {
             samReader.setValidationStringency(SAMFileReader.ValidationStringency.SILENT);
@@ -124,10 +163,11 @@ public class MappedSamRecords
                 if (unmapped == false)
                 {
                     mappedReads.add(samRecord.getReadName());
+                    unmappedReads++;
                 }
             }
         }
-        System.out.println("Found " + mappedReads.size() + " mapped reads");
+        System.out.println("Found " + unmappedReads + " mapped reads from " + mappedReads.size() + " different pairs");
         return mappedReads;
     }
 
@@ -138,7 +178,7 @@ public class MappedSamRecords
      * @param bamFile a sam/bam file
      * @return a unique list of mapped reads where both pairs are mapped
      */
-    public HashSet listBothPairedMappedReadsFromBam(File bamFile)
+    public HashSet listBothPairedReadsMappedFromBam(File bamFile)
     {
         HashSet<String> mappedReads = new HashSet<>();
 
@@ -183,7 +223,7 @@ public class MappedSamRecords
      * @param bamFile a sam/bam file
      * @return a unique list of mapped reads
      */
-    public HashMap listSingleUnmappedPairedReadsFromBam(File bamFile)
+    public HashMap listSinglePairedReadUnmappedFromBam(File bamFile)
     {
         HashMap<String, Boolean> unmappedReads = new HashMap<>();
 
@@ -212,30 +252,35 @@ public class MappedSamRecords
                         {
                             //is it a left or right read
                             boolean isLeft = samRecord.getFirstOfPairFlag();
-                            {
-                                //add it to the list
-                                unmappedReads.put(samRecord.getReadName(), isLeft);
-                                System.out.println(samRecord.getReadName()+ " " + isLeft);
-                            }
+                            //add it to the list
+                            unmappedReads.put(samRecord.getReadName(), isLeft);
+                            //System.out.println(samRecord.getReadName() + " " + isLeft);
                         }
                     }
                 }
             }
+            samReader.close();
         }
+
+//        for (Map.Entry<String, Boolean> entry : unmappedReads.entrySet())
+//        {
+//            String key = entry.getKey();
+//            Boolean value = entry.getValue();
+//            System.out.println("Read, " + key + " isLeft " + value);
+//        }
         System.out.println("Found " + unmappedReads.size() + " mapped reads");
         return unmappedReads;
     }
 
     /**
-     * Returns a HashSet of mapped reads where only one of the paired reads are
-     * mapped
+     * Returns a HashSet of ummapped unpaired reads
      *
      * @param bamFile a sam/bam file
      * @return a unique list of mapped reads
      */
-    public HashMap listUnmappedUnpairedReadsFromBam(File bamFile)
+    public HashSet listUnmappedSingleEndReadsFromBam(File bamFile)
     {
-        HashMap<String, Boolean> unmappedReads = new HashMap<>();
+        HashSet<String> unmappedReads = new HashSet<>();
 
         try (SAMFileReader samReader = new SAMFileReader(bamFile))
         {
@@ -255,12 +300,8 @@ public class MappedSamRecords
                     //if it is paired
                     if (isPaired == false)
                     {
-                        //is it a left or right read
-                        boolean isLeft = samRecord.getFirstOfPairFlag();
-                        {
-                            //add it to the list
-                            unmappedReads.put(samRecord.getReadName(), isLeft);
-                        }
+                        //add it to the list
+                        unmappedReads.add(samRecord.getReadName());
                     }
                 }
             }
@@ -276,9 +317,9 @@ public class MappedSamRecords
      * @param bamFile a sam/bam file
      * @return a unique list of mapped reads
      */
-    public HashMap listSingleMappedReadsFromBam(File bamFile)
+    public HashSet listMappedSingleEndReadsFromBam(File bamFile)
     {
-        HashMap<String, Boolean> mappedReads = new HashMap<>();
+        HashSet<String> mappedReads = new HashSet<>();
 
         try (SAMFileReader samReader = new SAMFileReader(bamFile))
         {
@@ -296,20 +337,10 @@ public class MappedSamRecords
                     //is it paired
                     boolean isPaired = samRecord.getReadPairedFlag();
                     //if it is paired
-                    if (isPaired)
+                    if (isPaired == false)
                     {
-                        //is its mate mapped
-                        boolean mateUnmapped = samRecord.getMateUnmappedFlag();
-                        //if it's mapped and its mate is unmapped
-                        if (mateUnmapped)
-                        {
-                            //is it a left or right read
-                            boolean isLeft = samRecord.getFirstOfPairFlag();
-                            {
-                                //add it to the list
-                                mappedReads.put(samRecord.getReadName(), isLeft);
-                            }
-                        }
+                        //add it to the list
+                        mappedReads.add(samRecord.getReadName());
                     }
                 }
             }
@@ -376,7 +407,13 @@ public class MappedSamRecords
         final FastqReader fastqReaderLeft = new FastqReader(fastqInLeft);
         final FastqReader fastqReaderRight = new FastqReader(fastqInRight);
         int noFound = 0;
-        while (fastqReaderLeft.hasNext())
+        for (Map.Entry<String, Boolean> entry : list.entrySet())
+        {
+            String key = entry.getKey();
+            Boolean value = entry.getValue();
+            System.out.println("Read, " + key + " isLeft " + value);
+        }
+        while (fastqReaderRight.hasNext())
         {
             FastqRecord leftRecord = fastqReaderLeft.next();
             FastqRecord rightRecord = fastqReaderRight.next();
@@ -386,13 +423,19 @@ public class MappedSamRecords
 
             if (list.containsKey(readName))
             {
+                System.out.print("Found " + readName);
+                System.out.println(list.get(readName));
                 boolean isLeft = list.get(readName);
+                System.out.print(" IsLeft? " + isLeft);
                 if (isLeft)
                 {
                     out.write(leftRecord);
+                    System.out.println(" Left");
+
                 } else
                 {
                     out.write(rightRecord);
+                    System.out.println(" Right");
                 }
                 noFound++;
             }
@@ -440,6 +483,31 @@ public class MappedSamRecords
             System.out.println("Fullreadname " + rightRead);
         }
 
+    }
+
+    public void hashSetToTextFile(HashSet hs, File file) throws FileNotFoundException, UnsupportedEncodingException
+    {
+        try (PrintWriter writer = new PrintWriter(file, "UTF-8"))
+        {
+            for (Object hso : hs)
+            {
+                writer.println(hso.toString());
+            }
+            writer.close();
+        }
+
+    }
+
+    public void hashMapToTextFile(HashMap<String, Boolean> hm, File file) throws FileNotFoundException, UnsupportedEncodingException
+    {
+        try (PrintWriter writer = new PrintWriter(file, "UTF-8"))
+        {
+            for (Map.Entry<String, Boolean> entry : hm.entrySet())
+            {
+                writer.println(entry.getKey());
+            }
+            writer.close();
+        }
     }
 
     private class ScaffoldMappingStats

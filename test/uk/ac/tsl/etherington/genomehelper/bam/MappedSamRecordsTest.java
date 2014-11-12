@@ -194,7 +194,7 @@ public class MappedSamRecordsTest
     }
 
     /**
-     * Test of listPairedUnmappedReadsFromBam method, of class MappedSamRecords.
+     * Test of listEitherPairedReadUnmappedFromBam method, of class MappedSamRecords.
      */
     @Test
     public void testListPairedUnmappedReadsFromBam()
@@ -203,14 +203,14 @@ public class MappedSamRecordsTest
         File bamFile = null;
         MappedSamRecords instance = new MappedSamRecords();
         HashSet expResult = null;
-        HashSet result = instance.listPairedUnmappedReadsFromBam(bamFile);
+        HashSet result = instance.listEitherPairedReadUnmappedFromBam(bamFile);
         assertEquals(expResult, result);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }
 
     /**
-     * Test of listPairedMappedReadsFromBam method, of class MappedSamRecords.
+     * Test of listEitherPairedReadMappedFromBam method, of class MappedSamRecords.
      */
     @Test
     public void testListPairedMappedReadsFromBam()
@@ -219,14 +219,14 @@ public class MappedSamRecordsTest
         File bamFile = null;
         MappedSamRecords instance = new MappedSamRecords();
         HashSet expResult = null;
-        HashSet result = instance.listPairedMappedReadsFromBam(bamFile);
+        HashSet result = instance.listEitherPairedReadMappedFromBam(bamFile);
         assertEquals(expResult, result);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }
 
     /**
-     * Test of listSingleUnmappedPairedReadsFromBam method, of class MappedSamRecords.
+     * Test of listSinglePairedReadUnmappedFromBam method, of class MappedSamRecords.
      */
     @Test
     public void testListSingleUnmappedPairedReadsFromBam()
@@ -235,14 +235,14 @@ public class MappedSamRecordsTest
         File bamFile = null;
         MappedSamRecords instance = new MappedSamRecords();
         HashMap expResult = null;
-        HashMap result = instance.listSingleUnmappedPairedReadsFromBam(bamFile);
+        HashMap result = instance.listSinglePairedReadUnmappedFromBam(bamFile);
         assertEquals(expResult, result);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }
 
     /**
-     * Test of listSingleMappedReadsFromBam method, of class MappedSamRecords.
+     * Test of listMappedSingleEndReadsFromBam method, of class MappedSamRecords.
      */
     @Test
     public void testListSingleMappedReadsFromBam()
@@ -251,7 +251,7 @@ public class MappedSamRecordsTest
         File bamFile = null;
         MappedSamRecords instance = new MappedSamRecords();
         HashMap expResult = null;
-        HashMap result = instance.listSingleMappedReadsFromBam(bamFile);
+        HashSet result = instance.listMappedSingleEndReadsFromBam(bamFile);
         assertEquals(expResult, result);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");

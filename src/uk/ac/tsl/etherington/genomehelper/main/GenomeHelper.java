@@ -88,6 +88,8 @@ public class GenomeHelper
             System.out.println("Usage: BAMGetPairedMappedReads bamfile fastqInLeft fastqInRight fastqOutLeft fastqOutRight");
             System.out.println("Usage: BAMGetBothPairedUnmappedReads bamfile fastqInLeft fastqInRight fastqOutLeft fastqOutRight");
             System.out.println("Usage: BAMListBothPairedUnmappedReads bamfile listFile");
+            System.out.println("Usage: BAMListSingleUnmappedPairedReads bamfile listFile");
+            
             
             System.out.println("Usage: BAMGetSingleUnmappedPairedReads bamfile, fastqInLeft, fastqInRight, fastqSingles");
             System.out.println("Usage: BAMGetSingleMappedReads bamfile, fastqInLeft, fastqInRight, fastqSingles");
@@ -876,7 +878,30 @@ public class GenomeHelper
                 HashMap hm = msr.listSinglePairedReadUnmappedFromBam(bamfile);
                 msr.writeSingleReadsFromHashMap(hm, fastqInLeft, fastqInRight, fastqSingles);
             }
-        }  else if (args[0].equalsIgnoreCase("BAMPrintReads"))
+        }  
+        else if (args[0].equalsIgnoreCase("BAMListSingleUnmappedPairedReads"))
+        {
+            if (args[1].equalsIgnoreCase("-h"))
+            {
+                System.out.println("Usage: BAMGetPairedUnmappedReads bamfile fastqInLeft fastqInRight fastqOutLeft fastqOutRight");
+                System.out.println("Returns the reads that are paired but only one of the pair is unmapped.");
+                System.out.println("bamfile - the sam or bam file to examin");
+                System.out.println("fastqInLeft - the left-handed reads that were used in the mapping");
+                System.out.println("fastqInRight - the right-handed reads that were used in the mapping");
+                System.out.println("fastqSingles - The mapped left-handed paired reads");
+
+            } else
+            {
+                File bamfile = new File(args[1]);
+                File outfile = new File(args[2]);
+
+                MappedSamRecords msr = new MappedSamRecords();
+                HashMap hm = msr.listSinglePairedReadUnmappedFromBam(bamfile);
+                msr.hashMapToTextFile(hm, outfile);
+            }
+        }
+        
+        else if (args[0].equalsIgnoreCase("BAMPrintReads"))
         {
             if (args[1].equalsIgnoreCase("-h"))
             {

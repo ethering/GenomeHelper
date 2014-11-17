@@ -261,14 +261,7 @@ public class MappedSamRecords
             }
             samReader.close();
         }
-
-//        for (Map.Entry<String, Boolean> entry : unmappedReads.entrySet())
-//        {
-//            String key = entry.getKey();
-//            Boolean value = entry.getValue();
-//            System.out.println("Read, " + key + " isLeft " + value);
-//        }
-        System.out.println("Found " + unmappedReads.size() + " mapped reads");
+        System.out.println("Found " + unmappedReads.size() + " unmapped reads");
         return unmappedReads;
     }
 
@@ -504,7 +497,16 @@ public class MappedSamRecords
         {
             for (Map.Entry<String, Boolean> entry : hm.entrySet())
             {
-                writer.println(entry.getKey());
+                writer.print(entry.getKey());
+                writer.print('\t');
+                if (entry.setValue(Boolean.TRUE))
+                {
+                    writer.println("1");
+                }
+                else
+                {
+                    writer.println("2");
+                }
             }
             writer.close();
         }

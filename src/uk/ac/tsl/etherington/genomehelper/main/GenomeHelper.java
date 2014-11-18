@@ -268,16 +268,12 @@ public class GenomeHelper
                 System.out.println("readsOut  the file to write the reads to");
             } else
             {
-                boolean includeDNA = false;
-                File in = new File(args[1]);
-                File out = new File(args[2]);
-                if (args.length == 4)
-                {
-                    includeDNA = Boolean.parseBoolean(args[3]);
-                }
-
-                FastqParser fp = new FastqParser();
-                fp.fastqToFastaSixFrameTranslation(in, out, includeDNA);
+                File listfile = new File(args[1]);
+                File leftFastq = new File(args[2]);
+                File rightFastq =new File(args[3]);
+                File out = new File(args[4]);
+                MappedSamRecords msr = new MappedSamRecords();
+                msr.getReadsFromList(listfile, leftFastq, rightFastq, out);
             }
         }
         

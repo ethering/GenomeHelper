@@ -5,6 +5,8 @@ package uk.ac.tsl.etherington.genomehelper.bam;
  * read or its mate (or both) are mapped
  */
 import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -217,8 +219,8 @@ public class MappedSamRecords
     }
 
     /**
-     * Returns a HashSet of mapped reads where only one of the paired reads are
-     * mapped
+     * Returns a HashMap of unmapped reads where only one of the paired reads
+     * are unmapped
      *
      * @param bamFile a sam/bam file
      * @return a unique list of mapped reads
@@ -502,14 +504,79 @@ public class MappedSamRecords
                 if (entry.setValue(Boolean.TRUE))
                 {
                     writer.println("1");
-                }
-                else
+                } else
                 {
                     writer.println("2");
                 }
             }
             writer.close();
         }
+    }
+
+    /**
+     *Takes a tab-delimited file in the format <readname><pair-end>, where pair-end is either '1',
+     * meaning a left-hand (forward) read or '2', meaning a right-hand (reverse) read.
+     * @param file a tab-delimited file containing read-names and pair-end annotation
+     * @param leftFastq - the left-hand reads
+     * @param rightFastq the right-hand reads
+     * @param readsOut the file to write the reads listed in @param file to
+     */
+    public void getReadsFromList(File file, File leftFastq, File rightFastq, File readsOut)
+    {
+        HashSet<String> leftReads = new HashSet();
+        HashSet<String> rightReads = new HashSet();
+
+        Charset charset = Charset.forName("US-ASCII");
+        try (BufferedReader reader = Files.newBufferedReader(file.toPath(), charset))
+        {
+            String line = null;
+            while ((line = reader.readLine()) != null)
+            {
+                System.out.println(line);
+                String[] array = line.split("/t");
+                String readName = array[0];
+                String pair = array[1];
+                if (pair.equals("1"))
+                {
+                    leftReads.add(readName);
+                } else
+                {
+                    rightReads.add(readName);
+                }
+            }
+        } catch (IOException x)
+        {
+            System.err.format("IOException: %s%n", x);
+        }
+        int unmappedReads = leftReads.size() + rightReads.size();
+        System.out.println("There are " + unmappedReads + " unmapped reads");
+
+        FastqWriterFactory writer = new FastqWriterFactory();
+        FastqWriter out = writer.newWriter(readsOut);
+        final FastqReader fastqReaderLeft = new FastqReader(leftFastq);
+        final FastqReader fastqReaderRight = new FastqReader(rightFastq);
+
+        int noFound = 0;
+        while (fastqReaderLeft.hasNext())
+        {
+            FastqRecord leftRecord = fastqReaderLeft.next();
+            FastqRecord rightRecord = fastqReaderRight.next();
+            String fullReadName = leftRecord.getReadHeader();
+            int hashIndex = fullReadName.indexOf(" ");
+            String readName = fullReadName.substring(0, hashIndex);
+            if (leftReads.contains(readName))
+            {
+                out.write(leftRecord);
+                noFound++;
+            }
+            if (rightReads.contains(readName))
+            {
+                out.write(rightRecord);
+                noFound++;
+            }
+
+        }
+        System.out.println("Wrote " + noFound + " reads");
     }
 
     private class ScaffoldMappingStats

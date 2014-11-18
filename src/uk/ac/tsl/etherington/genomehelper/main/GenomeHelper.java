@@ -89,7 +89,7 @@ public class GenomeHelper
             System.out.println("Usage: BAMGetBothPairedUnmappedReads bamfile fastqInLeft fastqInRight fastqOutLeft fastqOutRight");
             System.out.println("Usage: BAMListBothPairedUnmappedReads bamfile listFile");
             System.out.println("Usage: BAMListSingleUnmappedPairedReads bamfile listFile");
-            
+            System.out.println("Usage: GetReadsFromList listFile, leftFastq, rightFastq, readsOut");
             
             System.out.println("Usage: BAMGetSingleUnmappedPairedReads bamfile, fastqInLeft, fastqInRight, fastqSingles");
             System.out.println("Usage: BAMGetSingleMappedReads bamfile, fastqInLeft, fastqInRight, fastqSingles");
@@ -253,7 +253,35 @@ public class GenomeHelper
                     System.err.println("Wrong number of paramters try GenomeHelper.jar FastaGetSingleFromMultiFasta -h for help");
                 }
             }
-        } else if (args[0].equalsIgnoreCase("FastqTranslate"))
+        }
+        
+        else if (args[0].equalsIgnoreCase("GetReadsFromList"))
+        {
+            if (args[1].equalsIgnoreCase("-h"))
+            {
+                System.out.println("Usage: GetReadsFromList listFile, leftFastq, rightFastq, readsOut");
+
+                System.out.println("Takes a tab-delimited file in the format <readname><pair-end>, where pair-end is either '1',meaning a left-hand (forward) read or '2', meaning a right-hand (reverse) read.");
+                System.out.println("listfile - a tab-delimited file containing read-names and pair-end annotation");
+                System.out.println("leftFastq - the left-hand reads");
+                System.out.println("rightFastq the right-hand reads");
+                System.out.println("readsOut  the file to write the reads to");
+            } else
+            {
+                boolean includeDNA = false;
+                File in = new File(args[1]);
+                File out = new File(args[2]);
+                if (args.length == 4)
+                {
+                    includeDNA = Boolean.parseBoolean(args[3]);
+                }
+
+                FastqParser fp = new FastqParser();
+                fp.fastqToFastaSixFrameTranslation(in, out, includeDNA);
+            }
+        }
+        
+        else if (args[0].equalsIgnoreCase("FastqTranslate"))
         {
             if (args[1].equalsIgnoreCase("-h"))
             {
@@ -860,7 +888,7 @@ public class GenomeHelper
         {
             if (args[1].equalsIgnoreCase("-h"))
             {
-                System.out.println("Usage: BAMGetPairedUnmappedReads bamfile fastqInLeft fastqInRight fastqOutLeft fastqOutRight");
+                System.out.println("Usage: BAMGetSingleUnmappedPairedReads bamfile fastqInLeft fastqInRight fastqOutLeft fastqOutRight");
                 System.out.println("Returns the reads that are paired but only one of the pair is unmapped.");
                 System.out.println("bamfile - the sam or bam file to examin");
                 System.out.println("fastqInLeft - the left-handed reads that were used in the mapping");
@@ -883,12 +911,10 @@ public class GenomeHelper
         {
             if (args[1].equalsIgnoreCase("-h"))
             {
-                System.out.println("Usage: BAMGetPairedUnmappedReads bamfile fastqInLeft fastqInRight fastqOutLeft fastqOutRight");
+                System.out.println("Usage: BAMListSingleUnmappedPairedReads bamfile fastqInLeft fastqInRight fastqOutLeft fastqOutRight");
                 System.out.println("Returns the reads that are paired but only one of the pair is unmapped.");
                 System.out.println("bamfile - the sam or bam file to examin");
-                System.out.println("fastqInLeft - the left-handed reads that were used in the mapping");
-                System.out.println("fastqInRight - the right-handed reads that were used in the mapping");
-                System.out.println("fastqSingles - The mapped left-handed paired reads");
+                System.out.println("outfile - the unmapped read headers ('1' denontes left-hand reads, '2' denotes right-hand reads");
 
             } else
             {

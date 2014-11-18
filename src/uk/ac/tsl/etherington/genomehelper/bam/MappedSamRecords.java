@@ -532,8 +532,7 @@ public class MappedSamRecords
             String line = null;
             while ((line = reader.readLine()) != null)
             {
-                System.out.println(line);
-                String[] array = line.split("/t");
+                String[] array = line.split("//t");
                 String readName = array[0];
                 String pair = array[1];
                 if (pair.equals("1"))

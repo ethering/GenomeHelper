@@ -35,7 +35,7 @@ public class FastaFeatures
      * @throws FileNotFoundException exception
      * @throws BioException exception
      */
-    public static HashMap getSequenceLengths(File refSeq) throws FileNotFoundException, BioException, Exception
+    public static HashMap<String, Integer> getSequenceLengths(File refSeq) throws FileNotFoundException, BioException, Exception
     {
 
         HashMap<String, Integer> seqLengths = new HashMap<>();

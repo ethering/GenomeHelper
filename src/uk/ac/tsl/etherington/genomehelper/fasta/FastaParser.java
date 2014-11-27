@@ -7,6 +7,7 @@ package uk.ac.tsl.etherington.genomehelper.fasta;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -14,13 +15,23 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map.Entry;
 import org.biojava.bio.BioException;
+import org.biojava.bio.seq.Sequence;
+import org.biojava.bio.seq.SequenceIterator;
 import org.biojava.bio.symbol.Alphabet;
 import org.biojava.bio.symbol.AlphabetManager;
-import org.biojavax.Namespace;
+import org.biojava3.core.sequence.DNASequence;
+import org.biojava3.core.sequence.compound.DNACompoundSet;
+import org.biojava3.core.sequence.compound.NucleotideCompound;
+import org.biojava3.core.sequence.io.DNASequenceCreator;
+import org.biojava3.core.sequence.io.FastaReader;
+import org.biojava3.core.sequence.io.GenericFastaHeaderParser;
 import org.biojavax.SimpleNamespace;
 import org.biojavax.bio.seq.RichSequence;
 import org.biojavax.bio.seq.RichSequenceIterator;
+import org.biojavax.bio.seq.SimpleRichSequence;
 
 /**
  *
@@ -80,25 +91,21 @@ public class FastaParser
     public void filterFastaByLength(File fastaIn, File fastaOut, int minLength) throws IOException, BioException
     {
         FileWriter fw = new FileWriter(fastaOut.getAbsoluteFile());
-        BufferedWriter bw = new BufferedWriter(fw);
-        OutputStream output = new FileOutputStream(fastaOut);
-        BufferedReader br = new BufferedReader(new FileReader(fastaIn));
-        Alphabet alpha = AlphabetManager.alphabetForName("DNA");
-        SimpleNamespace ns = null;
-
-        RichSequenceIterator iterator = RichSequence.IOTools.readFasta(br,
-                alpha.getTokenization("token"), ns);
-        while (iterator.hasNext())
+        String newLine = System.getProperty("line.separator");
+        FileInputStream inStream = new FileInputStream(fastaIn);
+        FastaReader<DNASequence, NucleotideCompound> fastaReader = new FastaReader<>(inStream,
+                new GenericFastaHeaderParser<DNASequence, NucleotideCompound>(),
+                new DNASequenceCreator(DNACompoundSet.getDNACompoundSet()));
+        LinkedHashMap<String, DNASequence> b = fastaReader.process();
+        for (Entry<String, DNASequence> entry : b.entrySet())
         {
-            RichSequence rec = iterator.nextRichSequence();
-
-            if (rec.seqString().length() >= minLength)
+            //System.out.println(entry.getValue().getOriginalHeader() + "=" + entry.getValue().getSequenceAsString());
+            if (entry.getValue().getSequenceAsString().length() >= minLength)
             {
-                RichSequence.IOTools.writeFasta(output, rec, ns);
-
+                fw.write(">" + entry.getValue().getOriginalHeader() + newLine + entry.getValue().getSequenceAsString()+newLine);
             }
-
         }
-
+        fw.close();
     }
+    
 }

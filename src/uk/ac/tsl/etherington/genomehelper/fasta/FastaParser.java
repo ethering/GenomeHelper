@@ -81,12 +81,10 @@ public class FastaParser
     {
         FileWriter fw = new FileWriter(fastaOut.getAbsoluteFile());
         BufferedWriter bw = new BufferedWriter(fw);
-        String newLine = System.getProperty("line.separator");
         OutputStream output = new FileOutputStream(fastaOut);
-
         BufferedReader br = new BufferedReader(new FileReader(fastaIn));
         Alphabet alpha = AlphabetManager.alphabetForName("DNA");
-        SimpleNamespace ns = new SimpleNamespace("biojava");
+        SimpleNamespace ns = null;
 
         RichSequenceIterator iterator = RichSequence.IOTools.readFasta(br,
                 alpha.getTokenization("token"), ns);

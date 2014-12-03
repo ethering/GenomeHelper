@@ -62,6 +62,8 @@ public class GFFFeatureStats
         FeatureList fl = GFF3Reader.read(gff);
         try
         {
+            getMeanFeatureLength(fl, "transcript");
+            System.out.println("");
             getMeanFeatureLength(fl, "CDS");
             System.out.println("");
             getMeanFeatureLength(fl, "exon");
@@ -381,11 +383,12 @@ public class GFFFeatureStats
         }
         double meanLength = combinedFeatureLength / numberOfFeatures;
         double stdev = getStandardDeviation(featArray);
+        System.out.println("Feature calculated: " + featureName);
+        System.out.println("Mean feature length = " + meanLength);
         System.out.println("Stddev = " + stdev);
         double stderr = getStandardErrorOfMean(stdev, featArray.length);
         System.out.println("Standard error of mean = "+stderr);
-        System.out.println("Feature calculated: " + featureName);
-        System.out.println("Mean feature length = " + meanLength);
+        
         return meanLength;
     }
 

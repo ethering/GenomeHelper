@@ -57,7 +57,7 @@ public class GFFFeatureStats
 
         HashMap<String, int[]> genomeMap = new HashMap<>(FastaFeatures.getSequenceAsIntArray(refSeq));
         double genomeSize = getGenomeSizeFromIntArrayHashMap(genomeMap);
-        double genomeMb = genomeSize / 1048576;
+        double genomeMb = genomeSize / 1000000;
         System.out.println("Genome size = " + genomeSize + "(" + genomeMb + "MB)");
         FeatureList fl = GFF3Reader.read(gff);
         try

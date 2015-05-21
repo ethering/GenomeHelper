@@ -99,16 +99,4 @@ public class Interval
 
     }
 
-    public static void main(String[] args)
-    {
-        //File bamFile = new File("/Users/ethering/temp/test_data/genomehelper/SRR1508214_scaffold_unmapped_100_merged_reheader.bam");
-        //File outFile = new File("/Users/ethering/temp/test_data/genomehelper/SRR1508214_scaffold_unmapped_100_merged_reheader_out.bam");
-        //File gatkInteval = new File("/Users/ethering/temp/test_data/genomehelper/interval.txt");
-        //File options = new File("/Users/ethering/temp/test_data/genomehelper/options.txt");
-        File bamFile = new File(args[0]);
-        File gatkInteval = new File(args[1]);
-        Interval i = new Interval();
-        i.gatkToSamInterval(bamFile, gatkInteval);
-    }
-
 }

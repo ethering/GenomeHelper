@@ -4,7 +4,6 @@
  */
 package uk.ac.tsl.etherington.genomehelper.fastq;
 
-import uk.ac.tsl.etherington.genomehelper.fastq.FastqInterlacer;
 import java.io.File;
 import java.io.IOException;
 import org.junit.AfterClass;

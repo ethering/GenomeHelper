@@ -4,7 +4,6 @@
  */
 package uk.ac.tsl.etherington.genomehelper.fasta;
 
-import uk.ac.tsl.etherington.genomehelper.fasta.ContigPosition;
 import java.util.ArrayList;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;

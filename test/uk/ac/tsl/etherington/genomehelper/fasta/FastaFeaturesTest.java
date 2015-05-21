@@ -4,7 +4,6 @@
  */
 package uk.ac.tsl.etherington.genomehelper.fasta;
 
-import uk.ac.tsl.etherington.genomehelper.fasta.FastaFeatures;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Iterator;

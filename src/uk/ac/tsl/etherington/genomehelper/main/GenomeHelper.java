@@ -27,6 +27,7 @@ import uk.ac.tsl.etherington.genomehelper.fastq.FastqMotifFinder;
 import uk.ac.tsl.etherington.genomehelper.fastq.FastqParser;
 import uk.ac.tsl.etherington.genomehelper.fastq.FastqQC;
 import uk.ac.tsl.etherington.genomehelper.gff.GFFFeatureStats;
+import uk.ac.tsl.etherington.genomehelper.utils.Interval;
 
 /**
  *
@@ -1128,7 +1129,30 @@ public class GenomeHelper
                 GFFFeatureStats gffs = new GFFFeatureStats();
                 gffs.getStats(gffFile, refSeq, attribute);
             }
-        } else
+        }
+        else if (args[0].equalsIgnoreCase("gatkToSamInterval"))
+        {
+            if (args[1].equalsIgnoreCase("-h"))
+            {
+                System.out.println("Usage: gatkToSamInterval bamFile");
+                System.out.println("Calculates the mean length of any CDS, exons and introns in a gff file.");
+                System.out.println("gffFile - the gff or gtf file in which the features are stored");
+                System.out.println("refSeq - the reference sequence for the gff file");
+                System.out.println("attribute - the name of the attribute that will make the genes unique (e.g. 'name', 'gene_id', etc))");
+            } else
+            {
+                File bamFile = new File(args[1]);
+                File interval = new File(args[2]);
+                
+                Interval i = new Interval();
+                i.gatkToSamInterval(bamFile, interval);
+            }
+        }
+        
+                
+        
+        
+        else
         {
             System.err.println("Unknow program, use GenomeHelper.jar -h for help");
             System.exit(0);

@@ -4,14 +4,13 @@
  */
 package uk.ac.tsl.etherington.genomehelper.fastq;
 
-import uk.ac.tsl.etherington.genomehelper.fastq.FastqQC;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import net.sf.picard.fastq.FastqRecord;
-import net.sf.picard.util.FastqQualityFormat;
+import htsjdk.samtools.fastq.FastqRecord;
+import htsjdk.samtools.util.FastqQualityFormat;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;

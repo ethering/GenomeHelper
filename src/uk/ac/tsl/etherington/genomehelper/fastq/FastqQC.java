@@ -4,6 +4,7 @@
  */
 package uk.ac.tsl.etherington.genomehelper.fastq;
 
+import htsjdk.samtools.SAMUtils;
 import java.io.File;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -11,13 +12,13 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
-import net.sf.picard.fastq.FastqReader;
-import net.sf.picard.fastq.FastqRecord;
-import net.sf.picard.fastq.FastqWriter;
-import net.sf.picard.fastq.FastqWriterFactory;
-import net.sf.picard.util.FastqQualityFormat;
-import net.sf.picard.util.QualityEncodingDetector;
-import net.sf.picard.util.SolexaQualityConverter;
+import htsjdk.samtools.fastq.FastqReader;
+import htsjdk.samtools.fastq.FastqRecord;
+import htsjdk.samtools.fastq.FastqWriter;
+import htsjdk.samtools.fastq.FastqWriterFactory;
+import htsjdk.samtools.util.FastqQualityFormat;
+import htsjdk.samtools.util.QualityEncodingDetector;
+import htsjdk.samtools.util.SolexaQualityConverter;
 
 /**
  * A Quality Control (QC) class that takes fastq sequences in various structure
@@ -471,7 +472,7 @@ public class FastqQC
         {
             byte[] sangerQuals = record.getBaseQualityString().getBytes();
             SolexaQualityConverter.getSingleton().convertSolexa_1_3_QualityCharsToPhredBinary(sangerQuals);
-            String quality = net.sf.samtools.SAMUtils.phredToFastq(sangerQuals);
+            String quality = SAMUtils.phredToFastq(sangerQuals);
             newseq = new FastqRecord(record.getReadHeader(), record.getReadString(), "", quality);
             return newseq;
         } else if (format.equalsIgnoreCase("sanger"))
@@ -496,7 +497,7 @@ public class FastqQC
     {
         QualityEncodingDetector detector = new QualityEncodingDetector();
         detector.add(record);
-        FastqQualityFormat qual = detector.generateBestGuess(QualityEncodingDetector.FileContext.FASTQ);
+        FastqQualityFormat qual = detector.generateBestGuess(QualityEncodingDetector.FileContext.FASTQ, FastqQualityFormat.Illumina);
         System.out.println("Qualaty encoding: " + qual.toString());
         return qual;
     }

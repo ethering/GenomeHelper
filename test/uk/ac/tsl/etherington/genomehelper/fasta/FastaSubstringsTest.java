@@ -4,7 +4,6 @@
  */
 package uk.ac.tsl.etherington.genomehelper.fasta;
 
-import uk.ac.tsl.etherington.genomehelper.fasta.FastaSubstrings;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;

@@ -3,7 +3,7 @@ package uk.ac.tsl.etherington.genomehelper.fasta;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Objects;
-import net.sf.samtools.SAMRecord;
+import htsjdk.samtools.SAMRecord;
 
 /**
  * This class represents the co-ordinates of any feature or region of a contig,

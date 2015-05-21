@@ -10,13 +10,10 @@ import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import net.sf.picard.fastq.FastqReader;
-import net.sf.picard.fastq.FastqRecord;
-import net.sf.picard.fastq.FastqWriter;
-import net.sf.picard.fastq.FastqWriterFactory;
-import net.sf.samtools.SAMFileReader;
-import net.sf.samtools.SAMRecord;
-import net.sf.samtools.SAMRecordIterator;
+import htsjdk.samtools.fastq.*;
+import htsjdk.samtools.SamReaderFactory;
+import htsjdk.samtools.SAMRecord;
+import htsjdk.samtools.SamReader;
 
 /**
  *
@@ -35,24 +32,19 @@ public class MappedSamRecords
     public HashSet listEitherPairedReadUnmappedFromBam(File bamFile)
     {
         HashSet<String> unmappedReads = new HashSet<>();
-
-        try (SAMFileReader samReader = new SAMFileReader(bamFile))
+        final SamReader reader = SamReaderFactory.makeDefault().open(bamFile);
+        //USE SamReaderFactory
+        for (final SAMRecord samRecord : reader)
         {
-            samReader.setValidationStringency(SAMFileReader.ValidationStringency.SILENT);
-            // Open an iterator for the particular sequence
-            SAMRecordIterator iterator = samReader.iterator();
-            while (iterator.hasNext())
+            //is the read unmapped?
+            boolean unmapped = samRecord.getReadUnmappedFlag();
+            //if it is...
+            if (unmapped)
             {
-                SAMRecord samRecord = iterator.next();
-                //is the read unmapped?
-                boolean unmapped = samRecord.getReadUnmappedFlag();
-                //if it is...
-                if (unmapped)
-                {
-                    unmappedReads.add(samRecord.getReadName());
-                }
+                unmappedReads.add(samRecord.getReadName());
             }
         }
+
         System.out.println("Found " + unmappedReads.size() + " unmapped reads");
         return unmappedReads;
     }
@@ -68,35 +60,31 @@ public class MappedSamRecords
     {
         HashSet<String> unmappedReads = new HashSet<>();
 
-        try (SAMFileReader samReader = new SAMFileReader(bamFile))
+        final SamReader reader = SamReaderFactory.makeDefault().open(bamFile);
+        //USE SamReaderFactory
+        for (final SAMRecord samRecord : reader)
         {
-            samReader.setValidationStringency(SAMFileReader.ValidationStringency.SILENT);
-            // Open an iterator for the particular sequence
-            SAMRecordIterator iterator = samReader.iterator();
-            while (iterator.hasNext())
+            //is the read unmapped?
+            boolean unmapped = samRecord.getReadUnmappedFlag();
+            //if it is...
+            if (unmapped)
             {
-                SAMRecord samRecord = iterator.next();
-                //is the read unmapped?
-                boolean unmapped = samRecord.getReadUnmappedFlag();
-                //if it is...
-                if (unmapped)
+                //is it paired
+                boolean isPaired = samRecord.getReadPairedFlag();
+                //if it is paired
+                if (isPaired)
                 {
-                    //is it paired
-                    boolean isPaired = samRecord.getReadPairedFlag();
-                    //if it is paired
-                    if (isPaired)
+                    //is its mate mapped
+                    boolean mateUnmapped = samRecord.getMateUnmappedFlag();
+                    //if both it and it's mate are unmapped
+                    if (mateUnmapped)
                     {
-                        //is its mate mapped
-                        boolean mateUnmapped = samRecord.getMateUnmappedFlag();
-                        //if both it and it's mate are unmapped
-                        if (mateUnmapped)
-                        {
-                            //add it to the list
-                            unmappedReads.add(samRecord.getReadName());
-                        }
+                        //add it to the list
+                        unmappedReads.add(samRecord.getReadName());
                     }
                 }
             }
+
         }
         System.out.println("Found " + unmappedReads.size() + " unmapped reads");
         return unmappedReads;
@@ -112,30 +100,26 @@ public class MappedSamRecords
     {
         HashSet<String> unmappedReads = new HashSet<>();
 
-        try (SAMFileReader samReader = new SAMFileReader(bamFile))
+        final SamReader reader = SamReaderFactory.makeDefault().open(bamFile);
+        //USE SamReaderFactory
+        for (final SAMRecord samRecord : reader)
         {
-            samReader.setValidationStringency(SAMFileReader.ValidationStringency.SILENT);
-            // Open an iterator for the particular sequence
-            SAMRecordIterator iterator = samReader.iterator();
-            while (iterator.hasNext())
+            //is it paired
+            boolean isPaired = samRecord.getReadPairedFlag();
+            //if it is paired
+            if (isPaired)
             {
-                SAMRecord samRecord = iterator.next();
-                //is it paired
-                boolean isPaired = samRecord.getReadPairedFlag();
-                //if it is paired
-                if (isPaired)
+                //is the read unmapped?
+                boolean properlyPaired = samRecord.getProperPairFlag();
+                //if it is...
+                if (properlyPaired == false)
                 {
-                    //is the read unmapped?
-                    boolean properlyPaired = samRecord.getProperPairFlag();
-                    //if it is...
-                    if (properlyPaired == false)
-                    {
-                        //add it to the list
-                        unmappedReads.add(samRecord.getReadName());
-                    }
+                    //add it to the list
+                    unmappedReads.add(samRecord.getReadName());
                 }
             }
         }
+
         System.out.println("Found " + unmappedReads.size() + " non-properly paired reads");
         return unmappedReads;
     }
@@ -151,24 +135,20 @@ public class MappedSamRecords
     {
         HashSet<String> mappedReads = new HashSet<>();
         int unmappedReads = 0;
-        try (SAMFileReader samReader = new SAMFileReader(bamFile))
+        final SamReader reader = SamReaderFactory.makeDefault().open(bamFile);
+        //USE SamReaderFactory
+        for (final SAMRecord samRecord : reader)
         {
-            samReader.setValidationStringency(SAMFileReader.ValidationStringency.SILENT);
-            // Open an iterator for the particular sequence
-            SAMRecordIterator iterator = samReader.iterator();
-            while (iterator.hasNext())
+            //is the read unmapped?
+            boolean unmapped = samRecord.getReadUnmappedFlag();
+            //if it is...
+            if (unmapped == false)
             {
-                SAMRecord samRecord = iterator.next();
-                //is the read unmapped?
-                boolean unmapped = samRecord.getReadUnmappedFlag();
-                //if it is...
-                if (unmapped == false)
-                {
-                    mappedReads.add(samRecord.getReadName());
-                    unmappedReads++;
-                }
+                mappedReads.add(samRecord.getReadName());
+                unmappedReads++;
             }
         }
+
         System.out.println("Found " + unmappedReads + " mapped reads from " + mappedReads.size() + " different pairs");
         return mappedReads;
     }
@@ -184,36 +164,32 @@ public class MappedSamRecords
     {
         HashSet<String> mappedReads = new HashSet<>();
 
-        try (SAMFileReader samReader = new SAMFileReader(bamFile))
+        final SamReader reader = SamReaderFactory.makeDefault().open(bamFile);
+        //USE SamReaderFactory
+        for (final SAMRecord samRecord : reader)
         {
-            samReader.setValidationStringency(SAMFileReader.ValidationStringency.SILENT);
-            // Open an iterator for the particular sequence
-            SAMRecordIterator iterator = samReader.iterator();
-            while (iterator.hasNext())
+            //is the read unmapped?
+            boolean unmapped = samRecord.getReadUnmappedFlag();
+            //if it is...
+            if (unmapped == false)
             {
-                SAMRecord samRecord = iterator.next();
-                //is the read unmapped?
-                boolean unmapped = samRecord.getReadUnmappedFlag();
-                //if it is...
-                if (unmapped == false)
+                //is it paired
+                boolean isPaired = samRecord.getReadPairedFlag();
+                //if it is paired
+                if (isPaired)
                 {
-                    //is it paired
-                    boolean isPaired = samRecord.getReadPairedFlag();
-                    //if it is paired
-                    if (isPaired)
+                    //is its mate mapped
+                    boolean mateUnmapped = samRecord.getMateUnmappedFlag();
+                    //if both it and it's mate are unmapped
+                    if (mateUnmapped == false)
                     {
-                        //is its mate mapped
-                        boolean mateUnmapped = samRecord.getMateUnmappedFlag();
-                        //if both it and it's mate are unmapped
-                        if (mateUnmapped == false)
-                        {
-                            //add it to the list
-                            mappedReads.add(samRecord.getReadName());
-                        }
+                        //add it to the list
+                        mappedReads.add(samRecord.getReadName());
                     }
                 }
             }
         }
+
         System.out.println("Found " + mappedReads.size() + " unmapped reads");
         return mappedReads;
     }
@@ -229,40 +205,37 @@ public class MappedSamRecords
     {
         HashMap<String, Boolean> unmappedReads = new HashMap<>();
 
-        try (SAMFileReader samReader = new SAMFileReader(bamFile))
+        final SamReader reader = SamReaderFactory.makeDefault().open(bamFile);
+        //USE SamReaderFactory
+        for (final SAMRecord samRecord : reader)
         {
-            samReader.setValidationStringency(SAMFileReader.ValidationStringency.SILENT);
-            // Open an iterator for the particular sequence
-            SAMRecordIterator iterator = samReader.iterator();
-            while (iterator.hasNext())
+            //is the read unmapped?
+            boolean unmapped = samRecord.getReadUnmappedFlag();
+            //if it is...
+            if (unmapped)
             {
-                SAMRecord samRecord = iterator.next();
-                //is the read unmapped?
-                boolean unmapped = samRecord.getReadUnmappedFlag();
-                //if it is...
-                if (unmapped)
+                //is it paired
+                boolean isPaired = samRecord.getReadPairedFlag();
+                //if it is paired
+                if (isPaired)
                 {
-                    //is it paired
-                    boolean isPaired = samRecord.getReadPairedFlag();
-                    //if it is paired
-                    if (isPaired)
+                    //is its mate mapped
+                    boolean mateUnmapped = samRecord.getMateUnmappedFlag();
+                    //if it's unmapped and its mate is mapped
+                    if (mateUnmapped == false)
                     {
-                        //is its mate mapped
-                        boolean mateUnmapped = samRecord.getMateUnmappedFlag();
-                        //if it's unmapped and its mate is mapped
-                        if (mateUnmapped == false)
-                        {
-                            //is it a left or right read
-                            boolean isLeft = samRecord.getFirstOfPairFlag();
-                            //add it to the list
-                            unmappedReads.put(samRecord.getReadName(), isLeft);
-                            //System.out.println(samRecord.getReadName() + " " + isLeft);
-                        }
+                        //is it a left or right read
+                        boolean isLeft = samRecord.getFirstOfPairFlag();
+                        //add it to the list
+                        unmappedReads.put(samRecord.getReadName(), isLeft);
+                        //System.out.println(samRecord.getReadName() + " " + isLeft);
                     }
                 }
             }
-            samReader.close();
         }
+
+
+
         System.out.println("Found " + unmappedReads.size() + " unmapped reads");
         return unmappedReads;
     }
@@ -277,14 +250,10 @@ public class MappedSamRecords
     {
         HashSet<String> unmappedReads = new HashSet<>();
 
-        try (SAMFileReader samReader = new SAMFileReader(bamFile))
+        final SamReader reader = SamReaderFactory.makeDefault().open(bamFile);
+        //USE SamReaderFactory
+        for (final SAMRecord samRecord : reader)
         {
-            samReader.setValidationStringency(SAMFileReader.ValidationStringency.SILENT);
-            // Open an iterator for the particular sequence
-            SAMRecordIterator iterator = samReader.iterator();
-            while (iterator.hasNext())
-            {
-                SAMRecord samRecord = iterator.next();
                 //is the read unmapped?
                 boolean unmapped = samRecord.getReadUnmappedFlag();
                 //if it is...
@@ -300,7 +269,7 @@ public class MappedSamRecords
                     }
                 }
             }
-        }
+        
         System.out.println("Found " + unmappedReads.size() + " mapped reads");
         return unmappedReads;
     }
@@ -316,14 +285,10 @@ public class MappedSamRecords
     {
         HashSet<String> mappedReads = new HashSet<>();
 
-        try (SAMFileReader samReader = new SAMFileReader(bamFile))
+       final SamReader reader = SamReaderFactory.makeDefault().open(bamFile);
+        //USE SamReaderFactory
+        for (final SAMRecord samRecord : reader)
         {
-            samReader.setValidationStringency(SAMFileReader.ValidationStringency.SILENT);
-            // Open an iterator for the particular sequence
-            SAMRecordIterator iterator = samReader.iterator();
-            while (iterator.hasNext())
-            {
-                SAMRecord samRecord = iterator.next();
                 //is the read unmapped?
                 boolean unmapped = samRecord.getReadUnmappedFlag();
                 //if it is...
@@ -339,7 +304,7 @@ public class MappedSamRecords
                     }
                 }
             }
-        }
+        
         System.out.println("Found " + mappedReads.size() + " mapped reads");
         return mappedReads;
     }
@@ -452,18 +417,13 @@ public class MappedSamRecords
      */
     public void printReadsFromBamAndFastq(File bamFile, File fastqInLeft, File fastqInRight)
     {
-        try (SAMFileReader samReader = new SAMFileReader(bamFile))
+        final SamReader reader = SamReaderFactory.makeDefault().open(bamFile);
+        //USE SamReaderFactory
+        for (final SAMRecord samRecord : reader)
         {
-            samReader.setValidationStringency(SAMFileReader.ValidationStringency.SILENT);
-            // Open an iterator for the particular sequence
-            SAMRecordIterator iterator = samReader.iterator();
-            System.out.println("Read Headers");
-            while (iterator.hasNext())
-            {
-                SAMRecord samRecord = iterator.next();
                 String readHeader = samRecord.getReadName();
                 System.out.println(readHeader);
-            }
+            
         }
         System.out.println("\t\t");
         final FastqReader fastqReaderLeft = new FastqReader(fastqInLeft);
@@ -514,9 +474,12 @@ public class MappedSamRecords
     }
 
     /**
-     *Takes a tab-delimited file in the format <readname><pair-end>, where pair-end is either '1',
-     * meaning a left-hand (forward) read or '2', meaning a right-hand (reverse) read.
-     * @param file a tab-delimited file containing read-names and pair-end annotation
+     * Takes a tab-delimited file in the format <readname><pair-end>, where
+     * pair-end is either '1', meaning a left-hand (forward) read or '2',
+     * meaning a right-hand (reverse) read.
+     *
+     * @param file a tab-delimited file containing read-names and pair-end
+     * annotation
      * @param leftFastq - the left-hand reads
      * @param rightFastq the right-hand reads
      * @param readsOut the file to write the reads listed in @param file to

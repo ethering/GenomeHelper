@@ -4,7 +4,6 @@
  */
 package uk.ac.tsl.etherington.genomehelper.fastq;
 
-import uk.ac.tsl.etherington.genomehelper.fastq.FastqCompression;
 import java.io.File;
 import java.io.RandomAccessFile;
 import java.util.zip.GZIPInputStream;

@@ -4,7 +4,6 @@
  */
 package uk.ac.tsl.etherington.genomehelper.fasta;
 
-import uk.ac.tsl.etherington.genomehelper.fasta.FastaMotifFinder;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;

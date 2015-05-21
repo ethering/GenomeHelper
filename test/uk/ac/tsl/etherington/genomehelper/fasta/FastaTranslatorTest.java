@@ -4,8 +4,6 @@
  */
 package uk.ac.tsl.etherington.genomehelper.fasta;
 
-import uk.ac.tsl.etherington.genomehelper.fasta.FastaTranslator;
-import java.io.File;
 import org.biojava3.core.sequence.AccessionID;
 import org.biojava3.core.sequence.DNASequence;
 import org.biojava3.core.sequence.ProteinSequence;

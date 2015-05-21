@@ -4,11 +4,10 @@
  */
 package uk.ac.tsl.etherington.genomehelper.fastq;
 
-import uk.ac.tsl.etherington.genomehelper.fastq.FastqParser;
 import java.io.File;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import net.sf.picard.fastq.FastqRecord;
+import htsjdk.samtools.fastq.FastqRecord;
 import org.biojava3.core.sequence.DNASequence;
 import org.biojava3.core.sequence.ProteinSequence;
 import org.biojava3.core.sequence.io.FastaReaderHelper;

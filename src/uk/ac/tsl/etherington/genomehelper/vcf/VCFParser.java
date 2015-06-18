@@ -61,6 +61,7 @@ public class VCFParser
         ArrayList<Double> doubleDP = new ArrayList<>();
         ArrayList<Double> doubleMQ = new ArrayList<>();
         ArrayList<Double> doubleFS = new ArrayList<>();
+        
 
         try (VCFFileReader reader = new VCFFileReader(vcfFile.toPath()))
         {
@@ -80,29 +81,42 @@ public class VCFParser
                 doubleFS.add(Double.parseDouble(stringStrandBias));
             }
         }
-
+        
+        double qualTotal = 0;
         double[] quals = new double[doubleQuals.size()];
         for (int i = 0; i < quals.length; i++)
         {
             quals[i] = doubleQuals.get(i);
+            qualTotal+=quals[i];
         }
-
+        double qualMean = qualTotal/quals.length;
+        
+        double covTotal = 0;
         double[] covs = new double[doubleDP.size()];
         for (int i = 0; i < covs.length; i++)
         {
             covs[i] = doubleDP.get(i);
+            covTotal+=covs[i];
         }
+        double covsMean = covTotal/covs.length;
+        
+        double mqlTotal = 0;
         double[] mapQuals = new double[doubleMQ.size()];
         for (int i = 0; i < mapQuals.length; i++)
         {
             mapQuals[i] = doubleMQ.get(i);
+            mqlTotal+=mapQuals[i];
         }
+        double mqMean = mqlTotal/mapQuals.length;
 
+        double sbTotal = 0;
         double[] strandBias = new double[doubleFS.size()];
         for (int i = 0; i < strandBias.length; i++)
         {
             strandBias[i] = doubleFS.get(i);
+            sbTotal+=strandBias[i];
         }
+        double sbMean = sbTotal/strandBias.length;
 
         //HistogramChart qualChart = new HistogramChart("Coverage", "Coverage", "Count", covs);
         //qualChart.view(500, 500);
@@ -112,6 +126,7 @@ public class VCFParser
         Arrays.sort(quals);
         p.setData(quals);
         System.out.println("\nSNP Quality");
+        System.out.println("Mean = " + qualMean);
         System.out.println("Median = " + p.evaluate(50));
         System.out.println("Lower 5 percentile = " + p.evaluate(5));
         System.out.println("Lower 1 percentile = " + p.evaluate(1));
@@ -119,6 +134,7 @@ public class VCFParser
         Arrays.sort(covs);
         p.setData(covs);
         System.out.println("\nCoverage");
+        System.out.println("Mean = " + covsMean);
         System.out.println("Median = " + p.evaluate(50));
         System.out.println("Lower 5 percentile = " + p.evaluate(5));
         System.out.println("Lower 1 percentile = " + p.evaluate(1));
@@ -126,6 +142,7 @@ public class VCFParser
         Arrays.sort(mapQuals);
         p.setData(mapQuals);
         System.out.println("\nMapping quality");
+        System.out.println("Mean = " + mqMean);
         System.out.println("Median = " + p.evaluate(50));
         System.out.println("Lower 5 percentile = " + p.evaluate(5));
         System.out.println("Lower 1 percentile = " + p.evaluate(1));
@@ -133,6 +150,7 @@ public class VCFParser
         Arrays.sort(strandBias);
         p.setData(strandBias);
         System.out.println("\nStrand Bias");
+        System.out.println("Mean = " + sbMean);
         System.out.println("Median = " + p.evaluate(50));
         System.out.println("Lower 5 percentile = " + p.evaluate(5));
         System.out.println("Lower 1 percentile = " + p.evaluate(1));

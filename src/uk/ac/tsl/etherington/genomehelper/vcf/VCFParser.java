@@ -9,15 +9,16 @@ import edu.unc.genomics.VCFEntry;
 import edu.unc.genomics.io.VCFFileReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
+import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
-import org.forester.util.DescriptiveStatistics;
+import org.apache.commons.math3.stat.descriptive.rank.Percentile;
+import umontreal.iro.lecuyer.charts.HistogramChart;
 
 /**
  *
@@ -56,54 +57,87 @@ public class VCFParser
 
     public void calculateGATKParams(File vcfFile) throws IOException
     {
-        // Get a SummaryStatistics instance
-        SummaryStatistics qualStats = new SummaryStatistics();
-        SummaryStatistics covStats = new SummaryStatistics();
-        SummaryStatistics mappinQualStats = new SummaryStatistics();
-        SummaryStatistics strandBiasStats = new SummaryStatistics();
+        ArrayList<Double> doubleQuals = new ArrayList<>();
+        ArrayList<Double> doubleDP = new ArrayList<>();
+        ArrayList<Double> doubleMQ = new ArrayList<>();
+        ArrayList<Double> doubleFS = new ArrayList<>();
 
         try (VCFFileReader reader = new VCFFileReader(vcfFile.toPath()))
         {
             for (VCFEntry vcf : reader)
             {
-                
 
                 Map<String, String> info = (Map<String, String>) vcf.getInfo();
-                vcf.getQual();
-                qualStats.addValue(vcf.getQual());
+                doubleQuals.add(vcf.getQual());
+
                 String stringCov = info.get("DP");
-                covStats.addValue(Double.parseDouble(stringCov));
+                doubleDP.add(Double.parseDouble(stringCov));
 
                 String stringMappingQual = info.get("MQ");
-                mappinQualStats.addValue(Double.parseDouble(stringMappingQual));
-                
+                doubleMQ.add(Double.parseDouble(stringMappingQual));
+
                 String stringStrandBias = info.get("FS");
-                strandBiasStats.addValue(Double.parseDouble(stringStrandBias));
+                doubleFS.add(Double.parseDouble(stringStrandBias));
             }
         }
 
+        double[] quals = new double[doubleQuals.size()];
+        for (int i = 0; i < quals.length; i++)
+        {
+            quals[i] = doubleQuals.get(i);
+        }
+
+        double[] covs = new double[doubleDP.size()];
+        for (int i = 0; i < covs.length; i++)
+        {
+            covs[i] = doubleDP.get(i);
+        }
+        double[] mapQuals = new double[doubleMQ.size()];
+        for (int i = 0; i < mapQuals.length; i++)
+        {
+            mapQuals[i] = doubleMQ.get(i);
+        }
+
+        double[] strandBias = new double[doubleFS.size()];
+        for (int i = 0; i < strandBias.length; i++)
+        {
+            strandBias[i] = doubleFS.get(i);
+        }
+
+        //HistogramChart qualChart = new HistogramChart("Coverage", "Coverage", "Count", covs);
+        //qualChart.view(500, 500);
         // Compute the statistics
-        double meanQual = qualStats.getMean();
-        double stdQual = qualStats.getStandardDeviation();
-        double lowerBoundQual = meanQual - stdQual;
+        Percentile p = new Percentile();
+
+        Arrays.sort(quals);
+        p.setData(quals);
+        System.out.println("\nSNP Quality");
+        System.out.println("Median = " + p.evaluate(50));
+        System.out.println("Lower 5 percentile = " + p.evaluate(5));
+        System.out.println("Lower 1 percentile = " + p.evaluate(1));
+
+        Arrays.sort(covs);
+        p.setData(covs);
+        System.out.println("\nCoverage");
+        System.out.println("Median = " + p.evaluate(50));
+        System.out.println("Lower 5 percentile = " + p.evaluate(5));
+        System.out.println("Lower 1 percentile = " + p.evaluate(1));
+
+        Arrays.sort(mapQuals);
+        p.setData(mapQuals);
+        System.out.println("\nMapping quality");
+        System.out.println("Median = " + p.evaluate(50));
+        System.out.println("Lower 5 percentile = " + p.evaluate(5));
+        System.out.println("Lower 1 percentile = " + p.evaluate(1));
         
-        double meanCov = covStats.getMean();
-        double stdCov = covStats.getStandardDeviation();
-        double lowerBoundCov = meanCov - stdCov;
+        Arrays.sort(strandBias);
+        p.setData(strandBias);
+        System.out.println("\nStrand Bias");
+        System.out.println("Median = " + p.evaluate(50));
+        System.out.println("Lower 5 percentile = " + p.evaluate(5));
+        System.out.println("Lower 1 percentile = " + p.evaluate(1));
         
-        double meanMappinQual = mappinQualStats.getMean();
-        double stdMappinQual = mappinQualStats.getStandardDeviation();
-        double lowerBoundMappingQual = meanMappinQual - stdMappinQual;
-        
-        double meanStrandBias = strandBiasStats.getMean();
-        double stdStrandBias = strandBiasStats.getStandardDeviation();
-        double lowerBoundStrandBias = meanStrandBias - stdStrandBias;        
-        
-        System.out.println("Genotype quality: Mean = "+meanQual + " stddev = "+stdQual + " Lower bound = "+lowerBoundQual);
-        System.out.println("Approximate read depth: Mean = "+meanCov +" stddev = "+stdCov + " Lower bound = "+lowerBoundCov);
-        System.out.println("Mapping quality: Mean = "+meanMappinQual +" stddev = "+stdMappinQual + " Lower bound = "+lowerBoundMappingQual);
-        System.out.println("Phred-scaled p-value using Fisher's exact test to detect strand bias:"
-                + "Mean = "+meanStrandBias +" stddev = "+stdStrandBias + " Lower bound = "+lowerBoundStrandBias);
+
     }
 
     public void printHeterozygotes(File vcfFile) throws IOException

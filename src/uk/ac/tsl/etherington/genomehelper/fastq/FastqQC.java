@@ -241,9 +241,7 @@ public class FastqQC
                 {
                     FastqRecord seq = groomRead(rightSeqRecord, format);
                     singleSeqs.write(seq);
-                } 
-                
-                else if (writeBadSeqs)
+                } else if (writeBadSeqs)
                 {
                     if (leftGood == false && rightGood == false)
                     {
@@ -266,14 +264,14 @@ public class FastqQC
         {
             badSeqs.close();
         }
-        
+
         System.out.println("Completed writing " + itCounter + " good reads");
     }
 
     /**
      * Removes pairs of reads where at least one of the pair contains short/long
-     * reads or a read that contain an 'N', from an interlaced fastq file and writes
-     * the resulting good reads to two separate paired-end files
+     * reads or a read that contain an 'N', from an interlaced fastq file and
+     * writes the resulting good reads to two separate paired-end files
      *
      * @param fastqFileIn an interlaced fastq file
      * @param leftReadsOut the good left-handed reads
@@ -381,8 +379,9 @@ public class FastqQC
         if (checkFormat(format) == true)
         {
             //create an interator for each file
-            
-            for (FastqRecord seqRecord : fq) {
+
+            for (FastqRecord seqRecord : fq)
+            {
                 int seqLength = seqRecord.getReadString().length();
                 String readString = seqRecord.getReadString();
                 boolean containsN = readString.toLowerCase().contains("n");
@@ -439,8 +438,9 @@ public class FastqQC
         if (checkFormat(format) == true)
         {
             //create an interator for the interlaced file
-            
-            for (FastqRecord seqRecord : fq) {
+
+            for (FastqRecord seqRecord : fq)
+            {
                 boolean goodRead = checkLengthAndContent(seqRecord, singleEndReadLength);
 
                 if (goodRead)
@@ -528,7 +528,7 @@ public class FastqQC
         String readsString = formatter.format(reads);
         String ntString = formatter.format(nucleotides);
         System.out.println("No. of reads\tNucleotide count");
-        System.out.println(readsString +"\t" + ntString);
+        System.out.println(readsString + "\t" + ntString);
         return nucleotides;
     }
 
@@ -753,6 +753,59 @@ public class FastqQC
             }
         }
         return goodSeq;
+    }
+
+    /**
+     * Removes pairs of reads where at least one of the pair contains short/long
+     * reads or a read that contain an 'N', from paired-end fastq files.
+     * Optionally writes bad reads to a file.
+     *
+     * @param leftFastqFileIn the left-handed reads
+     * @param rightFastqFileIn the right-handed reads
+     * @param leftReadsOut the QCd left-handed reads
+     * @param rightReadsOut the QCd right-handed reads
+
+     */
+    public void removeNsFromPairedReads(File leftFastqFileIn, File rightFastqFileIn, File leftReadsOut, File rightReadsOut)
+    {
+        FastqReader fql = new FastqReader(leftFastqFileIn);
+        FastqReader fqr = new FastqReader(rightFastqFileIn);
+
+        FastqWriterFactory writer = new FastqWriterFactory();
+        FastqWriter goodLeftSeqs = writer.newWriter(leftReadsOut);
+        FastqWriter goodRightSeqs = writer.newWriter(rightReadsOut);
+
+        int itCounterAll = 0;
+        int itCounterGood = 0;
+
+        //create an interator for each file
+        Iterator itl = fql.iterator();
+        Iterator itr = fqr.iterator();
+
+        while (itl.hasNext())
+        {
+            itCounterAll++;
+            //get the corresponding reads
+            FastqRecord leftSeqRecord = (FastqRecord) itl.next();
+            FastqRecord rightSeqRecord = (FastqRecord) itr.next();
+            String leftReadString = leftSeqRecord.getReadString();
+            String rightReadString = rightSeqRecord.getReadString();
+            boolean leftContainsN = leftReadString.toLowerCase().contains("n");
+            boolean rightContainsN = rightReadString.toLowerCase().contains("n");
+
+
+            if (!leftContainsN && !rightContainsN)
+            {
+                goodLeftSeqs.write(leftSeqRecord);
+                goodRightSeqs.write(rightSeqRecord);
+                itCounterGood++;
+            } 
+        }
+
+        goodLeftSeqs.close();
+        goodRightSeqs.close();
+
+        System.out.println("Wrote " + itCounterGood + " of " +  itCounterAll +" reads");
     }
 
 //    public static void main(String[] args)

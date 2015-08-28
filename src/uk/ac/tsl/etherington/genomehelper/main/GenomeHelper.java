@@ -50,7 +50,7 @@ public class GenomeHelper
      *
      */
     public static String footer = "\nPlease report issues at https://github.com/ethering/GenomeHelper/issues";
-    
+
     @SuppressWarnings("static-access")
     public static void main(String[] args) throws IOException, CharacterParseException, Exception
     {
@@ -98,6 +98,7 @@ public class GenomeHelper
             System.out.println("\nQuality-control programs:");
             System.out.println("Usage: QCPairedReads fastqInLeft fastqInRight fastqLeftOut fastqrRightOut singleReads readLength format('sanger' or 'illumina') writeBadReads ('true' or 'false')");
             System.out.println("Usage: QCSingleEndReads fastqIn fastqOut readLength format('sanger' or 'illumina') writeBadReads ('true' or 'false')");
+            System.out.println("Usage: RemoveNsFromPairedReads fastqInLeft fastqInRight fastqLeftOut fastqrRightOut");
             System.out.println("Usage: QCInterlacedReads fastqIn fastqOut singleReads readLength format('sanger' or 'illumina') writeBadReads ('true' or 'false')");
             System.out.println("Usage: QCInterlacedReadsToPairs fastqIn fastqLeftOut fastqrRightOut singleReads readLength format('sanger' or 'illumina') writeBadReads ('true' or 'false')");
             System.out.println("Usage: QCJoinedReads fastqIn fastqLeftOut fastqrRightOut readLength format('sanger' or 'illumina') writeBadReads ('true' or 'false')");
@@ -190,11 +191,9 @@ public class GenomeHelper
             FastaMotifFinder fmf = new FastaMotifFinder();
             fmf.findMatches(fastaFile, searchMotif, motifCounts, aaMotifCounts, minCount);
 
-           // }
-        }
-        else if (args[0].equalsIgnoreCase("CalculateGATKparmas"))
+            // }
+        } else if (args[0].equalsIgnoreCase("CalculateGATKparmas"))
         {
-
 
             // create Options object
             Options options = new Options();
@@ -204,10 +203,9 @@ public class GenomeHelper
                     .withDescription("the fasta file to search")
                     .create('f'));
             options.addOption(OptionBuilder.withLongOpt("help").create('h'));
-            
+
             String header = "Calculates the mean and standard lower standard deviations for various vcf fields.\n"
                     + "These can be used for input parameters into the GATK VariantFiltration tool\n";
-            
 
             HelpFormatter formatter = new HelpFormatter();
             formatter.printHelp("CalculateGATKparmas", header, options, footer, false);
@@ -215,13 +213,12 @@ public class GenomeHelper
             CommandLine cmd = parser.parse(options, args);
 
             File in = new File(cmd.getOptionValue("f"));
-            
+
             VCFParser vcfParser = new VCFParser();
             vcfParser.calculateGATKParams(in);
 
-           // }
-        }
-        else if (args[0].equalsIgnoreCase(
+            // }
+        } else if (args[0].equalsIgnoreCase(
                 "FastaGetLongestSubstring"))
         {
             if (args[1].equalsIgnoreCase("-h"))
@@ -769,7 +766,37 @@ public class GenomeHelper
                 FastqQC check = new FastqQC();
                 check.qcInterlacedReads(fastqIn, fastqOut, singles, readLength, format, writeBadReads);
             }
-        } else if (args[0].equalsIgnoreCase(
+        } 
+        
+        else if (args[0].equalsIgnoreCase(
+                "RemoveNsFromPairedReads"))
+        {
+            if (args[1].equalsIgnoreCase("-h"))
+            {
+                System.out.println("Usage: RemoveNsFromPairedReads fastqIn fastqOutLeft fastqOutRight ");
+                System.out.println("Takes fastq paired reads and returns  paired-end reads that contain no 'N',"
+                        + " from single-end fastq files. Expects quality scores in fastqsanger");
+                System.out.println("fastqInLeft - the left-handed reads to QC");
+                System.out.println("fastqInRight - the right-handed reads to QC");
+                System.out.println("fastqOutLeft - the QCd left-handed reads");
+                System.out.println("fastqOutRight - the QCd right-handed reads");
+                
+            } else
+            {
+
+                File fastqInLeft = new File(args[1]);
+                File fastqInRight = new File(args[2]);
+                File fastqOutLeft = new File(args[3]);
+                File fastqOutRight = new File(args[4]);
+                
+               
+                FastqQC check = new FastqQC();
+                check.removeNsFromPairedReads(fastqInLeft, fastqInRight, fastqOutLeft, fastqOutRight);
+            }
+        }
+        
+        
+        else if (args[0].equalsIgnoreCase(
                 "QCSingleEndReads"))
         {
             if (args[1].equalsIgnoreCase("-h"))

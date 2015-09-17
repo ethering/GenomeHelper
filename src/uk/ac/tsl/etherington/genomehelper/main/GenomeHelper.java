@@ -78,6 +78,7 @@ public class GenomeHelper
             System.out.println("Usage: FastaGetSingleFromMultiFasta  infile outfile  seqId subsequence_start (optional) subsequence_end (optional)");
             System.out.println("Usage: FastaSelectRandomSequences fastaIn numberOfRandomSeqs randomSeqsoutfile");
             System.out.println("Usage: FastaToFastq fastaIn fastqOut");
+            System.out.println("Usage: FastaFilterByLength fastaIn fastaOut minLength");
 
             System.out.println("\nFastq-related programs:");
             System.out.println("Usage: FastqCompress fastqIn fastqOut.gz");
@@ -317,8 +318,27 @@ public class GenomeHelper
                 RandomFasta rf = new RandomFasta();
                 rf.selectRandomSequences(infile, noRandSeqs, outfile);
             }
-        } else if (args[0].equalsIgnoreCase(
-                "FastaGetSingleFromMultiFasta"))
+        }
+        else if (args[0].equalsIgnoreCase("FastaFilterByLength"))
+        {
+            if (args[1].equalsIgnoreCase("-h"))
+            {
+                System.out.println("Usage: FastaFilterByLength infile outfile minLength");
+                System.out.println("Filters a fasta file for sequences over a given length.");
+                System.out.println("infile - the multi-asta file from which to select  sequences");
+                System.out.println("outfile - the file containing the chosen sequences");
+                System.out.println("minLength - the minimum length a sequence must be to remain");
+            } else
+            {
+                File infile = new File(args[1]);
+                File outfile = new File(args[2]);
+                int minLength = Integer.parseInt(args[3]);
+                
+                FastaParser fp = new FastaParser();
+                fp.filterFastaByLength(infile, outfile, minLength);
+            }
+        }
+        else if (args[0].equalsIgnoreCase("FastaGetSingleFromMultiFasta"))
         {
             if (args[1].equalsIgnoreCase("-h"))
             {
@@ -766,9 +786,7 @@ public class GenomeHelper
                 FastqQC check = new FastqQC();
                 check.qcInterlacedReads(fastqIn, fastqOut, singles, readLength, format, writeBadReads);
             }
-        } 
-        
-        else if (args[0].equalsIgnoreCase(
+        } else if (args[0].equalsIgnoreCase(
                 "RemoveNsFromPairedReads"))
         {
             if (args[1].equalsIgnoreCase("-h"))
@@ -780,7 +798,7 @@ public class GenomeHelper
                 System.out.println("fastqInRight - the right-handed reads to QC");
                 System.out.println("fastqOutLeft - the QCd left-handed reads");
                 System.out.println("fastqOutRight - the QCd right-handed reads");
-                
+
             } else
             {
 
@@ -788,15 +806,11 @@ public class GenomeHelper
                 File fastqInRight = new File(args[2]);
                 File fastqOutLeft = new File(args[3]);
                 File fastqOutRight = new File(args[4]);
-                
-               
+
                 FastqQC check = new FastqQC();
                 check.removeNsFromPairedReads(fastqInLeft, fastqInRight, fastqOutLeft, fastqOutRight);
             }
-        }
-        
-        
-        else if (args[0].equalsIgnoreCase(
+        } else if (args[0].equalsIgnoreCase(
                 "QCSingleEndReads"))
         {
             if (args[1].equalsIgnoreCase("-h"))

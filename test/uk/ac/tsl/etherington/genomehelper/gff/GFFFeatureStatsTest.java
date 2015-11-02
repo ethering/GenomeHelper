@@ -53,7 +53,7 @@ public class GFFFeatureStatsTest
     {
         System.out.println("getGenomeSizeFromIntArrayHashMap");
         File refSeq = new File("test/test_data_in/piculus_test_refseq.fasta");
-        HashMap<String, int[]> genomeMap = new HashMap<>(FastaFeatures.getSequenceAsIntArray(refSeq));
+        HashMap<String, int[]> genomeMap = new HashMap<>(FastaFeatures.getSequenceAsHashMapIntArray(refSeq));
         GFFFeatureStats instance = new GFFFeatureStats();
         double result = instance.getGenomeSizeFromIntArrayHashMap(genomeMap);
         assertEquals(200, result, 0.0);
@@ -87,7 +87,7 @@ public class GFFFeatureStatsTest
         String featureName = "exon";
         GFFFeatureStats gffs = new GFFFeatureStats();
         FeatureList fl = gffs.getFeatureList(gffFile);
-        HashMap<String, int[]> genomeMap = new HashMap<>(FastaFeatures.getSequenceAsIntArray(refSeq));
+        HashMap<String, int[]> genomeMap = new HashMap<>(FastaFeatures.getSequenceAsHashMapIntArray(refSeq));
         double result = gffs.getMeanFeatureLength(fl, genomeMap, featureName);
         assertEquals(10, result, 0.0);
     }
@@ -107,7 +107,7 @@ public class GFFFeatureStatsTest
 
         GFFFeatureStats gffs = new GFFFeatureStats();
         FeatureList fl = gffs.getFeatureList(gffFile);
-        HashMap<String, int[]> genomeMap = new HashMap<>(FastaFeatures.getSequenceAsIntArray(refSeq));
+        HashMap<String, int[]> genomeMap = new HashMap<>(FastaFeatures.getSequenceAsHashMapIntArray(refSeq));
         double result = gffs.getMeanFeatureLength(fl, genomeMap, featureName, geneIds, attribute);
         assertEquals(10, result, 0.0);
 
@@ -218,7 +218,7 @@ public class GFFFeatureStatsTest
         File refSeq = new File("test/test_data_in/piculus_test_refseq.fasta");
 
         GFFFeatureStats gffs = new GFFFeatureStats();
-        HashMap<String, int[]> genomeMap = new HashMap<>(FastaFeatures.getSequenceAsIntArray(refSeq));
+        HashMap<String, int[]> genomeMap = new HashMap<>(FastaFeatures.getSequenceAsHashMapIntArray(refSeq));
         double genomeSize = gffs.getGenomeSizeFromIntArrayHashMap(genomeMap);
         FeatureList fl = gffs.getFeatureList(gffFile);
 

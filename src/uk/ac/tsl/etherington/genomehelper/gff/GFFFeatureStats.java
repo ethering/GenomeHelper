@@ -55,7 +55,7 @@ public class GFFFeatureStats
     public void getStats(String gff, File refSeq, String attribute) throws FileNotFoundException, BioException, IOException, Exception
     {
 
-        HashMap<String, int[]> genomeMap = new HashMap<>(FastaFeatures.getSequenceAsIntArray(refSeq));
+        HashMap<String, int[]> genomeMap = new HashMap<>(FastaFeatures.getSequenceAsHashMapIntArray(refSeq));
         double genomeSize = getGenomeSizeFromIntArrayHashMap(genomeMap);
         double genomeMb = genomeSize / 1000000;
         System.out.println("Genome size = " + genomeSize + "(" + genomeMb + "MB)");
@@ -70,7 +70,7 @@ public class GFFFeatureStats
             System.out.println("");
             getMeanIntronLength(fl, attribute, genomeSize);
             System.out.println("");
-            //genomeMap = new HashMap<String, int[]>(fastautils.FastaFeatures.getSequenceAsIntArray(refSeq));
+            //genomeMap = new HashMap<String, int[]>(fastautils.FastaFeatures.getSequenceAsHashMapIntArray(refSeq));
             //getCodingAndNonCodingRegions(fl, genomeMap, attribute, genomeSize);
         }
         catch (Exception ex)

@@ -83,14 +83,14 @@ public class FastaFeaturesTest
     }
 
     /**
-     * Test of getSequenceAsIntArray method, of class FastaFeatures.
+     * Test of getSequenceAsHashMapIntArray method, of class FastaFeatures.
      */
     @Test
     public void testGetSequenceAsIntArray() throws Exception
     {
         System.out.println("getSequenceAsIntArray");
         File refSeq = new File("test/test_data_in/piculus_test_left.fasta");
-        HashMap result = FastaFeatures.getSequenceAsIntArray(refSeq);
+        HashMap result = FastaFeatures.getSequenceAsHashMapIntArray(refSeq);
         assertEquals(result.size(), 2000);
     }
 

@@ -148,6 +148,7 @@ public class FastaFeatures
         
         for (Integer i : sortedSeqLengths)
         {
+            System.out.println(i);
             genomeSize+=i;
         }
         
@@ -159,6 +160,7 @@ public class FastaFeatures
         for (Integer i : sortedSeqLengths)
         {
             cumulativeSize+=i;
+            System.out.println("Cumulative size: "+cumulativeSize);
             if ((genomeSize/100)*10 < cumulativeSize && (genomeSize/100)*10 > (cumulativeSize - i))
             {
                 System.out.println("N10\t"+i);

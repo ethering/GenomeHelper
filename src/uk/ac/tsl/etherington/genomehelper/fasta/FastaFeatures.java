@@ -144,7 +144,7 @@ public class FastaFeatures
     
     public void getNStats (ArrayList<Integer> sortedSeqLengths)
     {
-        int genomeSize = 0;
+        double genomeSize = 0;
         
         for (Integer i : sortedSeqLengths)
         {
@@ -155,7 +155,7 @@ public class FastaFeatures
         System.out.println("Genome size = "+genomeSize);
         System.out.println("No. seqs = "+sortedSeqLengths.size());
         
-        int cumulativeSize = 0;
+        double cumulativeSize = 0;
         
         for (Integer i : sortedSeqLengths)
         {

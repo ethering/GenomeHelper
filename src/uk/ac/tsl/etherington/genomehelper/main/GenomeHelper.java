@@ -138,6 +138,7 @@ public
             System.out.println("Usage: gatkToSamInterval bam gatkInterval");
 
         }
+        
         else if (args[0].equalsIgnoreCase("FastaMotifFinder"))
         {
 //            if (args[1].equalsIgnoreCase("-h"))

@@ -146,7 +146,7 @@ public class FastaFeatures
     {
         int genomeSize = 0;
         
-        for (int i : sortedSeqLengths)
+        for (Integer i : sortedSeqLengths)
         {
             genomeSize+=i;
         }
@@ -156,7 +156,7 @@ public class FastaFeatures
         
         int cumulativeSize = 0;
         
-        for (int i : sortedSeqLengths)
+        for (Integer i : sortedSeqLengths)
         {
             cumulativeSize+=i;
             if ((genomeSize/100)*10 < cumulativeSize && (genomeSize/100)*10 > (cumulativeSize - i))

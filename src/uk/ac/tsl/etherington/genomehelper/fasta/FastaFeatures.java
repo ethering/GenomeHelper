@@ -141,6 +141,24 @@ public class FastaFeatures
         Collections.sort(lengths);
         return lengths;
     }
+    public static ArrayList<Integer> getSequenceAsSortedIntArrayList(File refSeq, int minContigSize) throws FileNotFoundException, BioException, Exception
+    {
+
+        HashMap<String, Integer> seqLengths = new HashMap<>(FastaFeatures.getSequenceLengths(refSeq));
+        ArrayList<Integer> lengths = new ArrayList<>();
+
+        for (Map.Entry<String, Integer> entry : seqLengths.entrySet())
+        {
+            int length = entry.getValue();
+            if (length >= minContigSize)
+            {
+                lengths.add(length);
+            }
+            
+        }
+        Collections.sort(lengths);
+        return lengths;
+    }
     
     public void getNStats (ArrayList<Integer> sortedSeqLengths)
     {

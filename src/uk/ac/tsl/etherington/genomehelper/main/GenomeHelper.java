@@ -138,7 +138,7 @@ public
             System.out.println("Usage: gatkToSamInterval bam gatkInterval");
 
         }
-        
+
         else if (args[0].equalsIgnoreCase("FastaMotifFinder"))
         {
 //            if (args[1].equalsIgnoreCase("-h"))
@@ -395,25 +395,68 @@ public
                 }
             }
         }
-        
+
+//        else if (args[0].equalsIgnoreCase("GetNStats"))
+//        {
+//            if (args[1].equalsIgnoreCase("-h"))
+//            {
+//                System.out.println("Usage: GetNStats fastaIn");
+//                System.out.println("Calculates N10 - N90 for a fasta assembly");
+//                System.out.println("fastaInn - the multi-asta file from which to select  sequences");
+//            }
+//            else
+//            {
+//                File infile = new File(args[1]);
+//                FastaFeatures ff = new FastaFeatures();
+//                ArrayList<Integer> seqlengths = ff.getSequenceAsSortedIntArrayList(infile);
+//                ff.getNStats(seqlengths);
+//            }
+//        }
         else if (args[0].equalsIgnoreCase("GetNStats"))
         {
-            if (args[1].equalsIgnoreCase("-h"))
+
+            // create Options object
+            Options options = new Options();
+            options.addOption(OptionBuilder.withArgName("file")
+                    .hasArg()
+                    .isRequired()
+                    .withDescription("the fasta file to search")
+                    .create('f'));
+           
+            options.addOption(OptionBuilder.withArgName("min")
+                    .hasArg()
+                    .withDescription("minimum contig length to include")
+                    .create('m'));
+            options.addOption(OptionBuilder.withLongOpt("help").create('h'));
+
+            String header = "Calculates N10 - N90 and longest contig for a fasta assembly.\n";
+            String footer = "\nPlease report issues to me";
+            HelpFormatter formatter = new HelpFormatter();
+            
+            formatter.printHelp("GetNStats", header, options, footer);
+            CommandLineParser parser = new BasicParser();
+            CommandLine cmd = parser.parse(options, args);
+
+            FastaFeatures ff = new FastaFeatures();
+            ArrayList<Integer> seqlengths;
+            if (cmd.hasOption("m"))
             {
-                System.out.println("Usage: GetNStats fastaIn");
-                System.out.println("Calculates N10 - N90 for a fasta assembly");
-                System.out.println("fastaInn - the multi-asta file from which to select  sequences");
+                File in = new File(cmd.getOptionValue("f"));
+                int length = Integer.parseInt(cmd.getOptionValue("m"));
+                seqlengths = ff.getSequenceAsSortedIntArrayList(in, length);
+                System.out.println(in +" "+length);
             }
             else
             {
-                File infile = new File(args[1]);
-                FastaFeatures ff = new FastaFeatures();
-                ArrayList<Integer> seqlengths = ff.getSequenceAsSortedIntArrayList(infile);
-                ff.getNStats(seqlengths);
+                File in = new File(cmd.getOptionValue("f"));
+                seqlengths = ff.getSequenceAsSortedIntArrayList(in);
+                System.out.println(in);
             }
+
+            ff.getNStats(seqlengths);
+
         }
-        
-        
+
         else if (args[0].equalsIgnoreCase(
                 "GetReadsFromList"))
         {

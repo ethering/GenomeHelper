@@ -73,7 +73,11 @@ public
             System.out.println("-motifCounts   a tab-delimited file of the occurrence of each motif");
             System.out.println("-proteinCounts a tab-delimited file of the occurrence of each pattern when translated into ammino acids");
             System.out.println("-minCount      the minimum number of times a motif must be found to be included in the results");
-
+            
+            System.out.println("Usage: MultiFastaToSingleFasta -fastain -fastaout");
+            System.out.println("-fastain    input fasta file containing multiple fasta sequences");
+            System.out.println("-fastaout   output fasta containing single concatenated sequence");
+          
             System.out.println("Usage: FastaGetLongestSubstring  <path to files>  -out.");
             System.out.println("Usage: FastaGetGenomeLength  infile");
             System.out.println("Usage: FastaTranslate infile outfile");
@@ -227,6 +231,41 @@ public
 
             // }
         }
+        
+        else if (args[0].equalsIgnoreCase("MultiFastaToSingleFasta"))
+        {
+
+            // create Options object
+            Options options = new Options();
+            options.addOption(OptionBuilder.withArgName("infile")
+                    .hasArg()
+                    .isRequired()
+                    .withDescription("input fasta file containing multiple fasta sequences")
+                    .create('f'));
+            options.addOption(OptionBuilder.withArgName("outfile")
+                    .hasArg()
+                    .isRequired()
+                    .withDescription("a tab-delimited file of the occurrence of each pattern when translated into ammino acids")
+                    .create('o'));
+            options.addOption(OptionBuilder.withLongOpt("help").create('h'));
+
+            String header = "Concatenates all fasta sequences in multifasta file to a single fasta sequence\n";
+
+            HelpFormatter formatter = new HelpFormatter();
+            formatter.printHelp("MultiFastaToSingleFasta", header, options, footer, false);
+            CommandLineParser parser = new BasicParser();
+            CommandLine cmd = parser.parse(options, args);
+
+            File in = new File(cmd.getOptionValue("f"));
+            File out = new File(cmd.getOptionValue("o"));
+
+            FastaParser fp = new FastaParser();
+            fp.multiFastaToSingleFasta(in, out);
+
+            // }
+        }
+        
+        
         else if (args[0].equalsIgnoreCase("FastaGetLongestSubstring"))
         {
             if (args[1].equalsIgnoreCase("-h"))

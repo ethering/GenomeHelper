@@ -170,7 +170,7 @@ public class FastaFeatures
         }
         
         System.out.printf("Genome size = "+genomeSize);
-        System.out.println("No. seqs = "+sortedSeqLengths.size());
+        System.out.println("\nNo. seqs = "+sortedSeqLengths.size());
         
         double cumulativeSize = 0;
         
@@ -215,7 +215,7 @@ public class FastaFeatures
             }
             
         }
-        System.out.println("Longest contig\t"+sortedSeqLengths.get(sortedSeqLengths.size() - 1));
+        System.out.println("Longest_contig\t"+sortedSeqLengths.get(sortedSeqLengths.size() - 1));
         
     }
     

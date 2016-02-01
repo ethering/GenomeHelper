@@ -139,6 +139,7 @@ public class FastaFeatures
             lengths.add(entry.getValue());
         }
         Collections.sort(lengths);
+        Collections.reverse(lengths);
         return lengths;
     }
     public static ArrayList<Integer> getSequenceAsSortedIntArrayList(File refSeq, int minContigSize) throws FileNotFoundException, BioException, Exception
@@ -157,6 +158,7 @@ public class FastaFeatures
             
         }
         Collections.sort(lengths);
+        Collections.reverse(lengths);
         return lengths;
     }
     

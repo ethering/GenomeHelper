@@ -179,19 +179,19 @@ public class FastaFeatures
         for (Integer i : sortedSeqLengths)
         {
             cumulativeSize+=i;
-            if ((genomeSize/100)*90 < cumulativeSize && (genomeSize/100)*10 > (cumulativeSize - i))
+            if ((genomeSize/100)*90 < cumulativeSize && (genomeSize/100)*90 > (cumulativeSize - i))
             {
                 System.out.println("N90\t"+i);
             }
-            if ((genomeSize/100)*80 < cumulativeSize && (genomeSize/100)*20 > (cumulativeSize - i))
+            if ((genomeSize/100)*80 < cumulativeSize && (genomeSize/100)*80 > (cumulativeSize - i))
             {
                 System.out.println("N80\t"+i);
             }
-            if ((genomeSize/100)*70 < cumulativeSize && (genomeSize/100)*30 > (cumulativeSize - i))
+            if ((genomeSize/100)*70 < cumulativeSize && (genomeSize/100)*70 > (cumulativeSize - i))
             {
                 System.out.println("N70\t"+i);
             }
-            if ((genomeSize/100)*60 < cumulativeSize && (genomeSize/100)*40 > (cumulativeSize - i))
+            if ((genomeSize/100)*60 < cumulativeSize && (genomeSize/100)*60 > (cumulativeSize - i))
             {
                 System.out.println("N60\t"+i);
             }
@@ -199,19 +199,19 @@ public class FastaFeatures
             {
                 System.out.println("N50\t"+i);
             }
-            if ((genomeSize/100)*40 < cumulativeSize && (genomeSize/100)*60 > (cumulativeSize - i))
+            if ((genomeSize/100)*40 < cumulativeSize && (genomeSize/100)*40 > (cumulativeSize - i))
             {
                 System.out.println("N40\t"+i);
             }
-            if ((genomeSize/100)*30 < cumulativeSize && (genomeSize/100)*70 > (cumulativeSize - i))
+            if ((genomeSize/100)*30 < cumulativeSize && (genomeSize/100)*30 > (cumulativeSize - i))
             {
                 System.out.println("N30\t"+i);
             }
-            if ((genomeSize/100)*20 < cumulativeSize && (genomeSize/100)*80 > (cumulativeSize - i))
+            if ((genomeSize/100)*20 < cumulativeSize && (genomeSize/100)*20 > (cumulativeSize - i))
             {
                 System.out.println("N20\t"+i);
             }
-            if ((genomeSize/100)*10 < cumulativeSize && (genomeSize/100)*90 > (cumulativeSize - i))
+            if ((genomeSize/100)*10 < cumulativeSize && (genomeSize/100)*10 > (cumulativeSize - i))
             {
                 System.out.println("N10\t"+i);
             }

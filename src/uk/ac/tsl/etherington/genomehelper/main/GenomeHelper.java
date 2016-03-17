@@ -137,6 +137,14 @@ public
             System.out.println("Usage: GFFGetMeanTargetIntronLength gffFile featureName targets");
             System.out.println("Usage: GFFCalculateCodingRegion gffFile refSeq attribute");
             System.out.println("Usage: GFFGetStats gffFile refSeq attribute");
+            
+            System.out.println("\nVCF-related programs");
+            System.out.println("The following options are specific to this section");
+            
+
+            System.out.println("Usage: CalculateGATKparams -in");
+            System.out.println("-in a VCF file");
+      
 
             System.out.println("\nOther Utility programs:");
             System.out.println("Usage: gatkToSamInterval bam gatkInterval");
@@ -204,7 +212,7 @@ public
 
             // }
         }
-        else if (args[0].equalsIgnoreCase("CalculateGATKparmas"))
+        else if (args[0].equalsIgnoreCase("CalculateGATKparams"))
         {
 
             // create Options object
@@ -212,19 +220,19 @@ public
             options.addOption(OptionBuilder.withArgName("file")
                     .hasArg()
                     .isRequired()
-                    .withDescription("the fasta file to search")
-                    .create('f'));
+                    .withDescription("the VCF file to search")
+                    .create("in"));
             options.addOption(OptionBuilder.withLongOpt("help").create('h'));
 
             String header = "Calculates the mean and standard lower standard deviations for various vcf fields.\n"
                             + "These can be used for input parameters into the GATK VariantFiltration tool\n";
 
             HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp("CalculateGATKparmas", header, options, footer, false);
+            formatter.printHelp("CalculateGATKparams", header, options, footer, false);
             CommandLineParser parser = new BasicParser();
             CommandLine cmd = parser.parse(options, args);
 
-            File in = new File(cmd.getOptionValue("f"));
+            File in = new File(cmd.getOptionValue("in"));
 
             VCFParser vcfParser = new VCFParser();
             vcfParser.calculateGATKParams(in);

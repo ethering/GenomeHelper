@@ -9,16 +9,14 @@ import edu.unc.genomics.VCFEntry;
 import edu.unc.genomics.io.VCFFileReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.math3.distribution.NormalDistribution;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.apache.commons.math3.stat.descriptive.rank.Percentile;
-import umontreal.iro.lecuyer.charts.HistogramChart;
 
 /**
  *
@@ -61,7 +59,6 @@ public class VCFParser
         ArrayList<Double> doubleDP = new ArrayList<>();
         ArrayList<Double> doubleMQ = new ArrayList<>();
         ArrayList<Double> doubleFS = new ArrayList<>();
-        
 
         try (VCFFileReader reader = new VCFFileReader(vcfFile.toPath()))
         {
@@ -81,42 +78,42 @@ public class VCFParser
                 doubleFS.add(Double.parseDouble(stringStrandBias));
             }
         }
-        
+
         double qualTotal = 0;
         double[] quals = new double[doubleQuals.size()];
         for (int i = 0; i < quals.length; i++)
         {
             quals[i] = doubleQuals.get(i);
-            qualTotal+=quals[i];
+            qualTotal += quals[i];
         }
-        double qualMean = qualTotal/quals.length;
-        
+        double qualMean = qualTotal / quals.length;
+
         double covTotal = 0;
         double[] covs = new double[doubleDP.size()];
         for (int i = 0; i < covs.length; i++)
         {
             covs[i] = doubleDP.get(i);
-            covTotal+=covs[i];
+            covTotal += covs[i];
         }
-        double covsMean = covTotal/covs.length;
-        
+        double covsMean = covTotal / covs.length;
+
         double mqlTotal = 0;
         double[] mapQuals = new double[doubleMQ.size()];
         for (int i = 0; i < mapQuals.length; i++)
         {
             mapQuals[i] = doubleMQ.get(i);
-            mqlTotal+=mapQuals[i];
+            mqlTotal += mapQuals[i];
         }
-        double mqMean = mqlTotal/mapQuals.length;
+        double mqMean = mqlTotal / mapQuals.length;
 
         double sbTotal = 0;
         double[] strandBias = new double[doubleFS.size()];
         for (int i = 0; i < strandBias.length; i++)
         {
             strandBias[i] = doubleFS.get(i);
-            sbTotal+=strandBias[i];
+            sbTotal += strandBias[i];
         }
-        double sbMean = sbTotal/strandBias.length;
+        double sbMean = sbTotal / strandBias.length;
 
         //HistogramChart qualChart = new HistogramChart("Coverage", "Coverage", "Count", covs);
         //qualChart.view(500, 500);
@@ -146,7 +143,7 @@ public class VCFParser
         System.out.println("Median = " + p.evaluate(50));
         System.out.println("Lower 5 percentile = " + p.evaluate(5));
         System.out.println("Lower 1 percentile = " + p.evaluate(1));
-        
+
         Arrays.sort(strandBias);
         p.setData(strandBias);
         System.out.println("\nStrand Bias");
@@ -154,7 +151,62 @@ public class VCFParser
         System.out.println("Median = " + p.evaluate(50));
         System.out.println("Lower 5 percentile = " + p.evaluate(5));
         System.out.println("Lower 1 percentile = " + p.evaluate(1));
-        
+
+    }
+
+    public void calculateGATKParams2(File vcfFile) throws IOException
+    {
+        DescriptiveStatistics snpQualStats = new DescriptiveStatistics();
+        DescriptiveStatistics depthStats = new DescriptiveStatistics();
+        DescriptiveStatistics mappingStats = new DescriptiveStatistics();
+        DescriptiveStatistics strandStats = new DescriptiveStatistics();
+
+        try (VCFFileReader reader = new VCFFileReader(vcfFile.toPath()))
+        {
+            for (VCFEntry vcf : reader)
+            {
+
+                Map<String, String> info = (Map<String, String>) vcf.getInfo();
+                snpQualStats.addValue(vcf.getQual());
+
+                String stringCov = info.get("DP");
+                depthStats.addValue(Double.parseDouble(stringCov));
+
+                String stringMappingQual = info.get("MQ");
+                mappingStats.addValue(Double.parseDouble(stringMappingQual));
+
+                String stringStrandBias = info.get("FS");
+                strandStats.addValue(Double.parseDouble(stringStrandBias));
+            }
+        }
+
+
+        System.out.println("\nSNP Quality");
+        System.out.println("Mean = " + snpQualStats.getMean());
+        System.out.println("Median = " + snpQualStats.getPercentile(50));
+        System.out.println("Lower 5 percentile = " + snpQualStats.getPercentile(5));
+        System.out.println("Lower 1 percentile = " + snpQualStats.getPercentile(1));
+
+
+        System.out.println("\nCoverage");
+        System.out.println("Mean = " + depthStats.getMean());
+        System.out.println("Median = " + depthStats.getPercentile(50));
+        System.out.println("Lower 5 percentile = " + depthStats.getPercentile(5));
+        System.out.println("Lower 1 percentile = " + depthStats.getPercentile(1));
+
+
+        System.out.println("\nMapping quality");
+        System.out.println("Mean = " + mappingStats.getMean());
+        System.out.println("Median = " + mappingStats.getPercentile(50));
+        System.out.println("Lower 5 percentile = " + mappingStats.getPercentile(5));
+        System.out.println("Lower 1 percentile = " + mappingStats.getPercentile(1));
+
+
+        System.out.println("\nStrand Bias");
+        System.out.println("Mean = " + strandStats.getMean());
+        System.out.println("Median = " + strandStats.getPercentile(50));
+        System.out.println("Lower 5 percentile = " + strandStats.getPercentile(5));
+        System.out.println("Lower 1 percentile = " + strandStats.getPercentile(1));
 
     }
 
@@ -240,7 +292,8 @@ public class VCFParser
                                     al.add(start);
                                     hets.put(chr, al);
                                 }
-                            } else
+                            }
+                            else
                             {
                                 ArrayList<Integer> al = new ArrayList();
                                 al.add(start);

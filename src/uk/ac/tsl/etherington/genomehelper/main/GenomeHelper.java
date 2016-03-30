@@ -235,7 +235,7 @@ public
             File in = new File(cmd.getOptionValue("in"));
 
             VCFParser vcfParser = new VCFParser();
-            vcfParser.calculateGATKParams(in);
+            vcfParser.calculateGATKParams2(in);
 
             // }
         }
@@ -1379,7 +1379,7 @@ public
             if (args[1].equalsIgnoreCase("-h"))
             {
                 System.out.println("Usage: GFFCreateCodingGenome gffFile refSeq featureName cgenome");
-                System.out.println("Writes the DNA sequence of the non-coding portion of the genome (i.e. intergenic and intron).");
+                System.out.println("Writes the DNA sequence of the coding portion of the genome (i.e. exons).");
                 System.out.println("gffFile - the gff or gtf file in which the features are stored");
                 System.out.println("refSeq - the reference sequence for the gff file");
                 System.out.println("featureName - the gff feature from which to calculate the coding part of the genome (e.g. exon, cds, mRNA)");

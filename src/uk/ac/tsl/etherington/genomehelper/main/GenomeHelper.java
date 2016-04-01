@@ -142,8 +142,9 @@ public
             System.out.println("The following options are specific to this section");
             
 
-            System.out.println("Usage: CalculateGATKparams -in");
+            System.out.println("Usage: CalculateGATKparams -in -max");
             System.out.println("-in a VCF file");
+            System.out.println("-max (Optional) maximum number of VCF entries to analyse (default = all)");
       
 
             System.out.println("\nOther Utility programs:");
@@ -222,6 +223,11 @@ public
                     .isRequired()
                     .withDescription("the VCF file to search")
                     .create("in"));
+            options.addOption(OptionBuilder.withArgName("Max records")
+                    .hasArg()
+                    .withDescription("Optional: The maximum number of VCF lines to read (default = all). Using a lower number, e.g. 500,000 may speed up analysis for large files "
+                            + "whilst giving very similar results to examining all entries")
+                    .create("max"));
             options.addOption(OptionBuilder.withLongOpt("help").create('h'));
 
             String header = "Calculates the mean and standard lower standard deviations for various vcf fields.\n"
@@ -231,13 +237,19 @@ public
             formatter.printHelp("CalculateGATKparams", header, options, footer, false);
             CommandLineParser parser = new BasicParser();
             CommandLine cmd = parser.parse(options, args);
-
             File in = new File(cmd.getOptionValue("in"));
-
             VCFParser vcfParser = new VCFParser();
-            vcfParser.calculateGATKParams2(in);
+            
+            if (cmd.hasOption("max"))
+            {
+                int max = Integer.parseInt(cmd.getOptionValue("max"));
+                vcfParser.calculateGATKParams(in, max);
+            }
 
-            // }
+            else
+            {
+                vcfParser.calculateGATKParams(in);
+            }
         }
         
         else if (args[0].equalsIgnoreCase("MultiFastaToSingleFasta"))

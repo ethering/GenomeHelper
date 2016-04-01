@@ -52,8 +52,6 @@ public class VCFParser
         }
     }
 
-    
-    
     public void calculateGATKParams(File vcfFile) throws IOException
     {
         DescriptiveStatistics snpQualStats = new DescriptiveStatistics();
@@ -80,13 +78,11 @@ public class VCFParser
             }
         }
 
-
         System.out.println("\nSNP Quality");
         System.out.println("Mean = " + snpQualStats.getMean());
         System.out.println("Median = " + snpQualStats.getPercentile(50));
         System.out.println("Lower 5 percentile = " + snpQualStats.getPercentile(5));
         System.out.println("Lower 1 percentile = " + snpQualStats.getPercentile(1));
-
 
         System.out.println("\nCoverage");
         System.out.println("Mean = " + depthStats.getMean());
@@ -94,13 +90,11 @@ public class VCFParser
         System.out.println("Lower 5 percentile = " + depthStats.getPercentile(5));
         System.out.println("Lower 1 percentile = " + depthStats.getPercentile(1));
 
-
         System.out.println("\nMapping quality");
         System.out.println("Mean = " + mappingStats.getMean());
         System.out.println("Median = " + mappingStats.getPercentile(50));
         System.out.println("Lower 5 percentile = " + mappingStats.getPercentile(5));
         System.out.println("Lower 1 percentile = " + mappingStats.getPercentile(1));
-
 
         System.out.println("\nStrand Bias");
         System.out.println("Mean = " + strandStats.getMean());
@@ -120,9 +114,9 @@ public class VCFParser
         try (VCFFileReader reader = new VCFFileReader(vcfFile.toPath()))
         {
             Iterator it = reader.iterator();
-            while(it.hasNext() && recordCount <= maxRecords)
+            while (it.hasNext() && recordCount <= maxRecords)
             {
-                VCFEntry vcf = (VCFEntry)it.next();
+                VCFEntry vcf = (VCFEntry) it.next();
                 Map<String, String> info = (Map<String, String>) vcf.getInfo();
                 snpQualStats.addValue(vcf.getQual());
 
@@ -130,7 +124,11 @@ public class VCFParser
                 depthStats.addValue(Integer.parseInt(stringCov));
 
                 String stringMappingQual = info.get("MQ");
-                mappingStats.addValue(Float.parseFloat(stringMappingQual));
+                float mapFloat = Float.parseFloat(stringMappingQual);
+                if (!Float.isNaN(mapFloat))
+                {
+                    mappingStats.addValue(mapFloat);
+                }
 
                 String stringStrandBias = info.get("FS");
                 strandStats.addValue(Float.parseFloat(stringStrandBias));
@@ -138,13 +136,11 @@ public class VCFParser
             }
         }
 
-
         System.out.println("\nSNP Quality");
         System.out.println("Mean = " + snpQualStats.getMean());
         System.out.println("Median = " + snpQualStats.getPercentile(50));
         System.out.println("Lower 5 percentile = " + snpQualStats.getPercentile(5));
         System.out.println("Lower 1 percentile = " + snpQualStats.getPercentile(1));
-
 
         System.out.println("\nCoverage");
         System.out.println("Mean = " + depthStats.getMean());
@@ -152,13 +148,11 @@ public class VCFParser
         System.out.println("Lower 5 percentile = " + depthStats.getPercentile(5));
         System.out.println("Lower 1 percentile = " + depthStats.getPercentile(1));
 
-
         System.out.println("\nMapping quality");
         System.out.println("Mean = " + mappingStats.getMean());
         System.out.println("Median = " + mappingStats.getPercentile(50));
         System.out.println("Lower 5 percentile = " + mappingStats.getPercentile(5));
         System.out.println("Lower 1 percentile = " + mappingStats.getPercentile(1));
-
 
         System.out.println("\nStrand Bias");
         System.out.println("Mean = " + strandStats.getMean());

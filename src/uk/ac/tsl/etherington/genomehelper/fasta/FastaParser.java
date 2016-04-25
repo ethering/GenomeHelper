@@ -95,7 +95,11 @@ public class FastaParser
         RichSequenceIterator iterator = RichSequence.IOTools.readFasta(br,
                 alpha.getTokenization("token"), ns);
         String name = ">";
-        name = name.concat(fastaFileIn.getName() + newLine);
+        String tempName = fastaFileIn.getName();
+        int fileExtension = tempName.lastIndexOf(".");
+        String filePrefix = tempName.substring(0, fileExtension);
+        
+        name = name.concat(filePrefix + newLine);
         bw.write(name);
         while (iterator.hasNext())
         {

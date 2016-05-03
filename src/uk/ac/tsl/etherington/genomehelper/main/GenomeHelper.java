@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -40,8 +41,7 @@ import uk.ac.tsl.etherington.genomehelper.vcf.VCFParser;
  *
  * @author ethering
  */
-public
-        class GenomeHelper
+public class GenomeHelper
 {
 
     /**
@@ -50,8 +50,7 @@ public
      * @throws org.jtr.transliterate.CharacterParseException
      *
      */
-    public static
-            String footer = "\nPlease report issues at https://github.com/ethering/GenomeHelper/issues";
+    public static String footer = "\nPlease report issues at https://github.com/ethering/GenomeHelper/issues";
 
     @SuppressWarnings("static-access")
     public static
@@ -73,11 +72,14 @@ public
             System.out.println("-motifCounts   a tab-delimited file of the occurrence of each motif");
             System.out.println("-proteinCounts a tab-delimited file of the occurrence of each pattern when translated into ammino acids");
             System.out.println("-minCount      the minimum number of times a motif must be found to be included in the results");
-            
+
             System.out.println("Usage: MultiFastaToSingleFasta -fastain -fastaout");
             System.out.println("-fastain    input fasta file containing multiple fasta sequences");
             System.out.println("-fastaout   output fasta containing single concatenated sequence");
-          
+
+            System.out.println("Usage: FastaGetLengths -fastain ");
+            System.out.println("-fastain    input fasta file containing fasta sequence(s)");
+
             System.out.println("Usage: FastaGetLongestSubstring  <path to files>  -out.");
             System.out.println("Usage: FastaGetGenomeLength  infile");
             System.out.println("Usage: FastaTranslate infile outfile");
@@ -137,15 +139,13 @@ public
             System.out.println("Usage: GFFGetMeanTargetIntronLength gffFile featureName targets");
             System.out.println("Usage: GFFCalculateCodingRegion gffFile refSeq attribute");
             System.out.println("Usage: GFFGetStats gffFile refSeq attribute");
-            
+
             System.out.println("\nVCF-related programs");
             System.out.println("The following options are specific to this section");
-            
 
             System.out.println("Usage: CalculateGATKparams -in -max");
             System.out.println("-in a VCF file");
             System.out.println("-max (Optional) maximum number of VCF entries to analyse (default = all)");
-      
 
             System.out.println("\nOther Utility programs:");
             System.out.println("Usage: gatkToSamInterval bam gatkInterval");
@@ -226,7 +226,7 @@ public
             options.addOption(OptionBuilder.withArgName("Max records")
                     .hasArg()
                     .withDescription("Optional: The maximum number of VCF lines to read (default = all). Using a lower number, e.g. 500,000 may speed up analysis for large files "
-                            + "whilst giving very similar results to examining all entries")
+                                     + "whilst giving very similar results to examining all entries")
                     .create("max"));
             options.addOption(OptionBuilder.withLongOpt("help").create('h'));
 
@@ -239,7 +239,7 @@ public
             CommandLine cmd = parser.parse(options, args);
             File in = new File(cmd.getOptionValue("in"));
             VCFParser vcfParser = new VCFParser();
-            
+
             if (cmd.hasOption("max"))
             {
                 int max = Integer.parseInt(cmd.getOptionValue("max"));
@@ -251,7 +251,7 @@ public
                 vcfParser.calculateGATKParams(in);
             }
         }
-        
+
         else if (args[0].equalsIgnoreCase("MultiFastaToSingleFasta"))
         {
 
@@ -284,8 +284,43 @@ public
 
             // }
         }
-        
-        
+
+        else if (args[0].equalsIgnoreCase("FastaGetLengths"))
+        {
+
+            // create Options object
+            Options options = new Options();
+            options.addOption(OptionBuilder.withArgName("infile")
+                    .hasArg()
+                    .isRequired()
+                    .withDescription("input fasta file containing multiple fasta sequences")
+                    .create('f'));
+
+            options.addOption(OptionBuilder.withLongOpt("help").create('h'));
+
+            String header = "Calculates lengths of sequences in fasta file\n";
+
+            HelpFormatter formatter = new HelpFormatter();
+            formatter.printHelp("FastaGetLengths", header, options, footer, false);
+            CommandLineParser parser = new BasicParser();
+            CommandLine cmd = parser.parse(options, args);
+
+            File in = new File(cmd.getOptionValue("f"));
+
+            FastaFeatures fp = new FastaFeatures();
+            HashMap<String, Integer> seqLengths = new HashMap<>(FastaFeatures.getSequenceLengths(in));
+            for (Map.Entry<String, Integer> entry : seqLengths.entrySet())
+            {
+                String seqName = entry.getKey();
+                int genomeLength = entry.getValue();
+                System.out.println("Sequence name: "+seqName);
+                System.out.println("Length: "+ genomeLength);
+
+            }
+
+            // }
+        }
+
         else if (args[0].equalsIgnoreCase("FastaGetLongestSubstring"))
         {
             if (args[1].equalsIgnoreCase("-h"))
@@ -481,7 +516,7 @@ public
                     .isRequired()
                     .withDescription("the fasta file to search")
                     .create('f'));
-           
+
             options.addOption(OptionBuilder.withArgName("min")
                     .hasArg()
                     .withDescription("minimum contig length to include")
@@ -491,7 +526,7 @@ public
             String header = "Calculates N10 - N90 and longest contig for a fasta assembly.\n";
             String footer = "\nPlease report issues to me";
             HelpFormatter formatter = new HelpFormatter();
-            
+
             formatter.printHelp("GetNStats", header, options, footer);
             CommandLineParser parser = new BasicParser();
             CommandLine cmd = parser.parse(options, args);
@@ -503,7 +538,7 @@ public
                 File in = new File(cmd.getOptionValue("f"));
                 int length = Integer.parseInt(cmd.getOptionValue("m"));
                 seqlengths = ff.getSequenceAsSortedIntArrayList(in, length);
-                System.out.println(in +" "+length);
+                System.out.println(in + " " + length);
             }
             else
             {

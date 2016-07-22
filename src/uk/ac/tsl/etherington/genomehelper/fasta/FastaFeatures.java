@@ -8,6 +8,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -68,8 +69,7 @@ public class FastaFeatures
      * "gi|2033910|gb|AA381581.1|AA381581")
      * @throws Exception
      */
-    public static
-            LinkedHashMap<String, DNASequence> getParsedDNASequences(File refSeq) throws Exception
+    public static LinkedHashMap<String, DNASequence> getParsedDNASequences(File refSeq) throws Exception
     {
         LinkedHashMap<String, DNASequence> tempgenome = FastaReaderHelper.readFastaDNASequence(refSeq);
         LinkedHashMap<String, DNASequence> genome = new LinkedHashMap<>();
@@ -93,8 +93,7 @@ public class FastaFeatures
      * @throws FileNotFoundException
      * @throws BioException
      */
-    public static
-            double getGenomeSize(File refSeq) throws FileNotFoundException, BioException, Exception
+    public static double getGenomeSize(File refSeq) throws FileNotFoundException, BioException, Exception
     {
         double genomeSize = 0;
         HashMap<String, Integer> seqLengths = new HashMap<>(FastaFeatures.getSequenceLengths(refSeq));
@@ -114,8 +113,7 @@ public class FastaFeatures
      * @throws FileNotFoundException
      * @throws BioException
      */
-    public static
-            HashMap getSequenceAsHashMapIntArray(File refSeq) throws FileNotFoundException, BioException, Exception
+    public static HashMap getSequenceAsHashMapIntArray(File refSeq) throws FileNotFoundException, BioException, Exception
     {
 
         HashMap<String, Integer> seqLengths = new HashMap<>(FastaFeatures.getSequenceLengths(refSeq));
@@ -140,8 +138,7 @@ public class FastaFeatures
      * @throws FileNotFoundException
      * @throws BioException
      */
-    public static
-            ArrayList<Integer> getSequenceAsSortedIntArrayList(File refSeq) throws FileNotFoundException, BioException, Exception
+    public static ArrayList<Integer> getSequenceAsSortedIntArrayList(File refSeq) throws FileNotFoundException, BioException, Exception
     {
 
         HashMap<String, Integer> seqLengths = new HashMap<>(FastaFeatures.getSequenceLengths(refSeq));
@@ -156,8 +153,7 @@ public class FastaFeatures
         return lengths;
     }
 
-    public static
-            ArrayList<Integer> getSequenceAsSortedIntArrayList(File refSeq, int minContigSize) throws FileNotFoundException, BioException, Exception
+    public static ArrayList<Integer> getSequenceAsSortedIntArrayList(File refSeq, int minContigSize) throws FileNotFoundException, BioException, Exception
     {
 
         HashMap<String, Integer> seqLengths = new HashMap<>(FastaFeatures.getSequenceLengths(refSeq));
@@ -177,8 +173,7 @@ public class FastaFeatures
         return lengths;
     }
 
-    public
-            void getNStats(ArrayList<Integer> sortedSeqLengths)
+    public void getNStats(ArrayList<Integer> sortedSeqLengths)
     {
         double genomeSize = 0;
 
@@ -190,54 +185,68 @@ public class FastaFeatures
         System.out.printf("Genome size = " + genomeSize);
         System.out.println("\nNo. seqs = " + sortedSeqLengths.size());
         System.out.println("Longest_contig\t" + sortedSeqLengths.get(0));
+        System.out.println("N-size\tlength (Mb)");
         double cumulativeSize = 0;
+        double mb = 0;
+        DecimalFormat decimalFormat = new DecimalFormat("0.00000");
+        
 
         for (Integer i : sortedSeqLengths)
         {
             cumulativeSize += i;
+            mb = (double) i / 1000000.000;
+            
 
             if ((genomeSize / 100) * 10 < cumulativeSize && (genomeSize / 100) * 10 > (cumulativeSize - i))
             {
-                System.out.println("N10\t" + i);
+                System.out.print("N10\t");
+                System.out.println(decimalFormat.format(mb));
             }
             if ((genomeSize / 100) * 20 < cumulativeSize && (genomeSize / 100) * 20 > (cumulativeSize - i))
             {
-                System.out.println("N20\t" + i);
+                System.out.print("N20\t");
+                System.out.println(decimalFormat.format(mb));
             }
             if ((genomeSize / 100) * 30 < cumulativeSize && (genomeSize / 100) * 30 > (cumulativeSize - i))
             {
-                System.out.println("N30\t" + i);
+                System.out.print("N30\t");
+                System.out.println(decimalFormat.format(mb));
             }
             if ((genomeSize / 100) * 40 < cumulativeSize && (genomeSize / 100) * 40 > (cumulativeSize - i))
             {
-                System.out.println("N40\t" + i);
+                System.out.print("N40\t");
+                System.out.println(decimalFormat.format(mb));
             }
             if ((genomeSize / 100) * 50 < cumulativeSize && (genomeSize / 100) * 50 > (cumulativeSize - i))
             {
-                System.out.println("N50\t" + i);
+                System.out.print("N50\t");
+                System.out.println(decimalFormat.format(mb));
             }
             if ((genomeSize / 100) * 60 < cumulativeSize && (genomeSize / 100) * 60 > (cumulativeSize - i))
             {
-                System.out.println("N60\t" + i);
+                System.out.print("N60\t");
+                System.out.println(decimalFormat.format(mb));
             }
             if ((genomeSize / 100) * 70 < cumulativeSize && (genomeSize / 100) * 70 > (cumulativeSize - i))
             {
-                System.out.println("N70\t" + i);
+                System.out.print("N70\t");
+                System.out.println(decimalFormat.format(mb));
             }
             if ((genomeSize / 100) * 80 < cumulativeSize && (genomeSize / 100) * 80 > (cumulativeSize - i))
             {
-                System.out.println("N80\t" + i);
+                System.out.print("N80\t");
+                System.out.println(decimalFormat.format(mb));
             }
             if ((genomeSize / 100) * 90 < cumulativeSize && (genomeSize / 100) * 90 > (cumulativeSize - i))
             {
-                System.out.println("N90\t" + i);
+                System.out.print("N90\t");
+                System.out.println(decimalFormat.format(mb));
             }
         }
 
     }
 
-    public
-            double getGCContent(File fileName) throws FileNotFoundException, NoSuchElementException, BioException
+    public double getGCContent(File fileName) throws FileNotFoundException, NoSuchElementException, BioException
     {
         // Set up sequence iterator
         double noSeqs = 0;

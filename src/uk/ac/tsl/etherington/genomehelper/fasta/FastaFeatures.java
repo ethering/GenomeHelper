@@ -185,7 +185,7 @@ public class FastaFeatures
         System.out.printf("Genome size = " + genomeSize);
         System.out.println("\nNo. seqs = " + sortedSeqLengths.size());
         System.out.println("Longest_contig\t" + sortedSeqLengths.get(0));
-        System.out.println("N-size\tlength (Mb)");
+        System.out.println("N-size\tlength(Mb)");
         double cumulativeSize = 0;
         double mb = 0;
         DecimalFormat decimalFormat = new DecimalFormat("0.00000");
@@ -199,47 +199,47 @@ public class FastaFeatures
 
             if ((genomeSize / 100) * 10 < cumulativeSize && (genomeSize / 100) * 10 > (cumulativeSize - i))
             {
-                System.out.print("N10\t");
+                System.out.print("10\t");
                 System.out.println(decimalFormat.format(mb));
             }
             if ((genomeSize / 100) * 20 < cumulativeSize && (genomeSize / 100) * 20 > (cumulativeSize - i))
             {
-                System.out.print("N20\t");
+                System.out.print("20\t");
                 System.out.println(decimalFormat.format(mb));
             }
             if ((genomeSize / 100) * 30 < cumulativeSize && (genomeSize / 100) * 30 > (cumulativeSize - i))
             {
-                System.out.print("N30\t");
+                System.out.print("30\t");
                 System.out.println(decimalFormat.format(mb));
             }
             if ((genomeSize / 100) * 40 < cumulativeSize && (genomeSize / 100) * 40 > (cumulativeSize - i))
             {
-                System.out.print("N40\t");
+                System.out.print("40\t");
                 System.out.println(decimalFormat.format(mb));
             }
             if ((genomeSize / 100) * 50 < cumulativeSize && (genomeSize / 100) * 50 > (cumulativeSize - i))
             {
-                System.out.print("N50\t");
+                System.out.print("50\t");
                 System.out.println(decimalFormat.format(mb));
             }
             if ((genomeSize / 100) * 60 < cumulativeSize && (genomeSize / 100) * 60 > (cumulativeSize - i))
             {
-                System.out.print("N60\t");
+                System.out.print("60\t");
                 System.out.println(decimalFormat.format(mb));
             }
             if ((genomeSize / 100) * 70 < cumulativeSize && (genomeSize / 100) * 70 > (cumulativeSize - i))
             {
-                System.out.print("N70\t");
+                System.out.print("70\t");
                 System.out.println(decimalFormat.format(mb));
             }
             if ((genomeSize / 100) * 80 < cumulativeSize && (genomeSize / 100) * 80 > (cumulativeSize - i))
             {
-                System.out.print("N80\t");
+                System.out.print("80\t");
                 System.out.println(decimalFormat.format(mb));
             }
             if ((genomeSize / 100) * 90 < cumulativeSize && (genomeSize / 100) * 90 > (cumulativeSize - i))
             {
-                System.out.print("N90\t");
+                System.out.print("90\t");
                 System.out.println(decimalFormat.format(mb));
             }
         }

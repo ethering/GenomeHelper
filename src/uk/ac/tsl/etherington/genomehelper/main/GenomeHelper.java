@@ -1580,6 +1580,29 @@ public class GenomeHelper
                 i.gatkToSamInterval(bamFile, interval);
             }
         }
+        else if (args[0].equalsIgnoreCase(
+                "scrambleGenome"))
+        {
+            if (args[1].equalsIgnoreCase("-h"))
+            {
+                System.out.println("Usage: scrambleGenome fastaIn noGenomes prefixOut");
+                System.out.println("Changes gatk interval format into SAM interval format");
+                System.out.println("bam - the bam file for the interval data");
+                System.out.println("gatkInterval - the gatk interval file");
+                System.out.println("Output file name will be the name of the bam file, with '.interval_list' replacing '.bam'");
+            }
+            else
+            {
+                File fasta = new File(args[1]);
+                int noRandSeqs = Integer.parseInt(args[2]);
+                String prefix = args[3];
+                RandomFasta rand = new RandomFasta();
+                rand.scrambleGenome(fasta, noRandSeqs, prefix);
+            }
+        }
+        
+                
+                
         else
         {
             System.err.println("Unknow program, use GenomeHelper.jar -h for help");

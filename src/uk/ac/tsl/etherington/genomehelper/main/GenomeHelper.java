@@ -313,8 +313,8 @@ public class GenomeHelper
             {
                 String seqName = entry.getKey();
                 int genomeLength = entry.getValue();
-                System.out.println("Sequence name: "+seqName);
-                System.out.println("Length: "+ genomeLength);
+                System.out.println("Sequence name: " + seqName);
+                System.out.println("Length: " + genomeLength);
 
             }
 
@@ -1580,29 +1580,45 @@ public class GenomeHelper
                 i.gatkToSamInterval(bamFile, interval);
             }
         }
-        else if (args[0].equalsIgnoreCase(
-                "scrambleGenome"))
+        else if (args[0].equalsIgnoreCase("scrambleGenome"))
         {
-            if (args[1].equalsIgnoreCase("-h"))
-            {
-                System.out.println("Usage: scrambleGenome fastaIn noGenomes prefixOut");
-                System.out.println("Changes gatk interval format into SAM interval format");
-                System.out.println("bam - the bam file for the interval data");
-                System.out.println("gatkInterval - the gatk interval file");
-                System.out.println("Output file name will be the name of the bam file, with '.interval_list' replacing '.bam'");
-            }
-            else
-            {
-                File fasta = new File(args[1]);
-                int noRandSeqs = Integer.parseInt(args[2]);
-                String prefix = args[3];
-                RandomFasta rand = new RandomFasta();
-                rand.scrambleGenome(fasta, noRandSeqs, prefix);
-            }
+            // create Options object
+            Options options = new Options();
+            options.addOption(OptionBuilder.withArgName("infile")
+                    .hasArg()
+                    .isRequired()
+                    .withDescription("input fasta file containing multiple fasta sequences")
+                    .create('f'));
+            options.addOption(OptionBuilder.withArgName("no_genomes")
+                    .hasArg()
+                    .isRequired()
+                    .withDescription("the number of shuffled genomes you require")
+                    .create('n'));
+            options.addOption(OptionBuilder.withArgName("prefix")
+                    .hasArg()
+                    .isRequired()
+                    .withDescription("prefix file names with <string>")
+                    .create('p'));
+
+            options.addOption(OptionBuilder.withLongOpt("help").create('h'));
+
+            String header = "Provides shuffled versions of a given fasta file\n";
+
+            HelpFormatter formatter = new HelpFormatter();
+            formatter.printHelp("FastaGetLengths", header, options, footer, false);
+            CommandLineParser parser = new BasicParser();
+            CommandLine cmd = parser.parse(options, args);
+
+            File fasta = new File(cmd.getOptionValue("f"));
+
+
+            int noRandSeqs = Integer.parseInt(cmd.getOptionValue("n"));
+            String prefix = cmd.getOptionValue("p");
+            RandomFasta rand = new RandomFasta();
+            rand.scrambleGenome(fasta, noRandSeqs, prefix);
+
         }
-        
-                
-                
+
         else
         {
             System.err.println("Unknow program, use GenomeHelper.jar -h for help");

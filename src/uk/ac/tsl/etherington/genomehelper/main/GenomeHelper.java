@@ -1605,7 +1605,7 @@ public class GenomeHelper
             String header = "Provides shuffled versions of a given fasta file\n";
 
             HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp("FastaGetLengths", header, options, footer, false);
+            formatter.printHelp("scrambleGenomes", header, options, footer, false);
             CommandLineParser parser = new BasicParser();
             CommandLine cmd = parser.parse(options, args);
 

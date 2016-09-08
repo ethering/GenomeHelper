@@ -1638,7 +1638,7 @@ public class GenomeHelper
             int noRandSeqs = Integer.parseInt(cmd.getOptionValue("n"));
             String prefix = cmd.getOptionValue("p");
             RandomFasta rand = new RandomFasta();
-            rand.scrambleGenome2(fasta, noRandSeqs, prefix);
+            rand.scrambleGenome(fasta, noRandSeqs, prefix);
 
         }
 

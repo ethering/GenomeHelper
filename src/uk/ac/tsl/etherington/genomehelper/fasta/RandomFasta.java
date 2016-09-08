@@ -26,6 +26,7 @@ import org.biojava3.data.sequence.FastaSequence;
 import org.biojava3.data.sequence.SequenceUtil;
 import org.biojavax.SimpleNamespace;
 import org.biojavax.bio.seq.RichSequence;
+import org.biojavax.bio.seq.RichSequenceIterator;
 
 /**
  *
@@ -82,7 +83,7 @@ public class RandomFasta
         Alphabet alpha = AlphabetManager.alphabetForName("DNA");
         SimpleNamespace ns = new SimpleNamespace("biojava");
         //get the reference genome
-        SequenceIterator iterator = RichSequence.IOTools.readFasta(br, alpha.getTokenization("token"), ns);
+        RichSequenceIterator iterator = RichSequence.IOTools.readFasta(br, alpha.getTokenization("token"), ns);
 
         //calculate the nucleotide composition
         int g = 0;
@@ -128,7 +129,7 @@ public class RandomFasta
         System.out.println("aContent = " + aContent);
         System.out.println("tContent = " + tContent);
 
-        
+        System.out.println("Genome size = "+genomeSize);
         //create a DNA sequence of around 100 nucleotides (totalContent size)
         String[] dnaContent = new String[totalContent];
         int index = 0;

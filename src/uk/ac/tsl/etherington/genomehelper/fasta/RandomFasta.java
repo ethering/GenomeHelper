@@ -15,9 +15,14 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import mathsutils.RandomUtils;
+import org.biojava.bio.seq.DNATools;
+import org.biojava.bio.seq.Sequence;
+import org.biojava.bio.seq.SequenceIterator;
 import org.biojava.bio.symbol.Alphabet;
 import org.biojava.bio.symbol.AlphabetManager;
+import org.biojava.bio.symbol.Symbol;
 import org.biojava3.data.sequence.FastaSequence;
 import org.biojava3.data.sequence.SequenceUtil;
 import org.biojavax.SimpleNamespace;
@@ -61,10 +66,13 @@ public class RandomFasta
         fop.close();
     }
 
+
     /**
-     * Takes a genome, concatenates it and outputs any number of shuffled versions
+     * Takes a genome, concatenates it and outputs any number of shuffled
+     * versions
+     *
      * @param fasta the multi-fasta infile
-     * @param numberOfSeqsRequired the number of scrambled genomes required
+     * @param numberOfGenomesRequired the number of scrambled genomes required
      * @param filePrefix the output sequences
      * @throws Exception
      */
@@ -72,51 +80,103 @@ public class RandomFasta
     {
         //read in the fasta sequences to a List
         BufferedReader br = new BufferedReader(new FileReader(fasta));
+
         Alphabet alpha = AlphabetManager.alphabetForName("DNA");
         SimpleNamespace ns = new SimpleNamespace("biojava");
         //get the reference genome
-        RichSequenceIterator iterator = RichSequence.IOTools.readFasta(br,
-                                                                       alpha.getTokenization("token"), ns);
-        String genome = "";
-        //concatenate it
+        SequenceIterator iterator = RichSequence.IOTools.readFasta(br,
+                                                                   alpha.getTokenization("token"), ns);
+
+        //calculate the nucleotide composition
+        int g = 0;
+        int c = 0;
+        int t = 0;
+        int a = 0;
+
         while (iterator.hasNext())
         {
-            RichSequence rec = iterator.nextRichSequence();
-            String dna = rec.seqString();
-            genome = genome.concat(dna);
+            Sequence seq = iterator.nextSequence();
+
+            for (int pos = 1; pos <= seq.length(); pos++)
+            {
+                Symbol sym = seq.symbolAt(pos);
+                if (sym == DNATools.g())
+                {
+                    g++;
+                }
+
+                if (sym == DNATools.c())
+                {
+                    c++;
+                }
+                if (sym == DNATools.t())
+                {
+                    t++;
+                }
+                if (sym == DNATools.a())
+                {
+                    a++;
+                }
+            }
         }
+      
+        int genomeSize = a + t + c + g;
+        int gContent = (g * 100) / genomeSize;
+        int cContent = (c * 100) / genomeSize;
+        int aContent = (a * 100) / genomeSize;
+        int tContent = (t * 100) / genomeSize;
+        int totalContent = gContent + cContent + aContent + tContent;
+        System.out.println("gContent = " + gContent);
+        System.out.println("cContent = " + cContent);
+        System.out.println("aContent = " + aContent);
+        System.out.println("tContent = " + tContent);
+
         
-        //create an array list filled with ints from zero to genome legth
-        ArrayList<Integer> nos = new ArrayList<>(genome.length());
-        for (int i = 0; i < genome.length(); i++)
-        { 
-            nos.add(i);
+        //create a DNA sequence of around 100 nucleotides (totalContent size)
+        String[] dnaContent = new String[totalContent];
+        int index = 0;
+        for (int i = 0; i < gContent; i++)
+        {
+            dnaContent[index] = "g";
+            index++;
         }
-        
+        for (int i = 0; i < cContent; i++)
+        {
+            dnaContent[index] = "c";
+            index++;
+        }
+        for (int i = 0; i < aContent; i++)
+        {
+            dnaContent[index] = "a";
+            index++;
+        }
+        for (int i = 0; i < tContent; i++)
+        {
+            dnaContent[index] = "t";
+            index++;
+        }
         //for each scrambled genome needed
+
         for (int i = 0; i < numberOfGenomesRequired; i++)
         {
-            //Fisher–Yates shuffle the array list
-            Collections.shuffle(nos);
-            //and then go through it from the shuffled start and create a new genome string
-            StringBuilder s = new StringBuilder();
-            for (int x : nos)
-            {
-                //System.out.print(alphabet.charAt(x));
-                s = s.append(genome.charAt(x));
-            }
-            //print the new genome to file
+            //create the new genome file
             String outfile = filePrefix + "_" + (i + 1) + ".fasta";
             try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(outfile)))
             {
                 writer.write(">" + outfile);
                 writer.write("\n");
-                writer.write(s.toString());
+                //for the length of the genome 
+                for (int x = 0; x < genomeSize; x++)
+                {
+                    //select a random nucleotide from the dnaContent array and write it to file
+                    int idx = new Random().nextInt(dnaContent.length);
+                    String random = (dnaContent[idx]);
+                    writer.write(random);
+                }
                 writer.write("\n");
                 writer.close();
             }
         }
-
 
     }
 }

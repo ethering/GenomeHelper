@@ -332,6 +332,30 @@ public class GenomeHelper
             }
             else
             {
+                // create Options object
+                Options options = new Options();
+                options.addOption(OptionBuilder.withArgName("infile")
+                        .hasArg()
+                        .isRequired()
+                        .withDescription("input fasta file containing multiple fasta sequences")
+                        .create('f'));
+                options.addOption(OptionBuilder.withArgName("outfile")
+                        .hasArg()
+                        .isRequired()
+                        .withDescription("Will contain the longest subsequences in the fasta files common to all input files.")
+                        .create('o'));
+                options.addOption(OptionBuilder.withLongOpt("help").create('h'));
+
+                String header = "Takes a list of fasta files (more than one) and finds the longest subsequences that are common to all files.\n";
+
+                HelpFormatter formatter = new HelpFormatter();
+                formatter.printHelp("FastaGetLongestSubstring", header, options, footer, false);
+                CommandLineParser parser = new BasicParser();
+                CommandLine cmd = parser.parse(options, args);
+                //CAN BE MULTIPLE FILES - HANDLE THIS
+                File in = new File(cmd.getOptionValue("f"));
+                File out = new File(cmd.getOptionValue("o"));
+                
                 ArrayList<String> al = new ArrayList<>();
                 for (int i = 1; i < args.length - 1; i++)
                 {
@@ -1611,11 +1635,10 @@ public class GenomeHelper
 
             File fasta = new File(cmd.getOptionValue("f"));
 
-
             int noRandSeqs = Integer.parseInt(cmd.getOptionValue("n"));
             String prefix = cmd.getOptionValue("p");
             RandomFasta rand = new RandomFasta();
-            rand.scrambleGenome(fasta, noRandSeqs, prefix);
+            rand.scrambleGenome2(fasta, noRandSeqs, prefix);
 
         }
 

@@ -82,8 +82,7 @@ public class RandomFasta
         Alphabet alpha = AlphabetManager.alphabetForName("DNA");
         SimpleNamespace ns = new SimpleNamespace("biojava");
         //get the reference genome
-        SequenceIterator iterator = RichSequence.IOTools.readFasta(br,
-                                                                   alpha.getTokenization("token"), ns);
+        SequenceIterator iterator = RichSequence.IOTools.readFasta(br, alpha.getTokenization("token"), ns);
 
         //calculate the nucleotide composition
         int g = 0;

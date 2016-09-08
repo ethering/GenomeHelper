@@ -168,10 +168,11 @@ public class RandomFasta
         for (int i = 0; i < numberOfGenomesRequired; i++)
         {
             //create the new genome file
-            String outfile = filePrefix + "_" + (i + 1) + ".fasta";
+            String prefix = filePrefix + "_" + (i + 1);
+            String outfile = prefix + ".fasta";
             try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(outfile)))
             {
-                writer.write(">" + outfile);
+                writer.write(">" + prefix);
                 writer.write("\n");
                 //for the length of the genome 
                 for (int x = 0; x < genomeSize; x++)

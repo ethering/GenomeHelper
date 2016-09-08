@@ -128,10 +128,10 @@ public class RandomFasta
         System.out.println("aContent = " + aContent);
         System.out.println("tContent = " + tContent);
         
-        int gContentI = gContent.intValue();
-        int cContentI = cContent.intValue();
-        int aContentI = aContent.intValue();
-        int tContentI = tContent.intValue();
+        int gContentI = (int) Math.rint(gContent);
+        int cContentI = (int) Math.rint(cContent);
+        int aContentI = (int) Math.rint(aContent);
+        int tContentI = (int) Math.rint(tContent);
         int genomeContent = gContentI + cContentI + aContentI +tContentI;
         System.out.println("gContentI = " + gContentI);
         System.out.println("cContentI = " + cContentI);

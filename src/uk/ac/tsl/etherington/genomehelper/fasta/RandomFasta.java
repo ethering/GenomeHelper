@@ -65,7 +65,6 @@ public class RandomFasta
         fop.close();
     }
 
-
     /**
      * Takes a genome, concatenates it and outputs any number of shuffled
      * versions
@@ -86,10 +85,10 @@ public class RandomFasta
         RichSequenceIterator iterator = RichSequence.IOTools.readFasta(br, alpha.getTokenization("token"), ns);
 
         //calculate the nucleotide composition
-        int g = 0;
-        int c = 0;
-        int t = 0;
-        int a = 0;
+        double g = 0;
+        double c = 0;
+        double t = 0;
+        double a = 0;
 
         while (iterator.hasNext())
         {
@@ -117,38 +116,49 @@ public class RandomFasta
                 }
             }
         }
-      
-        int genomeSize = a + t + c + g;
-        int gContent = (g * 100) / genomeSize;
-        int cContent = (c * 100) / genomeSize;
-        int aContent = (a * 100) / genomeSize;
-        int tContent = (t * 100) / genomeSize;
-        int totalContent = gContent + cContent + aContent + tContent;
+
+        Double genomeSize = a + t + c + g;
+        Double gContent = (g * 100) / genomeSize;
+        Double cContent = (c * 100) / genomeSize;
+        Double aContent = (a * 100) / genomeSize;
+        Double tContent = (t * 100) / genomeSize;
+        
         System.out.println("gContent = " + gContent);
         System.out.println("cContent = " + cContent);
         System.out.println("aContent = " + aContent);
         System.out.println("tContent = " + tContent);
+        
+        int gContentI = gContent.intValue();
+        int cContentI = cContent.intValue();
+        int aContentI = aContent.intValue();
+        int tContentI = tContent.intValue();
+        int genomeSizeI = gContentI + cContentI + aContentI +tContentI;
+        System.out.println("gContentI = " + gContentI);
+        System.out.println("cContentI = " + cContentI);
+        System.out.println("aContentI = " + aContentI);
+        System.out.println("tContentI = " + tContentI);
 
-        System.out.println("Genome size = "+genomeSize);
+        System.out.println("Genome size = " + genomeSizeI);
         //create a DNA sequence of around 100 nucleotides (totalContent size)
-        String[] dnaContent = new String[totalContent];
+
+        String[] dnaContent = new String[genomeSizeI];
         int index = 0;
-        for (int i = 0; i < gContent; i++)
+        for (int i = 0; i < gContentI; i++)
         {
             dnaContent[index] = "g";
             index++;
         }
-        for (int i = 0; i < cContent; i++)
+        for (int i = 0; i < cContentI; i++)
         {
             dnaContent[index] = "c";
             index++;
         }
-        for (int i = 0; i < aContent; i++)
+        for (int i = 0; i < aContentI; i++)
         {
             dnaContent[index] = "a";
             index++;
         }
-        for (int i = 0; i < tContent; i++)
+        for (int i = 0; i < tContentI; i++)
         {
             dnaContent[index] = "t";
             index++;
@@ -164,7 +174,7 @@ public class RandomFasta
                 writer.write(">" + outfile);
                 writer.write("\n");
                 //for the length of the genome 
-                for (int x = 0; x < genomeSize; x++)
+                for (int x = 0; x < genomeSizeI; x++)
                 {
                     //select a random nucleotide from the dnaContent array and write it to file
                     int idx = new Random().nextInt(dnaContent.length);

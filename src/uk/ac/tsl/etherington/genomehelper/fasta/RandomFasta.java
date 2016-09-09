@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -207,7 +208,7 @@ public class RandomFasta
         SimpleNamespace ns = new SimpleNamespace("biojava");
         //get the reference genome
         RichSequenceIterator iterator = RichSequence.IOTools.readFasta(br, alpha.getTokenization("token"), ns);
-        Map<String, Integer> seqLengths = new LinkedHashMap<>();
+        Map<String, Double> seqLengths = new LinkedHashMap<>();
 
         //calculate the nucleotide composition
         double g = 0;
@@ -221,7 +222,7 @@ public class RandomFasta
             RichSequence seq = iterator.nextRichSequence();
             String seqName = seq.getAccession() + " "+seq.getDescription();
             
-            seqLengths.put(seqName, seq.length());
+            seqLengths.put(seqName, (double)seq.length());
 
             for (int pos = 1; pos <= seq.length(); pos++)
             {
@@ -248,10 +249,10 @@ public class RandomFasta
 
         double genomeSize = a + t + c + g;
         System.out.println("Genome size = " + genomeSize);
-        double gContent = (g * 100) / genomeSize;
-        double cContent = (c * 100) / genomeSize;
-        double aContent = (a * 100) / genomeSize;
-        double tContent = (t * 100) / genomeSize;
+        Double gContent = (g * 100) / genomeSize;
+        Double cContent = (c * 100) / genomeSize;
+        Double aContent = (a * 100) / genomeSize;
+        Double tContent = (t * 100) / genomeSize;
 
         System.out.println("gContent = " + gContent);
         System.out.println("cContent = " + cContent);
@@ -303,10 +304,10 @@ public class RandomFasta
 
             try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(outfile)))
             {
-                for (Map.Entry<String, Integer> entry : seqLengths.entrySet())
+                for (Map.Entry<String, Double> entry : seqLengths.entrySet())
                 {
                     String seqName = entry.getKey();
-                    Integer seqLength = entry.getValue();
+                    Double seqLength = entry.getValue();
                     writer.write(">" + seqName);
                     writer.write("\n");
                     //for the length of the genome 

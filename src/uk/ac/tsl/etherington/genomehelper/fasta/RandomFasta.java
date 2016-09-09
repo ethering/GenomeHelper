@@ -118,6 +118,7 @@ public class RandomFasta
         }
 
         Double genomeSize = a + t + c + g;
+        System.out.println("Genome size = "+genomeSize);
         Double gContent = (g * 100) / genomeSize;
         Double cContent = (c * 100) / genomeSize;
         Double aContent = (a * 100) / genomeSize;
@@ -164,9 +165,10 @@ public class RandomFasta
             index++;
         }
         //for each scrambled genome needed
-
+        
         for (int i = 0; i < numberOfGenomesRequired; i++)
         {
+            int ntsWritten = 0;
             //create the new genome file
             String prefix = filePrefix + "_" + (i + 1);
             String outfile = prefix + ".fasta";
@@ -181,9 +183,12 @@ public class RandomFasta
                     int idx = new Random().nextInt(dnaContent.length);
                     String random = (dnaContent[idx]);
                     writer.write(random);
+                    ntsWritten++;
                 }
                 writer.write("\n");
                 writer.close();
+                System.out.println("Nts written = "+ntsWritten);
+                
             }
         }
 

@@ -186,8 +186,9 @@ public class RandomFasta
                     ntsWritten++;
                 }
                 writer.write("\n");
-                writer.close();
                 writer.flush();
+                writer.close();
+                
                 System.out.println("Nts written = "+ntsWritten);
                 
             }

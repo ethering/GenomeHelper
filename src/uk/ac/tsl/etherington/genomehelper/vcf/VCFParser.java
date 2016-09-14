@@ -80,24 +80,28 @@ public class VCFParser
 
         System.out.println("\nSNP Quality (QUAL)");
         System.out.println("Mean = " + snpQualStats.getMean());
+        System.out.println("SD = " + snpQualStats.getStandardDeviation());
         System.out.println("Median = " + snpQualStats.getPercentile(50));
         System.out.println("Lower 5 percentile = " + snpQualStats.getPercentile(5));
         System.out.println("Lower 1 percentile = " + snpQualStats.getPercentile(1));
 
         System.out.println("\nCoverage (DP)");
         System.out.println("Mean = " + depthStats.getMean());
+        System.out.println("SD = " + depthStats.getStandardDeviation());
         System.out.println("Median = " + depthStats.getPercentile(50));
         System.out.println("Lower 5 percentile = " + depthStats.getPercentile(5));
         System.out.println("Lower 1 percentile = " + depthStats.getPercentile(1));
 
         System.out.println("\nMapping quality (MQ)");
         System.out.println("Mean = " + mappingStats.getMean());
+        System.out.println("SD = " + mappingStats.getStandardDeviation());
         System.out.println("Median = " + mappingStats.getPercentile(50));
         System.out.println("Lower 5 percentile = " + mappingStats.getPercentile(5));
         System.out.println("Lower 1 percentile = " + mappingStats.getPercentile(1));
 
         System.out.println("\nStrand Bias (FS)");
         System.out.println("Mean = " + strandStats.getMean());
+        System.out.println("SD = " + strandStats.getStandardDeviation());
         System.out.println("Median = " + strandStats.getPercentile(50));
         System.out.println("Lower 5 percentile = " + strandStats.getPercentile(5));
         System.out.println("Lower 1 percentile = " + strandStats.getPercentile(1));

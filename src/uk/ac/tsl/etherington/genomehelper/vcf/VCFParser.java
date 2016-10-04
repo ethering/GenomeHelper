@@ -123,7 +123,7 @@ public class VCFParser
             {
                 VCFEntry vcf = (VCFEntry) it.next();
                 Map<String, String> info = (Map<String, String>) vcf.getInfo();
-                String quals = vcf.getQual().toString();
+                String quals = Double.toString(vcf.getQual());
                 if (!quals.equalsIgnoreCase("."))
                 {
                     snpQualStats.addValue(vcf.getQual());

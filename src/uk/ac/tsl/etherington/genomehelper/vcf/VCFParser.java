@@ -114,7 +114,6 @@ public class VCFParser
         DescriptiveStatistics depthStats = new DescriptiveStatistics();
         DescriptiveStatistics mappingStats = new DescriptiveStatistics();
         DescriptiveStatistics strandStats = new DescriptiveStatistics();
-        
         int recordCount = 1;
         try (VCFFileReader reader = new VCFFileReader(vcfFile.toPath()))
         {
@@ -123,12 +122,7 @@ public class VCFParser
             {
                 VCFEntry vcf = (VCFEntry) it.next();
                 Map<String, String> info = (Map<String, String>) vcf.getInfo();
-                String quals = Double.toString(vcf.getQual());
-                if (!quals.equalsIgnoreCase("."))
-                {
-                    snpQualStats.addValue(vcf.getQual());
-                }
-
+                snpQualStats.addValue(vcf.getQual());
 
                 String stringCov = info.get("DP");
                 depthStats.addValue(Integer.parseInt(stringCov));

@@ -95,9 +95,10 @@ public class VCFParser
         System.out.println("\nMapping quality (MQ)");
         System.out.println("Mean = " + mappingStats.getMean());
         System.out.println("SD = " + mappingStats.getStandardDeviation());
-        System.out.println("Median = " + mappingStats.getPercentile(50));
-        System.out.println("Lower 5 percentile = " + mappingStats.getPercentile(5));
-        System.out.println("Lower 1 percentile = " + mappingStats.getPercentile(1));
+        //Removed the code below as REALLY slow!
+//        System.out.println("Median = " + mappingStats.getPercentile(50));
+//        System.out.println("Lower 5 percentile = " + mappingStats.getPercentile(5));
+//        System.out.println("Lower 1 percentile = " + mappingStats.getPercentile(1));
 
         System.out.println("\nStrand Bias (FS)");
         System.out.println("Mean = " + strandStats.getMean());

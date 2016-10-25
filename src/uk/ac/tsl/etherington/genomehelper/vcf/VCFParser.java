@@ -15,7 +15,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.apache.commons.math3.stat.descriptive.*;
+import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 
 /**
  *
@@ -57,55 +58,49 @@ public class VCFParser
         DescriptiveStatistics snpQualStats = new DescriptiveStatistics();
         DescriptiveStatistics depthStats = new DescriptiveStatistics();
         DescriptiveStatistics mappingStats = new DescriptiveStatistics();
-        DescriptiveStatistics strandStats = new DescriptiveStatistics();
+        Percentile snpQualP = new Percentile();
+        Percentile depthP = new Percentile();
+        Percentile mappingP = new Percentile();
 
         try (VCFFileReader reader = new VCFFileReader(vcfFile.toPath()))
         {
             for (VCFEntry vcf : reader)
             {
-
                 Map<String, String> info = (Map<String, String>) vcf.getInfo();
                 snpQualStats.addValue(vcf.getQual());
 
                 String stringCov = info.get("DP");
-                depthStats.addValue(Integer.parseInt(stringCov));
+                depthStats.addValue(Double.parseDouble(stringCov));
 
                 String stringMappingQual = info.get("MQ");
-                mappingStats.addValue(Float.parseFloat(stringMappingQual));
+                mappingStats.addValue(Double.parseDouble(stringMappingQual));
 
-                String stringStrandBias = info.get("FS");
-                strandStats.addValue(Float.parseFloat(stringStrandBias));
             }
         }
+        double[] snpQualArray = snpQualStats.getValues();
+        double[] depthArray = depthStats.getValues();
+        double[] mappingArray = mappingStats.getValues();
+        snpQualP.setData(snpQualArray);
+        depthP.setData(depthArray);
+        mappingP.setData(mappingArray);
 
         System.out.println("\nSNP Quality (QUAL)");
         System.out.println("Mean = " + snpQualStats.getMean());
         System.out.println("SD = " + snpQualStats.getStandardDeviation());
-        System.out.println("Median = " + snpQualStats.getPercentile(50));
-        System.out.println("Lower 5 percentile = " + snpQualStats.getPercentile(5));
-        System.out.println("Lower 1 percentile = " + snpQualStats.getPercentile(1));
+        System.out.println("Lower 5 percentile = " + snpQualP.evaluate(5));
+        System.out.println("Lower 1 percentile = " + snpQualP.evaluate(1));
 
         System.out.println("\nCoverage (DP)");
         System.out.println("Mean = " + depthStats.getMean());
         System.out.println("SD = " + depthStats.getStandardDeviation());
-        System.out.println("Median = " + depthStats.getPercentile(50));
-        System.out.println("Lower 5 percentile = " + depthStats.getPercentile(5));
-        System.out.println("Lower 1 percentile = " + depthStats.getPercentile(1));
+        System.out.println("Lower 5 percentile = " + depthP.evaluate(5));
+        System.out.println("Lower 1 percentile = " + depthP.evaluate(1));
 
         System.out.println("\nMapping quality (MQ)");
         System.out.println("Mean = " + mappingStats.getMean());
         System.out.println("SD = " + mappingStats.getStandardDeviation());
-        //Removed the code below as REALLY slow!
-//        System.out.println("Median = " + mappingStats.getPercentile(50));
-//        System.out.println("Lower 5 percentile = " + mappingStats.getPercentile(5));
-//        System.out.println("Lower 1 percentile = " + mappingStats.getPercentile(1));
-
-        System.out.println("\nStrand Bias (FS)");
-        System.out.println("Mean = " + strandStats.getMean());
-        System.out.println("SD = " + strandStats.getStandardDeviation());
-        System.out.println("Median = " + strandStats.getPercentile(50));
-        System.out.println("Lower 5 percentile = " + strandStats.getPercentile(5));
-        System.out.println("Lower 1 percentile = " + strandStats.getPercentile(1));
+        System.out.println("Lower 5 percentile = " + mappingP.evaluate(5));
+        System.out.println("Lower 1 percentile = " + mappingP.evaluate(1));
 
     }
 

@@ -242,6 +242,7 @@ public class GenomeHelper
 
             if (cmd.hasOption("max"))
             {
+                System.out.println("Using -max option");
                 int max = Integer.parseInt(cmd.getOptionValue("max"));
                 vcfParser.calculateGATKParams(in, max);
             }

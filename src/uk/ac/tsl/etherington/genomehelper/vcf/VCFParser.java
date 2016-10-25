@@ -73,8 +73,10 @@ public class VCFParser
                 depthStats.addValue(Double.parseDouble(stringCov));
 
                 String stringMappingQual = info.get("MQ");
-                mappingStats.addValue(Double.parseDouble(stringMappingQual));
-
+                if (!Double.isNaN(Double.parseDouble(stringMappingQual)))
+                {
+                    mappingStats.addValue(Double.parseDouble(stringMappingQual));
+                }
             }
         }
         double[] snpQualArray = snpQualStats.getValues();
@@ -109,56 +111,57 @@ public class VCFParser
         DescriptiveStatistics snpQualStats = new DescriptiveStatistics();
         DescriptiveStatistics depthStats = new DescriptiveStatistics();
         DescriptiveStatistics mappingStats = new DescriptiveStatistics();
-        DescriptiveStatistics strandStats = new DescriptiveStatistics();
-        int recordCount = 1;
+        Percentile snpQualP = new Percentile();
+        Percentile depthP = new Percentile();
+        Percentile mappingP = new Percentile();
+        int recordCount = 0;
         try (VCFFileReader reader = new VCFFileReader(vcfFile.toPath()))
         {
             Iterator it = reader.iterator();
-            while (it.hasNext() && recordCount <= maxRecords)
+            while (it.hasNext() && recordCount < maxRecords)
             {
                 VCFEntry vcf = (VCFEntry) it.next();
+
                 Map<String, String> info = (Map<String, String>) vcf.getInfo();
                 snpQualStats.addValue(vcf.getQual());
 
                 String stringCov = info.get("DP");
-                depthStats.addValue(Integer.parseInt(stringCov));
+                depthStats.addValue(Double.parseDouble(stringCov));
 
                 String stringMappingQual = info.get("MQ");
-                float mapFloat = Float.parseFloat(stringMappingQual);
-                if (!Float.isNaN(mapFloat))
+                if (!Double.isNaN(Double.parseDouble(stringMappingQual)))
                 {
-                    mappingStats.addValue(mapFloat);
+                    mappingStats.addValue(Double.parseDouble(stringMappingQual));
                 }
 
-                String stringStrandBias = info.get("FS");
-                strandStats.addValue(Float.parseFloat(stringStrandBias));
                 recordCount++;
             }
         }
 
+        double[] snpQualArray = snpQualStats.getValues();
+        double[] depthArray = depthStats.getValues();
+        double[] mappingArray = mappingStats.getValues();
+        snpQualP.setData(snpQualArray);
+        depthP.setData(depthArray);
+        mappingP.setData(mappingArray);
+
         System.out.println("\nSNP Quality (QUAL)");
         System.out.println("Mean = " + snpQualStats.getMean());
-        System.out.println("Median = " + snpQualStats.getPercentile(50));
-        System.out.println("Lower 5 percentile = " + snpQualStats.getPercentile(5));
-        System.out.println("Lower 1 percentile = " + snpQualStats.getPercentile(1));
+        System.out.println("SD = " + snpQualStats.getStandardDeviation());
+        System.out.println("Lower 5 percentile = " + snpQualP.evaluate(5));
+        System.out.println("Lower 1 percentile = " + snpQualP.evaluate(1));
 
         System.out.println("\nCoverage (DP)");
         System.out.println("Mean = " + depthStats.getMean());
-        System.out.println("Median = " + depthStats.getPercentile(50));
-        System.out.println("Lower 5 percentile = " + depthStats.getPercentile(5));
-        System.out.println("Lower 1 percentile = " + depthStats.getPercentile(1));
+        System.out.println("SD = " + depthStats.getStandardDeviation());
+        System.out.println("Lower 5 percentile = " + depthP.evaluate(5));
+        System.out.println("Lower 1 percentile = " + depthP.evaluate(1));
 
         System.out.println("\nMapping quality (MQ)");
         System.out.println("Mean = " + mappingStats.getMean());
-        System.out.println("Median = " + mappingStats.getPercentile(50));
-        System.out.println("Lower 5 percentile = " + mappingStats.getPercentile(5));
-        System.out.println("Lower 1 percentile = " + mappingStats.getPercentile(1));
-
-        System.out.println("\nStrand Bias (FS)");
-        System.out.println("Mean = " + strandStats.getMean());
-        System.out.println("Median = " + strandStats.getPercentile(50));
-        System.out.println("Lower 5 percentile = " + strandStats.getPercentile(5));
-        System.out.println("Lower 1 percentile = " + strandStats.getPercentile(1));
+        System.out.println("SD = " + mappingStats.getStandardDeviation());
+        System.out.println("Lower 5 percentile = " + mappingP.evaluate(5));
+        System.out.println("Lower 1 percentile = " + mappingP.evaluate(1));
 
     }
 

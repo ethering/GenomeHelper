@@ -230,7 +230,7 @@ public class GenomeHelper
                     .create("max"));
             options.addOption(OptionBuilder.withLongOpt("help").create('h'));
 
-            String header = "Calculates the mean and standard lower standard deviations for various vcf fields.\n"
+            String header = "Calculates the mean, standard deviation, lower 5 percentile and lower 1 percentile for various vcf fields.\n"
                             + "These can be used for input parameters into the GATK VariantFiltration tool\n";
 
             HelpFormatter formatter = new HelpFormatter();
@@ -266,7 +266,7 @@ public class GenomeHelper
             options.addOption(OptionBuilder.withArgName("outfile")
                     .hasArg()
                     .isRequired()
-                    .withDescription("a tab-delimited file of the occurrence of each pattern when translated into ammino acids")
+                    .withDescription("the output file contaiing a single concatenated sequence of the input multi-fasta")
                     .create('o'));
             options.addOption(OptionBuilder.withLongOpt("help").create('h'));
 
@@ -285,6 +285,40 @@ public class GenomeHelper
 
             // }
         }
+        
+        else if (args[0].equalsIgnoreCase("MultiProteinFastaToSingleFasta"))
+        {
+
+            // create Options object
+            Options options = new Options();
+            options.addOption(OptionBuilder.withArgName("infile")
+                    .hasArg()
+                    .isRequired()
+                    .withDescription("input protein fasta file containing multiple fasta sequences")
+                    .create('f'));
+            options.addOption(OptionBuilder.withArgName("outfile")
+                    .hasArg()
+                    .isRequired()
+                    .withDescription("the output file contaiing a single concatenated protein sequence of the input multi-fasta")
+                    .create('o'));
+            options.addOption(OptionBuilder.withLongOpt("help").create('h'));
+
+            String header = "Concatenates all protein fasta sequences in multifasta file to a single fasta sequence\n";
+
+            HelpFormatter formatter = new HelpFormatter();
+            formatter.printHelp("MultiProtienFastaToSingleFasta", header, options, footer, false);
+            CommandLineParser parser = new BasicParser();
+            CommandLine cmd = parser.parse(options, args);
+
+            File in = new File(cmd.getOptionValue("f"));
+            File out = new File(cmd.getOptionValue("o"));
+
+            FastaParser fp = new FastaParser();
+            fp.multiProtienFastaToSingleFasta(in, out);
+
+            // }
+        }
+        
 
         else if (args[0].equalsIgnoreCase("FastaGetLengths"))
         {

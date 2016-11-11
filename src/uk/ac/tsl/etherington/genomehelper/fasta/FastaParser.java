@@ -111,6 +111,43 @@ public class FastaParser
 
         bw.close();
     }
+    /**
+     * Concatenates all fasta sequences in multifasta file to a single fasta sequence
+     * @param fastaFileIn input fasta file containing multiple fasta sequences
+     * @param fastaFileOut output fasta containing single concatenated sequence
+     * @throws FileNotFoundException
+     * @throws BioException
+     * @throws Exception
+     */
+    public void multiProtienFastaToSingleFasta(File fastaFileIn, File fastaFileOut) throws FileNotFoundException, BioException, Exception
+    {
+        FileWriter fw = new FileWriter(fastaFileOut.getAbsoluteFile());
+        BufferedWriter bw = new BufferedWriter(fw);
+        String newLine = System.getProperty("line.separator");
+
+        BufferedReader br = new BufferedReader(new FileReader(fastaFileIn));
+        Alphabet alpha = AlphabetManager.alphabetForName("PROTEIN-TERM");
+        SimpleNamespace ns = new SimpleNamespace("biojava");
+
+        RichSequenceIterator iterator = RichSequence.IOTools.readFasta(br,
+                alpha.getTokenization("token"), ns);
+        String name = ">";
+        String tempName = fastaFileIn.getName();
+        int fileExtension = tempName.lastIndexOf(".");
+        String filePrefix = tempName.substring(0, fileExtension);
+        
+        name = name.concat(filePrefix + newLine);
+        bw.write(name);
+        while (iterator.hasNext())
+        {
+            RichSequence rec = iterator.nextRichSequence();
+            String dna = rec.seqString();
+            bw.write(dna);
+
+        }
+
+        bw.close();
+    }
 
     /**
      * Filters a fasta file by length

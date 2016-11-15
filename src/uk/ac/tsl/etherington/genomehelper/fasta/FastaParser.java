@@ -108,7 +108,7 @@ public class FastaParser
             bw.write(dna);
 
         }
-
+        bw.write(newLine);
         bw.close();
     }
     /**
@@ -145,7 +145,7 @@ public class FastaParser
             bw.write(dna);
 
         }
-
+        bw.write(newLine);
         bw.close();
     }
 

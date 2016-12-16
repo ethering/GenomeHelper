@@ -230,26 +230,25 @@ public class GenomeHelper
                     .create("max"));
             options.addOption(OptionBuilder.withLongOpt("help").create('h'));
 
-            String header = "Calculates the mean, standard deviation, lower 5 percentile and lower 1 percentile for various vcf fields.\n"
-                            + "These can be used for input parameters into the GATK VariantFiltration tool\n";
-
+            //String header = "Calculates the mean, standard deviation, lower 5 percentile and lower 1 percentile for various vcf fields.\n"
+            // + "These can be used for input parameters into the GATK VariantFiltration tool\n";
             HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp("CalculateGATKparams", header, options, footer, false);
+            //formatter.printHelp("CalculateGATKparams", header, options, footer, false);
             CommandLineParser parser = new BasicParser();
             CommandLine cmd = parser.parse(options, args);
             File in = new File(cmd.getOptionValue("in"));
             VCFParser vcfParser = new VCFParser();
-
+            HashMap hm = new HashMap();
             if (cmd.hasOption("max"))
             {
                 System.out.println("Using -max option");
                 int max = Integer.parseInt(cmd.getOptionValue("max"));
-                vcfParser.calculateGATKParams(in, max);
+                hm = vcfParser.calculateGATKParams(in, max);
             }
 
             else
             {
-                vcfParser.calculateGATKParams(in);
+                hm = vcfParser.calculateGATKParams(in);
             }
         }
 
@@ -285,7 +284,7 @@ public class GenomeHelper
 
             // }
         }
-        
+
         else if (args[0].equalsIgnoreCase("MultiProteinFastaToSingleFasta"))
         {
 
@@ -318,7 +317,6 @@ public class GenomeHelper
 
             // }
         }
-        
 
         else if (args[0].equalsIgnoreCase("FastaGetLengths"))
         {
@@ -390,7 +388,7 @@ public class GenomeHelper
                 //CAN BE MULTIPLE FILES - HANDLE THIS
                 File in = new File(cmd.getOptionValue("f"));
                 File out = new File(cmd.getOptionValue("o"));
-                
+
                 ArrayList<String> al = new ArrayList<>();
                 for (int i = 1; i < args.length - 1; i++)
                 {
@@ -607,6 +605,33 @@ public class GenomeHelper
             }
 
             ff.getNStats(seqlengths);
+
+        }
+        else if (args[0].equalsIgnoreCase("GetGenomeStats"))
+        {
+
+            // create Options object
+            Options options = new Options();
+            options.addOption(OptionBuilder.withArgName("file")
+                    .hasArg()
+                    .isRequired()
+                    .withDescription("the fasta file to search")
+                    .create('f'));
+
+            String header = "Calculates lots of stats for a fasta assembly.\n";
+            String footnote = "\nPlease report issues to me";
+            HelpFormatter formatter = new HelpFormatter();
+
+            formatter.printHelp("GetGenomeStats", header, options, footnote);
+            CommandLineParser parser = new BasicParser();
+            CommandLine cmd = parser.parse(options, args);
+
+            FastaFeatures ff = new FastaFeatures();
+
+            File in = new File(cmd.getOptionValue("f"));
+            
+
+            ff.getGenomeStats(in);
 
         }
 

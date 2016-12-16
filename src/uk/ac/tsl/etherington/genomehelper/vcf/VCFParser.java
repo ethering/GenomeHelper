@@ -7,6 +7,7 @@ package uk.ac.tsl.etherington.genomehelper.vcf;
 
 import edu.unc.genomics.VCFEntry;
 import edu.unc.genomics.io.VCFFileReader;
+import edu.unc.genomics.io.VCFFileWriter;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -53,7 +54,7 @@ public class VCFParser
         }
     }
 
-    public void calculateGATKParams(File vcfFile) throws IOException
+    public HashMap calculateGATKParams(File vcfFile) throws IOException
     {
         DescriptiveStatistics snpQualStats = new DescriptiveStatistics();
         DescriptiveStatistics depthStats = new DescriptiveStatistics();
@@ -86,27 +87,36 @@ public class VCFParser
         depthP.setData(depthArray);
         mappingP.setData(mappingArray);
 
-        System.out.println("\nSNP Quality (QUAL)");
-        System.out.println("Mean = " + snpQualStats.getMean());
-        System.out.println("SD = " + snpQualStats.getStandardDeviation());
-        System.out.println("Lower 5 percentile = " + snpQualP.evaluate(5));
-        System.out.println("Lower 1 percentile = " + snpQualP.evaluate(1));
+        //System.out.println("\nSNP Quality (QUAL)");
+        //System.out.println("Mean = " + snpQualStats.getMean());
+        //System.out.println("SD = " + snpQualStats.getStandardDeviation());
+        //System.out.println("Lower 5 percentile = " + snpQualP.evaluate(5));
+        Double lowQUAL = snpQualP.evaluate(1);
+        System.out.println("lowQUAL\t"+lowQUAL);
 
-        System.out.println("\nCoverage (DP)");
-        System.out.println("Mean = " + depthStats.getMean());
-        System.out.println("SD = " + depthStats.getStandardDeviation());
-        System.out.println("Lower 5 percentile = " + depthP.evaluate(5));
-        System.out.println("Lower 1 percentile = " + depthP.evaluate(1));
+        //System.out.println("\nCoverage (DP)");
+        //System.out.println("Mean = " + depthStats.getMean());
+        //System.out.println("SD = " + depthStats.getStandardDeviation());
+        //System.out.println("Lower 5 percentile = " + depthP.evaluate(5));
+        Double lowDP = depthP.evaluate(1);
+        System.out.println("lowDP\t"+lowDP);
 
-        System.out.println("\nMapping quality (MQ)");
-        System.out.println("Mean = " + mappingStats.getMean());
-        System.out.println("SD = " + mappingStats.getStandardDeviation());
-        System.out.println("Lower 5 percentile = " + mappingP.evaluate(5));
-        System.out.println("Lower 1 percentile = " + mappingP.evaluate(1));
-
+        //System.out.println("\nMapping quality (MQ)");
+        //System.out.println("Mean = " + mappingStats.getMean());
+        //System.out.println("SD = " + mappingStats.getStandardDeviation());
+        //System.out.println("Lower 5 percentile = " + mappingP.evaluate(5));
+        Double lowMQ = mappingP.evaluate(1);
+        System.out.println("lowMQ\t"+lowMQ);
+        //System.out.println("Returning HashMap for 'lowQual, lowDP and lowMQ'");
+        
+        HashMap<String, Double> params = new HashMap(3);
+        params.put("lowQUAL", lowQUAL);
+        params.put("lowDP", lowDP);
+        params.put("lowMQ", lowMQ);
+        return params;
     }
 
-    public void calculateGATKParams(File vcfFile, int maxRecords) throws IOException
+    public HashMap calculateGATKParams(File vcfFile, int maxRecords) throws IOException
     {
         DescriptiveStatistics snpQualStats = new DescriptiveStatistics();
         DescriptiveStatistics depthStats = new DescriptiveStatistics();
@@ -148,20 +158,30 @@ public class VCFParser
         System.out.println("\nSNP Quality (QUAL)");
         System.out.println("Mean = " + snpQualStats.getMean());
         System.out.println("SD = " + snpQualStats.getStandardDeviation());
-        System.out.println("Lower 5 percentile = " + snpQualP.evaluate(5));
-        System.out.println("Lower 1 percentile = " + snpQualP.evaluate(1));
+        //System.out.println("Lower 5 percentile = " + snpQualP.evaluate(5));
+        Double lowQUAL = snpQualP.evaluate(1);
+        System.out.println("Lower 1 percentile = " + lowQUAL);
 
         System.out.println("\nCoverage (DP)");
         System.out.println("Mean = " + depthStats.getMean());
         System.out.println("SD = " + depthStats.getStandardDeviation());
-        System.out.println("Lower 5 percentile = " + depthP.evaluate(5));
-        System.out.println("Lower 1 percentile = " + depthP.evaluate(1));
+        //System.out.println("Lower 5 percentile = " + depthP.evaluate(5));
+        Double lowDP = depthP.evaluate(1);
+        System.out.println("Lower 1 percentile = " + lowDP);
 
         System.out.println("\nMapping quality (MQ)");
         System.out.println("Mean = " + mappingStats.getMean());
         System.out.println("SD = " + mappingStats.getStandardDeviation());
-        System.out.println("Lower 5 percentile = " + mappingP.evaluate(5));
-        System.out.println("Lower 1 percentile = " + mappingP.evaluate(1));
+        //System.out.println("Lower 5 percentile = " + mappingP.evaluate(5));
+        Double lowMQ = mappingP.evaluate(1);
+        System.out.println("Lower 1 percentile = " + lowMQ);
+
+        System.out.println("Returning HashMap for 'lowQual, lowDP and lowMQ'");
+        HashMap<String, Double> params = new HashMap(3);
+        params.put("lowQUAL", lowQUAL);
+        params.put("lowDP", lowDP);
+        params.put("lowMQ", lowMQ);
+        return params;
 
     }
 

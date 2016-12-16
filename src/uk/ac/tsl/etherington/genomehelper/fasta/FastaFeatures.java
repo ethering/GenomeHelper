@@ -6,6 +6,7 @@ package uk.ac.tsl.etherington.genomehelper.fasta;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.text.DecimalFormat;
@@ -20,7 +21,12 @@ import org.biojava.bio.seq.DNATools;
 import org.biojava.bio.seq.Sequence;
 import org.biojava.bio.symbol.Symbol;
 import org.biojava3.core.sequence.DNASequence;
+import org.biojava3.core.sequence.compound.AmbiguityDNACompoundSet;
+import org.biojava3.core.sequence.compound.NucleotideCompound;
+import org.biojava3.core.sequence.io.DNASequenceCreator;
+import org.biojava3.core.sequence.io.FastaReader;
 import org.biojava3.core.sequence.io.FastaReaderHelper;
+import org.biojava3.core.sequence.io.GenericFastaHeaderParser;
 import org.biojavax.SimpleNamespace;
 import org.biojavax.bio.seq.RichSequence;
 import org.biojavax.bio.seq.RichSequenceIterator;
@@ -189,13 +195,11 @@ public class FastaFeatures
         double cumulativeSize = 0;
         double mb = 0;
         DecimalFormat decimalFormat = new DecimalFormat("0.00000");
-        
 
         for (Integer i : sortedSeqLengths)
         {
             cumulativeSize += i;
             mb = (double) i / 1000000.000;
-            
 
             if ((genomeSize / 100) * 10 < cumulativeSize && (genomeSize / 100) * 10 > (cumulativeSize - i))
             {
@@ -242,6 +246,267 @@ public class FastaFeatures
                 System.out.print("90\t");
                 System.out.println(decimalFormat.format(mb));
             }
+        }
+
+    }
+    /*
+     Provides:
+     N-stats for all seqs
+     N-stats for > 1kb
+     Size_includeN   
+     Size_withoutN   
+     Scaffold_Num    
+     Genome size
+     Scaffold-size distribution (>100, >500, >1kb, >10kb, > 100kb, >1Mb)
+     GC content
+    
+    
+     */
+
+    public void getGenomeStats(File refSeq) throws Exception
+    {
+        FileInputStream inStream = new FileInputStream(refSeq);
+        FastaReader<DNASequence,NucleotideCompound> fastaReader = new FastaReader<>(inStream,
+                new GenericFastaHeaderParser<>(),
+                new DNASequenceCreator(AmbiguityDNACompoundSet.getDNACompoundSet()));
+        LinkedHashMap<String, DNASequence> b = fastaReader.process();
+
+        DecimalFormat decimalFormat = new DecimalFormat("0.00000");
+        double genomeSize = 0;
+        double genomeSizeOver1kb = 0;
+        int nseqsOver100b = 0;
+        int nseqsOver500b = 0;
+        int nseqsOver1kb = 0;
+        int nseqsOver10kb = 0;
+        int nseqsOver100kb = 0;
+        int nseqsOver1mb = 0;
+
+        ArrayList<Integer> seqLengths = new ArrayList<>();
+        Map<Character, Integer> numChars = new HashMap<>();
+        
+       for ( Map.Entry<String, DNASequence> entry : b.entrySet() ) 
+        {
+            DNASequence dna = entry.getValue();
+            int seqLength = dna.getLength();
+
+            seqLengths.add(seqLength);
+            genomeSize += seqLength;
+            if (seqLength > 100)
+            {
+                nseqsOver100b++;
+            }
+            if (seqLength > 500)
+            {
+                nseqsOver500b++;
+            }
+            if (seqLength > 1000)
+            {
+                genomeSizeOver1kb += seqLength;
+                nseqsOver1kb++;
+            }
+            if (seqLength > 10000)
+            {
+
+                nseqsOver10kb++;
+            }
+            if (seqLength > 100000)
+            {
+
+                nseqsOver100kb++;
+            }
+            if (seqLength > 1000000)
+            {
+
+                nseqsOver1mb++;
+            }
+            String seqString = dna.getSequenceAsString().toLowerCase();
+            for (int i = 0; i < seqLength; ++i)
+            {
+                char charAt = seqString.charAt(i);
+
+                if (!numChars.containsKey(charAt))
+                {
+                    numChars.put(charAt, 1);
+                }
+                else
+                {
+                    numChars.put(charAt, numChars.get(charAt) + 1);
+                }
+            }
+
+        }
+        System.out.println("Nucleotide content");
+
+        int a = numChars.get('a');
+        int t = numChars.get('t');
+        int c = numChars.get('c');
+        int g = numChars.get('g');
+        int n = numChars.get('n');
+        System.out.println("a = " + a);
+        System.out.println("t = " + t);
+        System.out.println("c = " + c);
+        System.out.println("g = " + g);
+        System.out.println("n = " + n);
+        
+        double gc = g+c;
+        double all = a + t + c + g;
+        double gcContent = (gc/all)*100;
+        DecimalFormat df = new DecimalFormat("##.##");
+        System.out.println("GC content (G+C)/(A+C+G+T) = " + df.format(gcContent));
+        //System.out.println("GC content (G+C)/(A+C+G+T) = " + gcContent);
+        
+        Collections.sort(seqLengths);
+        Collections.reverse(seqLengths);
+
+        System.out.println("Genome size = " + df.format(genomeSize/1000000 )+ " Mb");
+        int nCount = 0;
+        if (numChars.containsKey('n'))
+        {
+            nCount = numChars.get('n');
+        }
+
+        System.out.println("Genome size without N's = " + (df.format((genomeSize - nCount)/1000000)) + " Mb");
+
+        System.out.println("Genome size with contigs > 1kb = " + df.format(genomeSizeOver1kb/1000000) + " Mb");
+        System.out.println("\nNo. seqs = " + seqLengths.size());
+        System.out.println("\nNo. seqs > 100 bases = " + nseqsOver100b);
+        System.out.println("\nNo. seqs > 500 bases = " + nseqsOver500b);
+        System.out.println("\nNo. seqs > 1kb = " + nseqsOver1kb);
+        System.out.println("\nNo. seqs > 10kb = " + nseqsOver10kb);
+        System.out.println("\nNo. seqs > 100kb = " + nseqsOver100kb);
+        System.out.println("\nNo. seqs > 1Mb = " + nseqsOver1mb);
+
+        double longestContig = (double) seqLengths.get(0)/1000000.00;
+        System.out.println("Longest_contig\t" + decimalFormat.format(longestContig)+ " Mb");
+        System.out.println("N-size\tlength(Mb)");
+        double cumulativeSize = 0;
+        double mb = 0;
+       
+
+        //Get the N-stats
+        for (Integer i : seqLengths)
+        {
+            cumulativeSize += i;
+
+            if ((genomeSize / 100) * 10 < cumulativeSize && (genomeSize / 100) * 10 > (cumulativeSize - i))
+            {
+                System.out.print("10\t");
+                mb = (double) i / 1000000.000;
+                System.out.println(decimalFormat.format(mb));
+            }
+            if ((genomeSize / 100) * 20 < cumulativeSize && (genomeSize / 100) * 20 > (cumulativeSize - i))
+            {
+                System.out.print("20\t");
+                mb = (double) i / 1000000.000;
+                System.out.println(decimalFormat.format(mb));
+            }
+            if ((genomeSize / 100) * 30 < cumulativeSize && (genomeSize / 100) * 30 > (cumulativeSize - i))
+            {
+                System.out.print("30\t");
+                mb = (double) i / 1000000.000;
+                System.out.println(decimalFormat.format(mb));
+            }
+            if ((genomeSize / 100) * 40 < cumulativeSize && (genomeSize / 100) * 40 > (cumulativeSize - i))
+            {
+                System.out.print("40\t");
+                mb = (double) i / 1000000.000;
+                System.out.println(decimalFormat.format(mb));
+            }
+            if ((genomeSize / 100) * 50 < cumulativeSize && (genomeSize / 100) * 50 > (cumulativeSize - i))
+            {
+                System.out.print("50\t");
+                mb = (double) i / 1000000.000;
+                System.out.println(decimalFormat.format(mb));
+            }
+            if ((genomeSize / 100) * 60 < cumulativeSize && (genomeSize / 100) * 60 > (cumulativeSize - i))
+            {
+                System.out.print("60\t");
+                mb = (double) i / 1000000.000;
+                System.out.println(decimalFormat.format(mb));
+            }
+            if ((genomeSize / 100) * 70 < cumulativeSize && (genomeSize / 100) * 70 > (cumulativeSize - i))
+            {
+                System.out.print("70\t");
+                System.out.println(decimalFormat.format(mb));
+            }
+            if ((genomeSize / 100) * 80 < cumulativeSize && (genomeSize / 100) * 80 > (cumulativeSize - i))
+            {
+                System.out.print("80\t");
+                mb = (double) i / 1000000.000;
+                System.out.println(decimalFormat.format(mb));
+            }
+            if ((genomeSize / 100) * 90 < cumulativeSize && (genomeSize / 100) * 90 > (cumulativeSize - i))
+            {
+                System.out.print("90\t");
+                mb = (double) i / 1000000.000;
+                System.out.println(decimalFormat.format(mb));
+            }
+        }
+        System.out.println("N-stats for contigs > 1kb");
+        System.out.println("N-size\tlength(Mb)");
+        //Get the N-stats > 1kb
+        cumulativeSize = 0;
+        for (Integer i : seqLengths)
+        {
+            if (i > 1000)
+            {
+                cumulativeSize += i;
+
+                if ((genomeSizeOver1kb / 100) * 10 < cumulativeSize && (genomeSizeOver1kb / 100) * 10 > (cumulativeSize - i))
+                {
+                    System.out.print("10\t");
+                    mb = (double) i / 1000000.000;
+                    System.out.println(decimalFormat.format(mb));
+                }
+                if ((genomeSizeOver1kb / 100) * 20 < cumulativeSize && (genomeSizeOver1kb / 100) * 20 > (cumulativeSize - i))
+                {
+                    System.out.print("20\t");
+                    mb = (double) i / 1000000.000;
+                    System.out.println(decimalFormat.format(mb));
+                }
+                if ((genomeSizeOver1kb / 100) * 30 < cumulativeSize && (genomeSizeOver1kb / 100) * 30 > (cumulativeSize - i))
+                {
+                    System.out.print("30\t");
+                    mb = (double) i / 1000000.000;
+                    System.out.println(decimalFormat.format(mb));
+                }
+                if ((genomeSizeOver1kb / 100) * 40 < cumulativeSize && (genomeSizeOver1kb / 100) * 40 > (cumulativeSize - i))
+                {
+                    System.out.print("40\t");
+                    mb = (double) i / 1000000.000;
+                    System.out.println(decimalFormat.format(mb));
+                }
+                if ((genomeSizeOver1kb / 100) * 50 < cumulativeSize && (genomeSizeOver1kb / 100) * 50 > (cumulativeSize - i))
+                {
+                    System.out.print("50\t");
+                    mb = (double) i / 1000000.000;
+                    System.out.println(decimalFormat.format(mb));
+                }
+                if ((genomeSizeOver1kb / 100) * 60 < cumulativeSize && (genomeSizeOver1kb / 100) * 60 > (cumulativeSize - i))
+                {
+                    System.out.print("60\t");
+                    mb = (double) i / 1000000.000;
+                    System.out.println(decimalFormat.format(mb));
+                }
+                if ((genomeSizeOver1kb / 100) * 70 < cumulativeSize && (genomeSizeOver1kb / 100) * 70 > (cumulativeSize - i))
+                {
+                    System.out.print("70\t");
+                    System.out.println(decimalFormat.format(mb));
+                }
+                if ((genomeSizeOver1kb / 100) * 80 < cumulativeSize && (genomeSizeOver1kb / 100) * 80 > (cumulativeSize - i))
+                {
+                    System.out.print("80\t");
+                    mb = (double) i / 1000000.000;
+                    System.out.println(decimalFormat.format(mb));
+                }
+                if ((genomeSizeOver1kb / 100) * 90 < cumulativeSize && (genomeSizeOver1kb / 100) * 90 > (cumulativeSize - i))
+                {
+                    System.out.print("90\t");
+                    mb = (double) i / 1000000.000;
+                    System.out.println(decimalFormat.format(mb));
+                }
+            }
+
         }
 
     }

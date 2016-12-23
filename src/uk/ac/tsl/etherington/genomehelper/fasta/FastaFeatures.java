@@ -337,11 +337,11 @@ public class FastaFeatures
         }
         System.out.println("Nucleotide content");
 
-        int a = numChars.get('a');
-        int t = numChars.get('t');
-        int c = numChars.get('c');
-        int g = numChars.get('g');
-        int n = numChars.get('n');
+        double a = numChars.get('a');
+        double t = numChars.get('t');
+        double c = numChars.get('c');
+        double g = numChars.get('g');
+        double n = numChars.get('n');
         System.out.println("a = " + a);
         System.out.println("t = " + t);
         System.out.println("c = " + c);
@@ -350,7 +350,7 @@ public class FastaFeatures
         
         double gc = g+c;
         double all = a + t + c + g;
-        double gcContent = (gc/all)*100;
+        float gcContent = (float) ((gc)/all)*100;
         DecimalFormat df = new DecimalFormat("##.##");
         System.out.println("GC content (G+C)/(A+C+G+T) = " + df.format(gcContent));
         //System.out.println("GC content (G+C)/(A+C+G+T) = " + gcContent);

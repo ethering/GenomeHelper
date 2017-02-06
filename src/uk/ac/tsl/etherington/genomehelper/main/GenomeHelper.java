@@ -88,6 +88,7 @@ public class GenomeHelper
             System.out.println("Usage: FastaSelectRandomSequences fastaIn numberOfRandomSeqs randomSeqsoutfile");
             System.out.println("Usage: FastaToFastq fastaIn fastqOut");
             System.out.println("Usage: FastaFilterByLength fastaIn fastaOut minLength");
+            System.out.println("Usage: ReformatFasta fastaIn fastaOut prefix");
             System.out.println("Usage: GetNStats fastaIn");
 
             System.out.println("\nFastq-related programs:");
@@ -281,6 +282,45 @@ public class GenomeHelper
 
             FastaParser fp = new FastaParser();
             fp.multiFastaToSingleFasta(in, out);
+
+            // }
+        }
+        
+                else if (args[0].equalsIgnoreCase("ReformatFasta"))
+        {
+
+            // create Options object
+            Options options = new Options();
+            options.addOption(OptionBuilder.withArgName("infile")
+                    .hasArg()
+                    .isRequired()
+                    .withDescription("input fasta file containing multiple fasta sequences")
+                    .create('f'));
+            options.addOption(OptionBuilder.withArgName("outfile")
+                    .hasArg()
+                    .isRequired()
+                    .withDescription("the output file contaiing a single concatenated sequence of the input multi-fasta")
+                    .create('o'));
+            options.addOption(OptionBuilder.withArgName("prefix")
+                    .hasArg()
+                    .isRequired()
+                    .withDescription("the prefix for incremental sequence names, e.g. 'Sequence_' will become 'Sequence_1', 'Sequence_2', etc")
+                    .create('p'));            
+            options.addOption(OptionBuilder.withLongOpt("help").create('h'));
+
+            String header = "Concatenates all fasta sequences in multifasta file to a single fasta sequence\n";
+
+            HelpFormatter formatter = new HelpFormatter();
+            formatter.printHelp("ReformatFasta", header, options, footer, false);
+            CommandLineParser parser = new BasicParser();
+            CommandLine cmd = parser.parse(options, args);
+
+            File in = new File(cmd.getOptionValue("f"));
+            File out = new File(cmd.getOptionValue("o"));
+            String prefix = cmd.getOptionValue("p");
+
+            FastaParser fp = new FastaParser();
+            fp.reformatFasta(in, out, prefix);
 
             // }
         }

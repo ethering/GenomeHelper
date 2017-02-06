@@ -249,6 +249,7 @@ public class FastaFeatures
         }
 
     }
+
     /*
      Provides:
      N-stats for all seqs
@@ -259,16 +260,13 @@ public class FastaFeatures
      Genome size
      Scaffold-size distribution (>100, >500, >1kb, >10kb, > 100kb, >1Mb)
      GC content
-    
-    
      */
-
     public void getGenomeStats(File refSeq) throws Exception
     {
         FileInputStream inStream = new FileInputStream(refSeq);
-        FastaReader<DNASequence,NucleotideCompound> fastaReader = new FastaReader<>(inStream,
-                new GenericFastaHeaderParser<>(),
-                new DNASequenceCreator(AmbiguityDNACompoundSet.getDNACompoundSet()));
+        FastaReader<DNASequence, NucleotideCompound> fastaReader = new FastaReader<>(inStream,
+                                                                                     new GenericFastaHeaderParser<>(),
+                                                                                     new DNASequenceCreator(AmbiguityDNACompoundSet.getDNACompoundSet()));
         LinkedHashMap<String, DNASequence> b = fastaReader.process();
 
         DecimalFormat decimalFormat = new DecimalFormat("0.00000");
@@ -283,8 +281,8 @@ public class FastaFeatures
 
         ArrayList<Integer> seqLengths = new ArrayList<>();
         Map<Character, Integer> numChars = new HashMap<>();
-        
-       for ( Map.Entry<String, DNASequence> entry : b.entrySet() ) 
+
+        for (Map.Entry<String, DNASequence> entry : b.entrySet())
         {
             DNASequence dna = entry.getValue();
             int seqLength = dna.getLength();
@@ -336,38 +334,44 @@ public class FastaFeatures
 
         }
         System.out.println("Nucleotide content");
-
+        double n = 0;
         double a = numChars.get('a');
         double t = numChars.get('t');
         double c = numChars.get('c');
         double g = numChars.get('g');
-        double n = numChars.get('n');
-        System.out.println("a = " + a);
-        System.out.println("t = " + t);
-        System.out.println("c = " + c);
-        System.out.println("g = " + g);
-        System.out.println("n = " + n);
-        
-        double gc = g+c;
-        double all = a + t + c + g;
-        float gcContent = (float) ((gc)/all)*100;
+        //just in case we are lucky enough to be N-free!
+        if (numChars.containsKey('n'))
+        {
+             n = numChars.get('n');
+        }
+
         DecimalFormat df = new DecimalFormat("##.##");
+        System.out.println("a = " + df.format(a));
+        System.out.println("t = " + df.format(t));
+        System.out.println("c = " + df.format(c));
+        System.out.println("g = " + df.format(g));
+        System.out.println("n = " + df.format(n));
+
+        double gc = g + c;
+        double all = a + t + c + g;
+        float gcContent = (float) ((gc) / all) * 100;
+
         System.out.println("GC content (G+C)/(A+C+G+T) = " + df.format(gcContent));
         //System.out.println("GC content (G+C)/(A+C+G+T) = " + gcContent);
-        
+
         Collections.sort(seqLengths);
         Collections.reverse(seqLengths);
 
-        System.out.println("Genome size = " + df.format(genomeSize/1000000 )+ " Mb");
+        System.out.println("Genome size = " + df.format(genomeSize / 1000000) + " Mb");
         int nCount = 0;
         if (numChars.containsKey('n'))
         {
             nCount = numChars.get('n');
         }
 
-        System.out.println("Genome size without N's = " + (df.format((genomeSize - nCount)/1000000)) + " Mb");
+        System.out.println("Genome size without N's = " + (df.format((genomeSize - nCount) / 1000000)) + " Mb");
 
-        System.out.println("Genome size with contigs > 1kb = " + df.format(genomeSizeOver1kb/1000000) + " Mb");
+        System.out.println("Genome size with contigs > 1kb = " + df.format(genomeSizeOver1kb / 1000000) + " Mb");
         System.out.println("\nNo. seqs = " + seqLengths.size());
         System.out.println("\nNo. seqs > 100 bases = " + nseqsOver100b);
         System.out.println("\nNo. seqs > 500 bases = " + nseqsOver500b);
@@ -376,12 +380,11 @@ public class FastaFeatures
         System.out.println("\nNo. seqs > 100kb = " + nseqsOver100kb);
         System.out.println("\nNo. seqs > 1Mb = " + nseqsOver1mb);
 
-        double longestContig = (double) seqLengths.get(0)/1000000.00;
-        System.out.println("Longest_contig\t" + decimalFormat.format(longestContig)+ " Mb");
+        double longestContig = (double) seqLengths.get(0) / 1000000.00;
+        System.out.println("Longest_contig\t" + decimalFormat.format(longestContig) + " Mb");
         System.out.println("N-size\tlength(Mb)");
         double cumulativeSize = 0;
         double mb = 0;
-       
 
         //Get the N-stats
         for (Integer i : seqLengths)

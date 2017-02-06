@@ -54,7 +54,7 @@ public class FastaParser
         SimpleNamespace ns = new SimpleNamespace("biojava");
 
         RichSequenceIterator iterator = RichSequence.IOTools.readFasta(br,
-                alpha.getTokenization("token"), ns);
+                                                                       alpha.getTokenization("token"), ns);
         while (iterator.hasNext())
         {
             RichSequence rec = iterator.nextRichSequence();
@@ -73,9 +73,11 @@ public class FastaParser
 
         bw.close();
     }
-    
+
     /**
-     * Concatenates all fasta sequences in multifasta file to a single fasta sequence
+     * Concatenates all fasta sequences in multifasta file to a single fasta
+     * sequence
+     *
      * @param fastaFileIn input fasta file containing multiple fasta sequences
      * @param fastaFileOut output fasta containing single concatenated sequence
      * @throws FileNotFoundException
@@ -93,12 +95,12 @@ public class FastaParser
         SimpleNamespace ns = new SimpleNamespace("biojava");
 
         RichSequenceIterator iterator = RichSequence.IOTools.readFasta(br,
-                alpha.getTokenization("token"), ns);
+                                                                       alpha.getTokenization("token"), ns);
         String name = ">";
         String tempName = fastaFileIn.getName();
         int fileExtension = tempName.lastIndexOf(".");
         String filePrefix = tempName.substring(0, fileExtension);
-        
+
         name = name.concat(filePrefix + newLine);
         bw.write(name);
         while (iterator.hasNext())
@@ -111,8 +113,53 @@ public class FastaParser
         bw.write(newLine);
         bw.close();
     }
+
     /**
-     * Concatenates all fasta sequences in multifasta file to a single fasta sequence
+     * Concatenates all fasta sequences in multifasta file to a single fasta
+     * sequence
+     *
+     * @param fastaFileIn input fasta file containing multiple fasta sequences
+     * @param fastaFileOut output fasta containing reformatted sequence
+     * @param prefix the prefix for incremental sequence names, e.g. 'Sequence_'
+     * will become 'Sequence_1', 'Sequence_2', etc
+     * @throws FileNotFoundException
+     * @throws BioException
+     * @throws Exception
+     */
+    public void reformatFasta(File fastaFileIn, File fastaFileOut, String prefix) throws FileNotFoundException, BioException, Exception
+    {
+        FileWriter fw = new FileWriter(fastaFileOut.getAbsoluteFile());
+        BufferedWriter bw = new BufferedWriter(fw);
+        String newLine = System.getProperty("line.separator");
+
+        BufferedReader br = new BufferedReader(new FileReader(fastaFileIn));
+        Alphabet alpha = AlphabetManager.alphabetForName("DNA");
+        SimpleNamespace ns = new SimpleNamespace("biojava");
+
+        RichSequenceIterator iterator = RichSequence.IOTools.readFasta(br,
+                                                                       alpha.getTokenization("token"), ns);
+        int seqId = 1;
+        while (iterator.hasNext())
+        {
+            RichSequence rec = iterator.nextRichSequence();
+            String name = ">";
+            name = name.concat(prefix + seqId + newLine);
+          
+            bw.write(name);
+            String dna = rec.seqString();
+            bw.write(dna);
+            bw.write(newLine);
+            seqId++;
+            System.out.print(name);
+            System.out.println(dna);
+        }
+         bw.close();
+    }
+
+    /**
+     * Concatenates all fasta sequences in multifasta file to a single fasta
+     * sequence
+     *
      * @param fastaFileIn input fasta file containing multiple fasta sequences
      * @param fastaFileOut output fasta containing single concatenated sequence
      * @throws FileNotFoundException
@@ -130,12 +177,12 @@ public class FastaParser
         SimpleNamespace ns = new SimpleNamespace("biojava");
 
         RichSequenceIterator iterator = RichSequence.IOTools.readFasta(br,
-                alpha.getTokenization("token"), ns);
+                                                                       alpha.getTokenization("token"), ns);
         String name = ">";
         String tempName = fastaFileIn.getName();
         int fileExtension = tempName.lastIndexOf(".");
         String filePrefix = tempName.substring(0, fileExtension);
-        
+
         name = name.concat(filePrefix + newLine);
         bw.write(name);
         while (iterator.hasNext())
@@ -164,18 +211,18 @@ public class FastaParser
         String newLine = System.getProperty("line.separator");
         FileInputStream inStream = new FileInputStream(fastaIn);
         FastaReader<DNASequence, NucleotideCompound> fastaReader = new FastaReader<>(inStream,
-                new GenericFastaHeaderParser<DNASequence, NucleotideCompound>(),
-                new DNASequenceCreator(DNACompoundSet.getDNACompoundSet()));
+                                                                                     new GenericFastaHeaderParser<DNASequence, NucleotideCompound>(),
+                                                                                     new DNASequenceCreator(DNACompoundSet.getDNACompoundSet()));
         LinkedHashMap<String, DNASequence> b = fastaReader.process();
         for (Entry<String, DNASequence> entry : b.entrySet())
         {
             //System.out.println(entry.getValue().getOriginalHeader() + "=" + entry.getValue().getSequenceAsString());
             if (entry.getValue().getSequenceAsString().length() >= minLength)
             {
-                fw.write(">" + entry.getValue().getOriginalHeader() + newLine + entry.getValue().getSequenceAsString()+newLine);
+                fw.write(">" + entry.getValue().getOriginalHeader() + newLine + entry.getValue().getSequenceAsString() + newLine);
             }
         }
         fw.close();
     }
-    
+
 }

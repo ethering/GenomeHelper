@@ -150,8 +150,8 @@ public class FastaParser
             bw.write(dna);
             bw.write(newLine);
             seqId++;
-            System.out.print(name);
-            System.out.println(dna);
+            //System.out.print(name);
+            //System.out.println(dna);
         }
          bw.close();
     }

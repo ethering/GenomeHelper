@@ -430,6 +430,7 @@ public class FastaFeatures
             if ((genomeSize / 100) * 70 < cumulativeSize && (genomeSize / 100) * 70 > (cumulativeSize - i))
             {
                 System.out.print("70\t");
+                mb = (double) i / 1000000.000;
                 System.out.println(decimalFormat.format(mb));
             }
             if ((genomeSize / 100) * 80 < cumulativeSize && (genomeSize / 100) * 80 > (cumulativeSize - i))
@@ -494,6 +495,7 @@ public class FastaFeatures
                 if ((genomeSizeOver1kb / 100) * 70 < cumulativeSize && (genomeSizeOver1kb / 100) * 70 > (cumulativeSize - i))
                 {
                     System.out.print("70\t");
+                    mb = (double) i / 1000000.000;
                     System.out.println(decimalFormat.format(mb));
                 }
                 if ((genomeSizeOver1kb / 100) * 80 < cumulativeSize && (genomeSizeOver1kb / 100) * 80 > (cumulativeSize - i))

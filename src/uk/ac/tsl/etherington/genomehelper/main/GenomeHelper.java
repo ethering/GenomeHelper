@@ -148,6 +148,10 @@ public class GenomeHelper
             System.out.println("-in a VCF file");
             System.out.println("-max (Optional) maximum number of VCF entries to analyse (default = all)");
 
+            System.out.println("Usage: PhaseBlocks -in ");
+            System.out.println("-in a VCF file");
+            System.out.println("Identifies phasing blocks with VCF files containg the PID format descriptor and outputs a distribution of phasing block lengths");
+
             System.out.println("\nOther Utility programs:");
             System.out.println("Usage: gatkToSamInterval bam gatkInterval");
 
@@ -253,6 +257,29 @@ public class GenomeHelper
             }
         }
 
+        else if (args[0].equalsIgnoreCase("PhaseBlocks"))
+        {
+            Options options = new Options();
+            options.addOption(OptionBuilder.withArgName("file")
+                    .hasArg()
+                    .isRequired()
+                    .withDescription("the VCF file to search")
+                    .create("in"));
+            options.addOption(OptionBuilder.withLongOpt("help").create('h'));
+
+            //String header = "Calculates the mean, standard deviation, lower 5 percentile and lower 1 percentile for various vcf fields.\n"
+            // + "These can be used for input parameters into the GATK VariantFiltration tool\n";
+            HelpFormatter formatter = new HelpFormatter();
+            //formatter.printHelp("CalculateGATKparams", header, options, footer, false);
+            CommandLineParser parser = new BasicParser();
+            CommandLine cmd = parser.parse(options, args);
+            File in = new File(cmd.getOptionValue("in"));
+            VCFParser vcfParser = new VCFParser();
+
+            vcfParser.phaseBlocks(in);
+
+        }
+
         else if (args[0].equalsIgnoreCase("MultiFastaToSingleFasta"))
         {
 
@@ -285,8 +312,8 @@ public class GenomeHelper
 
             // }
         }
-        
-                else if (args[0].equalsIgnoreCase("ReformatFasta"))
+
+        else if (args[0].equalsIgnoreCase("ReformatFasta"))
         {
 
             // create Options object
@@ -305,7 +332,7 @@ public class GenomeHelper
                     .hasArg()
                     .isRequired()
                     .withDescription("the prefix for incremental sequence names, e.g. 'Sequence_' will become 'Sequence_1', 'Sequence_2', etc")
-                    .create('p'));            
+                    .create('p'));
             options.addOption(OptionBuilder.withLongOpt("help").create('h'));
 
             String header = "Concatenates all fasta sequences in multifasta file to a single fasta sequence\n";
@@ -669,7 +696,6 @@ public class GenomeHelper
             FastaFeatures ff = new FastaFeatures();
 
             File in = new File(cmd.getOptionValue("f"));
-            
 
             ff.getGenomeStats(in);
 

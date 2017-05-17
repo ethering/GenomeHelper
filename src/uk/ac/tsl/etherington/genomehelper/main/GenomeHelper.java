@@ -77,6 +77,9 @@ public class GenomeHelper
             System.out.println("-fastain    input fasta file containing multiple fasta sequences");
             System.out.println("-fastaout   output fasta containing single concatenated sequence");
 
+            System.out.println("Usage: CompareTwoFastaSequences -fasta1 -fasta2");
+            System.out.println("Comapress content of two aligned sequences (can be multifasta in the same order)");
+
             System.out.println("Usage: FastaGetLengths -fastain ");
             System.out.println("-fastain    input fasta file containing fasta sequence(s)");
 
@@ -278,6 +281,39 @@ public class GenomeHelper
 
             vcfParser.phaseBlocks(in);
 
+        }
+
+        else if (args[0].equalsIgnoreCase("CompareTwoFastaSequences"))
+        {
+
+            // create Options object
+            Options options = new Options();
+            options.addOption(OptionBuilder.withArgName("fasta1")
+                    .hasArg()
+                    .isRequired()
+                    .withDescription("first input fasta file containing multiple fasta sequences")
+                    .create('f'));
+            options.addOption(OptionBuilder.withArgName("fasta1")
+                    .hasArg()
+                    .isRequired()
+                    .withDescription("second input fasta file containing multiple fasta sequences")
+                    .create('c'));
+            options.addOption(OptionBuilder.withLongOpt("help").create('h'));
+
+            String header = "Concatenates all fasta sequences in multifasta file to a single fasta sequence\n";
+
+            HelpFormatter formatter = new HelpFormatter();
+            formatter.printHelp("MultiFastaToSingleFasta", header, options, footer, false);
+            CommandLineParser parser = new BasicParser();
+            CommandLine cmd = parser.parse(options, args);
+
+            File f1 = new File(cmd.getOptionValue("f"));
+            File f2 = new File(cmd.getOptionValue("c"));
+
+            FastaFeatures ff = new FastaFeatures();
+            ff.compareTwoFastaSequences(f1, f2);
+
+            // }
         }
 
         else if (args[0].equalsIgnoreCase("MultiFastaToSingleFasta"))

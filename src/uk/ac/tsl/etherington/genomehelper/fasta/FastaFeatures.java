@@ -11,10 +11,13 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import org.biojava.bio.BioException;
 import org.biojava.bio.seq.DNATools;
@@ -39,6 +42,52 @@ import org.biojavax.bio.seq.RichSequenceIterator;
  */
 public class FastaFeatures
 {
+
+    public Map<String, String[]> compareTwoFastaSequences(File seq1, File seq2) throws Exception
+    {
+
+        HashMap<String, String[]> snps = new HashMap<>();
+        LinkedHashMap<String, DNASequence> dna1 = FastaReaderHelper.readFastaDNASequence(seq1);
+        LinkedHashMap<String, DNASequence> dna2 = FastaReaderHelper.readFastaDNASequence(seq2);
+
+        for (Entry<String, DNASequence> entry : dna1.entrySet())
+        {
+            DNASequence dna1seq = entry.getValue();
+            //System.out.println(entry.getValue().getOriginalHeader() + "=" + entry.getValue().getSequenceAsString());
+            if (dna2.containsKey(entry.getValue().getOriginalHeader()))
+            {
+                DNASequence dna2seq = dna2.get(dna1seq.getOriginalHeader());
+                if (dna1seq.getLength() != dna2seq.getLength())
+                {
+                    System.err.println("Can't compare " + entry.getValue().getOriginalHeader() + " as they are different sizes: " + dna1seq.getLength() + " and  " + dna2seq.getLength());
+                }
+                else
+                {
+                    Iterator it1 = dna1seq.iterator();
+                    Iterator it2 = dna2seq.iterator();
+                    int position = 1;
+                    while (it1.hasNext())
+                    {
+                        NucleotideCompound nt1 = (NucleotideCompound) it1.next();
+                        NucleotideCompound nt2 = (NucleotideCompound) it2.next();
+                        if (!nt1.equalsIgnoreCase(nt2))
+                        {
+                            //System.out.println(entry.getValue().getOriginalHeader() + "\t" + position);
+                            String loci = dna1seq.getOriginalHeader().concat(":").concat(Integer.toString(position));
+                            System.out.println("Found " + loci + " " + nt1 + " in File 1 and " + nt2 + " in File 2");
+                            String[] snpArray = new String[2];
+                            snpArray[0] = nt1.toString();
+                            snpArray[1] = nt2.toString();
+                            //Arrays.sort(snpArray);
+                            snps.put(loci, snpArray);
+                        }
+                        position++;
+                    }
+                }
+            }
+        }
+        return snps;
+    }
 
     /**
      *
@@ -342,7 +391,7 @@ public class FastaFeatures
         //just in case we are lucky enough to be N-free!
         if (numChars.containsKey('n'))
         {
-             n = numChars.get('n');
+            n = numChars.get('n');
         }
 
         DecimalFormat df = new DecimalFormat("##.##");

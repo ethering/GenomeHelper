@@ -15,10 +15,14 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.math3.stat.descriptive.*;
 import org.apache.commons.math3.stat.descriptive.rank.Percentile;
+import org.biojava3.core.sequence.DNASequence;
+import org.biojava3.core.sequence.compound.NucleotideCompound;
+import org.biojava3.core.sequence.io.FastaReaderHelper;
 
 /**
  *
@@ -318,6 +322,7 @@ public class VCFParser
                     //if it does, get the PID, start and end info
                     int index = Arrays.asList(format).indexOf("PID");
                     List<String[]> format_values = vcf.getGenotypes();
+                    //we're only ever going to be looking at one sample, so it will be at index 0
                     String[] formats = format_values.get(0);
                     String pid = formats[index];
                     //if it's a new PID
@@ -382,6 +387,7 @@ public class VCFParser
             if (bin < 0)
             {
                 System.err.println("Ooops! Found a number that's too low");
+                System.out.println("Min = " + min + " Max = " + max);
                 System.err.println("d= " + d);
                 System.err.println("No. bins = " + numBins);
                 System.err.println("Bin size = " + binSize);
@@ -390,6 +396,7 @@ public class VCFParser
             else if (bin >= numBins)
             {
                 System.err.println("Ooops! Found a number that's too high");
+                System.out.println("Min = " + min + " Max = " + max);
                 System.err.println("d= " + d);
                 System.err.println("No. bins = " + numBins);
                 System.err.println("Bin size = " + binSize);
@@ -402,4 +409,6 @@ public class VCFParser
         }
         return result;
     }
+
+    
 }

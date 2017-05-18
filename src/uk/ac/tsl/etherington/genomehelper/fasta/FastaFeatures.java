@@ -615,6 +615,7 @@ public class FastaFeatures
 
         for (File file : files)
         {
+            System.out.println("Processing file "+file.toString());
             HashMap<String, String[]> snps = new HashMap<>();
             LinkedHashMap<String, DNASequence> dna = FastaReaderHelper.readFastaDNASequence(file);
 
@@ -638,6 +639,7 @@ public class FastaFeatures
 
             }
         }
+        System.out.println("Found "+seqLengths.size()+ " different sequences");
         HashMap<String, Integer> identicalSeqs = new HashMap<>();
         for (Map.Entry<String, ArrayList<Integer>> seqInfo : seqLengths.entrySet())
         {
@@ -660,12 +662,12 @@ public class FastaFeatures
 
             }
         }
+        System.out.println("Found "+identicalSeqs.size()+ " sequences with identical lengths");
         Map<String, Integer> sortedIdenticalSeqs = sortByValue(identicalSeqs);
         for (Map.Entry<String, Integer> seqInfo : sortedIdenticalSeqs.entrySet())
         {
             System.out.println(seqInfo.getKey()+"\t"+seqInfo.getValue());
         }
-
     }
 
     public static <K, V extends Comparable<? super V>> Map<K, V> sortByValue(Map<K, V> map)

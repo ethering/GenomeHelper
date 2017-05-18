@@ -12,13 +12,19 @@ import java.io.FileReader;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import org.biojava.bio.BioException;
 import org.biojava.bio.seq.DNATools;
 import org.biojava.bio.seq.Sequence;
@@ -70,9 +76,9 @@ public class FastaFeatures
                     {
                         NucleotideCompound nt1 = (NucleotideCompound) it1.next();
                         NucleotideCompound nt2 = (NucleotideCompound) it2.next();
+                        //System.out.println("Comparing " +nt1.toString()+ " to "+nt2.toString());
                         if (!nt1.equalsIgnoreCase(nt2))
                         {
-                            //System.out.println(entry.getValue().getOriginalHeader() + "\t" + position);
                             String loci = dna1seq.getOriginalHeader().concat(":").concat(Integer.toString(position));
                             System.out.println("Found " + loci + " " + nt1 + " in File 1 and " + nt2 + " in File 2");
                             String[] snpArray = new String[2];
@@ -80,6 +86,7 @@ public class FastaFeatures
                             snpArray[1] = nt2.toString();
                             //Arrays.sort(snpArray);
                             snps.put(loci, snpArray);
+
                         }
                         position++;
                     }
@@ -598,4 +605,86 @@ public class FastaFeatures
         System.out.println("Overall gcCount = " + gcCount);
         return gcCount;
     }
+
+    public void getSeqsOfMatchingLengths(ArrayList<File> files) throws Exception
+    {
+        //files must be fasta and have matching sequence names to be compared
+        //seqLengths contains the names of the sequences and an ArrayList of seqlengths
+
+        HashMap<String, ArrayList<Integer>> seqLengths = new HashMap<>();
+
+        for (File file : files)
+        {
+            HashMap<String, String[]> snps = new HashMap<>();
+            LinkedHashMap<String, DNASequence> dna = FastaReaderHelper.readFastaDNASequence(file);
+
+            for (Entry<String, DNASequence> entry : dna.entrySet())
+            {
+                DNASequence dnaseq = entry.getValue();
+                String name = entry.getKey();
+                int length = dnaseq.getLength();
+                if (seqLengths.containsKey(name))
+                {
+                    ArrayList al = seqLengths.get(name);
+                    al.add(length);
+                    seqLengths.put(name, al);
+                }
+                else
+                {
+                    ArrayList<Integer> al = new ArrayList<>();
+                    al.add(length);
+                    seqLengths.put(name, al);
+                }
+
+            }
+        }
+        HashMap<String, Integer> identicalSeqs = new HashMap<>();
+        for (Map.Entry<String, ArrayList<Integer>> seqInfo : seqLengths.entrySet())
+        {
+
+            //count how many entries are in the lengths array
+            int seqCount = seqInfo.getValue().size();
+            //if we have the same number of entries as files...
+            if (seqCount == files.size())
+            {
+                //System.out.println(seqInfo.getKey()+" has three values");
+                ArrayList<Integer> al = seqInfo.getValue();
+                Set<Integer> uniqueLengths = new HashSet<>(al);
+                //System.out.println(uniqueLengths.size()+" are unique");
+                if (uniqueLengths.size() == 1)
+                {
+                    String name = seqInfo.getKey();
+                    Integer firstElement = al.get(0);
+                    identicalSeqs.put(name, firstElement);
+                }
+
+            }
+        }
+        Map<String, Integer> sortedIdenticalSeqs = sortByValue(identicalSeqs);
+        for (Map.Entry<String, Integer> seqInfo : sortedIdenticalSeqs.entrySet())
+        {
+            System.out.println(seqInfo.getKey()+"\t"+seqInfo.getValue());
+        }
+
+    }
+
+    public static <K, V extends Comparable<? super V>> Map<K, V> sortByValue(Map<K, V> map)
+    {
+        List<Map.Entry<K, V>> list = new LinkedList<>(map.entrySet());
+        Collections.sort(list, new Comparator<Map.Entry<K, V>>()
+        {
+            public int compare(Map.Entry<K, V> o1, Map.Entry<K, V> o2)
+            {
+                return (o1.getValue()).compareTo(o2.getValue());
+            }
+        });
+
+        Map<K, V> result = new LinkedHashMap<>();
+        for (Map.Entry<K, V> entry : list)
+        {
+            result.put(entry.getKey(), entry.getValue());
+        }
+        return result;
+    }
+
 }

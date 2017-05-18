@@ -1803,6 +1803,32 @@ public class GenomeHelper
             rand.scrambleGenome(fasta, noRandSeqs, prefix);
 
         }
+        else if (args[0].equalsIgnoreCase("GetSeqsOfMatchingLength"))
+        {
+            ArrayList<File> files = new ArrayList<>();
+
+            // create Options object
+            Options options = new Options();
+            options.addOption(OptionBuilder.withArgName("fasta")
+                    .withLongOpt("fasta")
+                    .hasArg()
+                    .withDescription("a fasta file")
+                    .create());
+            // add t option
+            //options.addOption("t", false, "display current time");
+            CommandLineParser parser = new BasicParser();
+            CommandLine cmd = parser.parse(options, args);
+
+            // get c option value
+            String[] fastafiles = cmd.getOptionValues("fasta");
+            for (String fastafile : fastafiles)
+            {
+                files.add(new File(fastafile));
+            }
+            FastaFeatures fp = new FastaFeatures();
+            fp.getSeqsOfMatchingLengths(files);
+            //System.out.println(beforeVcf.toString() + " " + afterVcf.toString() + " " + out.toString());
+        }
 
         else
         {

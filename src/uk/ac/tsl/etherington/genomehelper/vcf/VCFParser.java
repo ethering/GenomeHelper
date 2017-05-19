@@ -358,18 +358,21 @@ public class VCFParser
         }
         //sort the pids from smallest to larges
         Collections.sort(pidLengths);
-        int minLength = Collections.min(pidLengths);
+        double minLength = Collections.min(pidLengths);
         //int maxLength = pidLengths.get(pidLengths.size() - 1);
-        int maxLength = Collections.max(pidLengths);
+        double maxLength = Collections.max(pidLengths);
         //calculate the partition size
-        int partitionSize = (maxLength - minLength + 1) / 100;
-        //System.out.println("Min: "+minLength+" Max: "+maxLength+" PartSize: "+partitionSize);
+        double partitionSize = (maxLength - minLength + 1) / 100;
+        System.out.println("Min: "+minLength+" Max: "+maxLength+" PartSize: "+partitionSize);
 
         int[] pidBins = calcHistogram(pidLengths, minLength, maxLength, 100);
-        int partMax = minLength;
+      
+        double partMax = minLength;
+        
         for (int count : pidBins)
         {
-            System.out.println(partMax + "\t" + count);
+            int rPartMax = (int) Math.round(partMax);
+            System.out.println(rPartMax + "\t" + count);
             partMax += partitionSize;
         }
 

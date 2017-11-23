@@ -712,28 +712,30 @@ public class GenomeHelper
         }
         else if (args[0].equalsIgnoreCase("GetGenomeStats"))
         {
+            if (args.length == 1 || args[1].equalsIgnoreCase("-help") || args[1].equalsIgnoreCase("-h"))
+            {
+                // create Options object
+                
+                System.out.println("Calculates N stats for a fasta assembly.");
+                System.out.println("usage: GetGenomeStats -f");
+                System.out.println(" -f <file>   the fasta file to search");
+                System.out.println(footer);
+            }
+            else
+            {
 
-            // create Options object
-            Options options = new Options();
-            options.addOption(OptionBuilder.withArgName("file")
-                    .hasArg()
-                    .isRequired()
-                    .withDescription("the fasta file to search")
-                    .create('f'));
-
-            String header = "Calculates lots of stats for a fasta assembly.\n";
-            String footnote = "\nPlease report issues to me";
-            HelpFormatter formatter = new HelpFormatter();
-
-            formatter.printHelp("GetGenomeStats", header, options, footnote);
-            CommandLineParser parser = new BasicParser();
-            CommandLine cmd = parser.parse(options, args);
-
-            FastaFeatures ff = new FastaFeatures();
-
-            File in = new File(cmd.getOptionValue("f"));
-
-            ff.getGenomeStats(in);
+                CommandLineParser parser = new BasicParser();
+                Options options = new Options();
+                options.addOption(OptionBuilder.withArgName("file")
+                        .hasArg()
+                        .isRequired()
+                        .withDescription("the fasta file to search")
+                        .create('f'));
+                CommandLine cmd = parser.parse(options, args);
+                File in = new File(cmd.getOptionValue("f"));
+                FastaFeatures ff = new FastaFeatures();
+                ff.getGenomeStats(in);
+            }
 
         }
 

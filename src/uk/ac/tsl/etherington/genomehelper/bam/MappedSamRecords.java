@@ -190,7 +190,7 @@ public class MappedSamRecords
             }
         }
 
-        System.out.println("Found " + mappedReads.size() + " unmapped reads");
+        System.out.println("Found " + mappedReads.size() + " umapped reads");
         return mappedReads;
     }
 

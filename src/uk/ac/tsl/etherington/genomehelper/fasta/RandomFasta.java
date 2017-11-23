@@ -27,6 +27,7 @@ import org.biojava.bio.symbol.AlphabetManager;
 import org.biojava.bio.symbol.Symbol;
 import org.biojava3.data.sequence.FastaSequence;
 import org.biojava3.data.sequence.SequenceUtil;
+
 import org.biojavax.SimpleNamespace;
 import org.biojavax.bio.seq.RichSequence;
 import org.biojavax.bio.seq.RichSequenceIterator;
